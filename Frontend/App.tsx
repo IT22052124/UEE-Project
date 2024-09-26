@@ -1,10 +1,12 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./CommunityConnect/Screen/HomeScreen";
 import CreatePostScreen from "./CommunityConnect/Screen/CreatePostScreen";
-import GroupScreen from "./CommunityConnect/Screen/GroupScreen";
+
+import CreateCommunityScreen from "./CommunityConnect/Screen/CreateCommunityScreen";
+import CommunityScreen from "./CommunityConnect/Screen/CommunityScreen";
 
 const Stack = createStackNavigator();
 
@@ -18,13 +20,18 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="CreateCommunityScreen"
+          component={CreateCommunityScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="CreatePostScreen"
           component={CreatePostScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="GroupScreen"
-          component={GroupScreen}
+          name="CommunityScreen"
+          component={CommunityScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

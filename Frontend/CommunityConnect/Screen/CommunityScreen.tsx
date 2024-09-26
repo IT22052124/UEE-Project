@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,116 @@ import {
   Platform,
   StatusBar,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
 
-export default function GroupScreen() {
+interface Admin {
+  _id: string;
+  username: string;
+  email: string;
+}
+
+interface Community {
+  _id: string;
+  communityName: string;
+  communityDescription: String;
+  admin: Admin;
+  communityPic: string;
+  coverPic: string;
+  members: any[]; // You can replace `any` with a more specific type if you have member structure
+  relatedPosts: any[]; // You can replace `any` with a more specific type if you have post structure
+  createdAt: string;
+  updatedAt: string;
+}
+
+export default function CommunityScreen() {
+  const userId = "66f55789b9c3be6113e48bae"; // Assuming you have the user ID from your context or state
+  const communityName = "Dedsec"; // Assuming you're passing the community ID via route params
+  const [community, setCommunity] = useState<Community | null>(null); // State to store the community data
+  const [loading, setLoading] = useState(true);
+  const [isMember, setIsMember] = useState(false); // State to track if user is a member
+
+  const handleJoinToggle = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/User//users/${userId}/toggle-community`, // Replace with your API endpoint
+        { communityId: community?._id } // Include necessary data
+      );
+      // Update the membership status based on the response
+      // Stop loading once data is fetched
+      setIsMember(!isMember); // Toggle membership status
+      alert(response.data.message); // Optionally show a message
+    } catch (error) {
+      console.error("Error toggling community membership", error);
+    }
+  };
+
+  // Fetch community data from API
+  useEffect(() => {
+    const fetchCommunity = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/Community/${communityName}`
+        ); // Replace with your backend API URL
+        console.log(response.data.data);
+        setCommunity(response.data.data); // Set the community data
+        setLoading(false); // Stop loading once data is fetched
+      } catch (error) {
+        console.error("Error fetching community data", error);
+        setLoading(false);
+      }
+    };
+
+    fetchCommunity(); // Call the function to fetch data
+  }, [communityName]);
+
+  useEffect(() => {
+    const fetchMemberStatus = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/User/users/${userId}/communities`
+        );
+        console.log(response.data); // Log the full response for debugging
+
+        // Check if communities exist and are in the expected format
+        if (Array.isArray(response.data.communities)) {
+          // Check if the current community's ID is included in the communities array
+          const memberCheck = response.data.communities.some(
+            (communityItem: any) => communityItem._id === community?._id
+          );
+          setIsMember(memberCheck);
+        } else {
+          console.error("Communities are not in the expected format");
+        }
+
+        setLoading(false); // Stop loading once data is fetched
+      } catch (error) {
+        console.error("Error fetching community data", error);
+        setLoading(false);
+      }
+    };
+
+    fetchMemberStatus(); // Call the function to fetch data
+  }, [communityName, community]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF4500" />
+      </View>
+    );
+  }
+
+  if (!community) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={{ color: "#FFFFFF" }}>Community not found</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -22,7 +128,7 @@ export default function GroupScreen() {
           </TouchableOpacity>
           <View style={styles.searchBar}>
             <Ionicons name="search" size={20} color="#FFFFFF" />
-            <Text style={styles.searchText}>r/Poverty</Text>
+            <Text style={styles.searchText}>r/{communityName}</Text>
           </View>
           <TouchableOpacity>
             <Ionicons name="share-social-outline" size={24} color="#FFFFFF" />
@@ -35,30 +141,34 @@ export default function GroupScreen() {
         <ScrollView>
           <Image
             source={{
-              uri: "https://firebasestorage.googleapis.com/v0/b/frontend-web-e454c.appspot.com/o/images%2FIMG_20210519_200116.jpg?alt=media&token=432d1910-5635-4aa9-b818-c8830a5e76b4",
+              uri: community.coverPic,
             }}
             style={styles.banner}
           />
           <View style={styles.communityInfo}>
             <Image
               source={{
-                uri: "https://firebasestorage.googleapis.com/v0/b/frontend-web-e454c.appspot.com/o/images%2FIMG_20210519_200116.jpg?alt=media&token=432d1910-5635-4aa9-b818-c8830a5e76b4",
+                uri: community.communityPic,
               }}
               style={styles.avatar}
             />
-            <Text style={styles.communityName}>r/Poverty</Text>
+            <Text style={styles.communityName}>
+              r/{community.communityName}
+            </Text>
             <Text style={styles.communityStats}>
-              86,553 • 1,501 paths particles
+              {community.members?.length || 0} members •{" "}
+              {community.relatedPosts?.length || 0} posts
             </Text>
             <Text style={styles.communityDescription}>
-              MANGA SPOILERS SUBREDDIT! {"\n"}
-              Shingeki no Kyojin / Attack on Titan healthy-ish fan community!
-              {"\n"}
-              With memes, shitposts, arts, news, discussions{"\n"}
-              for true titans, I mean humans. Definitely humans!
+              {community.communityDescription}
             </Text>
-            <TouchableOpacity style={styles.joinButton}>
-              <Text style={styles.joinButtonText}>Joined</Text>
+            <TouchableOpacity
+              style={styles.joinButton}
+              onPress={handleJoinToggle} // This function will handle join/unjoin action
+            >
+              <Text style={styles.joinButtonText}>
+                {isMember ? "Joined" : "Join"}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -68,12 +178,6 @@ export default function GroupScreen() {
             </TouchableOpacity>
             <TouchableOpacity style={styles.tab}>
               <Text style={styles.tabText}>About</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tab}>
-              <Text style={styles.tabText}>Menu</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tab}>
-              <Text style={styles.tabText}>Rooms</Text>
             </TouchableOpacity>
           </View>
 
@@ -300,5 +404,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: "#343536",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1A1A1B",
   },
 });

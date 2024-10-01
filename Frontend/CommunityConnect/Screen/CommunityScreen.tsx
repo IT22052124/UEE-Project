@@ -34,7 +34,7 @@ interface Community {
 }
 
 export default function CommunityScreen() {
-  const userId = "66f55789b9c3be6113e48bae"; // Assuming you have the user ID from your context or state
+  const userId = "66f3dda2bd01bea47d940c63"; // Assuming you have the user ID from your context or state
   const communityName = "Dedsec"; // Assuming you're passing the community ID via route params
   const [community, setCommunity] = useState<Community | null>(null); // State to store the community data
   const [loading, setLoading] = useState(true);
@@ -43,12 +43,10 @@ export default function CommunityScreen() {
   const handleJoinToggle = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/User//users/${userId}/toggle-community`, // Replace with your API endpoint
+        `http://192.168.124.102:5000/User/users/${userId}/toggle-community`, // Replace with your API endpoint
         { communityId: community?._id } // Include necessary data
       );
-      // Update the membership status based on the response
-      // Stop loading once data is fetched
-      setIsMember(!isMember); // Toggle membership status
+      setIsMember(!isMember);
       alert(response.data.message); // Optionally show a message
     } catch (error) {
       console.error("Error toggling community membership", error);
@@ -60,48 +58,26 @@ export default function CommunityScreen() {
     const fetchCommunity = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/Community/${communityName}`
-        ); // Replace with your backend API URL
-        console.log(response.data.data);
-        setCommunity(response.data.data); // Set the community data
-        setLoading(false); // Stop loading once data is fetched
-      } catch (error) {
-        console.error("Error fetching community data", error);
-        setLoading(false);
-      }
-    };
-
-    fetchCommunity(); // Call the function to fetch data
-  }, [communityName]);
-
-  useEffect(() => {
-    const fetchMemberStatus = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/User/users/${userId}/communities`
+          `http://192.168.124.102:5000/Community/${communityName}`
         );
-        console.log(response.data); // Log the full response for debugging
+        const communityData = response.data.data;
+        setCommunity(communityData);
 
-        // Check if communities exist and are in the expected format
-        if (Array.isArray(response.data.communities)) {
-          // Check if the current community's ID is included in the communities array
-          const memberCheck = response.data.communities.some(
-            (communityItem: any) => communityItem._id === community?._id
-          );
-          setIsMember(memberCheck);
-        } else {
-          console.error("Communities are not in the expected format");
-        }
+        const isUserMember = communityData.members.some(
+          (member: any) => member._id === userId
+        );
+        console.log(isUserMember);
+        setIsMember(isUserMember); // Set membership status
 
-        setLoading(false); // Stop loading once data is fetched
+        setLoading(false); // Stop loading
       } catch (error) {
         console.error("Error fetching community data", error);
         setLoading(false);
       }
     };
 
-    fetchMemberStatus(); // Call the function to fetch data
-  }, [communityName, community]);
+    fetchCommunity();
+  }, [communityName, userId]);
 
   if (loading) {
     return (

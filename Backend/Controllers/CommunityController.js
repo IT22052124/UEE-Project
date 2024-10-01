@@ -57,8 +57,8 @@ export const getAllCommunityByName = async (req, res) => {
     const community = await Community.find({
       communityName: req.params.communityName,
     })
-      .populate("admin", "username email") // Populates admin field with username and email from the User model
-      .populate("members", "username email") // Populates members with username and email from the User model
+      .populate("admin", "username email _id") // Populates admin field with username and email from the User model
+      .populate("members", "username email _id") // Populates members with username and email from the User model
       .populate("relatedPosts") // Populates related posts (assuming Post model has all necessary fields)
       .exec();
 

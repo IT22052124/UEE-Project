@@ -12,14 +12,17 @@ import {
   Image,
   FlatList,
   Modal,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { ResizeMode, Video } from "expo-av"; // Import Video component from expo-av
 import axios from "axios";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../Storage/firebase";
 
 export default function CreatePostScreen() {
-  const userId = "66f55789b9c3be6113e48bae";
+  const userId = "66f3dda2bd01bea47d940c63";
   const [community, setCommunity] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -37,7 +40,7 @@ export default function CreatePostScreen() {
     const fetchcommunities = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/User/users/${userId}/communities`
+          `http://192.168.124.102:5000/User/users/${userId}/communities`
         );
 
         if (Array.isArray(response.data.communities)) {
@@ -78,33 +81,88 @@ export default function CreatePostScreen() {
 
   // Function to pick media
   const pickMedia = async () => {
-    const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (result.status !== "granted") {
-      alert("Permission to access media library is required!");
+    if (media.length <= 4) {
+      const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (result.status !== "granted") {
+        alert("Permission to access media library is required!");
+        return;
+      }
+
+      let pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        quality: 1,
+      });
+      if (!pickerResult.canceled && pickerResult.assets) {
+        const { mimeType, uri } = pickerResult.assets[0];
+        const mediaType = mimeType?.startsWith("image/")
+          ? "Image"
+          : mimeType?.startsWith("video/")
+          ? "Video"
+          : "Other";
+
+        if (mediaType === "Other") {
+          alert("Please select an image or video only.");
+          return; // Exit the function if the type is not valid
+        }
+        setMedia([...media, { type: mediaType, uri }]);
+      }
+    } else {
+      Alert.alert("Only 4 medias can selected");
+    }
+  };
+
+  const handlePostSubmit = async () => {
+    if (!title || !content || !community) {
+      alert("Please fill in all fields and add at least one media item.");
       return;
     }
 
-    let pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      quality: 1,
-    });
-    console.log(pickerResult);
-    if (!pickerResult.canceled && pickerResult.assets) {
-      const { mimeType, uri } = pickerResult.assets[0];
-      const mediaType = mimeType?.startsWith("image/")
-        ? "Image"
-        : mimeType?.startsWith("video/")
-        ? "Video"
-        : "Other";
+    const mediaUrls = [];
 
-      if (mediaType === "Other") {
-        alert("Please select an image or video only.");
-        return; // Exit the function if the type is not valid
+    try {
+      for (const item of media) {
+        const response = await fetch(item.uri);
+        const blob = await response.blob();
+
+        const mediaRef = ref(
+          storage,
+          `media/${Date.now()}_${item.uri.split("/").pop()}`
+        );
+        await uploadBytes(mediaRef, blob);
+
+        const downloadURL = await getDownloadURL(mediaRef);
+        mediaUrls.push(downloadURL);
       }
-      setMedia([...media, { type: mediaType, uri }]);
+
+      // Logging the media URLs
+
+      axios
+        .post("http://192.168.124.102:5000/Post/posts", {
+          postTitle: title,
+          descriptions: content,
+          community,
+          author: userId,
+          medias: mediaUrls,
+        })
+        .then((response) => {
+          console.log(response);
+          alert("Post created successfully!");
+          setTitle("");
+          setContent("");
+          setMedia([]);
+          setCommunity("");
+        })
+        .catch((err) => {
+          console.error("Error during post submission:", err);
+          alert("Failed to create post. Please try again.");
+        });
+    } catch (error) {
+      console.error("Error during media upload:", error);
+      alert("Failed to upload media. Please try again.");
     }
   };
+
   const handleRemoveMedia = (index: number) => {
     // Create a new array excluding the media at the given index
     setMedia((prevMedia) => prevMedia.filter((_, i) => i !== index));
@@ -230,7 +288,9 @@ export default function CreatePostScreen() {
           {/* Media Selector */}
           <TouchableOpacity style={styles.mediaButton} onPress={pickMedia}>
             <Ionicons name="images-outline" size={24} color="#898989" />
-            <Text style={styles.mediaButtonText}>Add Media</Text>
+            <Text style={styles.mediaButtonText}>
+              Add Media ({media.length}/4)
+            </Text>
           </TouchableOpacity>
 
           {/* Display selected media horizontally */}
@@ -267,7 +327,10 @@ export default function CreatePostScreen() {
           </ScrollView>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.postButton}>
+            <TouchableOpacity
+              style={styles.postButton}
+              onPress={handlePostSubmit}
+            >
               <Text style={styles.postButtonText}>Post</Text>
             </TouchableOpacity>
           </View>

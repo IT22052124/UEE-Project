@@ -98,7 +98,7 @@ export default function CreateCommunityScreen() {
         coverPic: uploadedCoverPic,
       });
       axios
-        .post("http://192.168.149.3:5000/Community/community", {
+        .post("http://192.168.28.3:5000/Community/community", {
           communityName,
           communityDescription: description,
           adminId: "66f3dda2bd01bea47d940c63", // Change to actual admin ID

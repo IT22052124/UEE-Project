@@ -19,7 +19,7 @@ app.use(cors());
 
 //Community Connect Routes
 app.use("/User", UserRote);
-app.use("/Post", PostRoute);
+app.use("/Post/", PostRoute);
 app.use("/Community", CommunityRoute);
 
 const PORT = process.env.PORT || 5000;

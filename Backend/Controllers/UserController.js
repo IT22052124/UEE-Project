@@ -115,18 +115,26 @@ export const deleteUser = async (req, res) => {
 // Retrieve all communities a user is part of by user ID
 export const getUserCommunities = async (req, res) => {
   try {
+    // Find the user and populate their communities
     const user = await User.findById(req.params.userId).populate({
       path: "communities.communityId", // Populate the community details
-      select: "communityName _id", // Specify the fields to retrieve from Community model
+      select: "communityName _id members", // Select the fields to retrieve
     });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Filter communities where the user is a member
+    const userCommunities = user.communities
+      .map((c) => c.communityId)
+      .filter(
+        (community) => community.members.includes(req.params.userId) // Check if user ID is in the community members list
+      );
+
     res.status(200).json({
       message: "Communities retrieved successfully",
-      communities: user.communities.map((c) => c.communityId), // Return populated community details
+      communities: userCommunities, // Return only the communities where the user is a member
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -155,20 +163,29 @@ export const toggleCommunityMembership = async (req, res) => {
       (communityObj) => communityObj.communityId.toString() === communityId
     );
 
-    if (isMember) {
-      // If the user is a member, unjoin (remove the community)
-      user.communities = user.communities.filter(
-        (communityObj) => communityObj.communityId.toString() !== communityId
-      );
+    if (!isMember) {
+      // If the user is not a member, join (add to user's community list)
+      user.communities.push({ communityId });
       await user.save();
+    }
+
+    // Now handle community's members list
+    const isUserInCommunity = community.members.includes(userId);
+
+    if (isUserInCommunity) {
+      // If user is in the community's members list, remove them
+      community.members = community.members.filter(
+        (memberId) => memberId.toString() !== userId
+      );
+      await community.save();
       return res.status(200).json({
         message: "Successfully left the community",
         communities: user.communities,
       });
     } else {
-      // If the user is not a member, join (add the community)
-      user.communities.push({ communityId });
-      await user.save();
+      // If the user is not in the community's members list, add them
+      community.members.push(userId);
+      await community.save();
       return res.status(200).json({
         message: "Successfully joined the community",
         communities: user.communities,

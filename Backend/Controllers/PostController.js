@@ -1,18 +1,75 @@
+import { Community } from "../Models/CommunityModel.js";
 import { Post } from "../Models/PostModel.js"; // Adjust the path as necessary
+import { User } from "../Models/UserModel.js";
 
 // Create a new post
 export const addPost = async (req, res) => {
   try {
-    const { postTitle, descriptions, author, medias } = req.body;
+    console.log(req.body);
+    // Ensure to access media correctly from the FormData
+    const { postTitle, descriptions, author, community, medias } = req.body;
 
     const newPost = new Post({
       postTitle,
       descriptions,
       author, // Set the author ID
-      medias,
+      medias: medias || [], // Ensure medias is an array
     });
 
     const savedPost = await newPost.save();
+
+    // Check if the community is "Post In Profile"
+    if (community === "Post In Profile") {
+      // Find the user by ID
+      const foundUser = await User.findById(author);
+
+      if (foundUser) {
+        // If user is found, push the new post's ID to profilePosts
+        foundUser.profilePosts.push(savedPost._id);
+        await foundUser.save(); // Save the updated user
+      } else {
+        return res.status(404).json({ message: "User not found." });
+      }
+    } else {
+      // Find the community by name if not "Post In Profile"
+      const foundCommunity = await Community.findOne({
+        communityName: community,
+      });
+
+      if (foundCommunity) {
+        // If community is found, push the new post's ID to relatedPosts
+        foundCommunity.relatedPosts.push(savedPost._id);
+        await foundCommunity.save(); // Save the updated community
+
+        // Now also update the user's communities with the new post ID
+        const foundUser = await User.findById(author);
+
+        if (foundUser) {
+          // Check if user is part of the community
+          const communityIndex = foundUser.communities.findIndex(
+            (c) => c.communityId.toString() === foundCommunity._id.toString()
+          );
+
+          if (communityIndex !== -1) {
+            // If user is part of the community, push the new post ID to postIds
+            foundUser.communities[communityIndex].postIds.push(savedPost._id);
+            await foundUser.save(); // Save the updated user
+          } else {
+            // Optional: handle the case if the user is not part of the community
+            // e.g., add the community to user's communities
+            foundUser.communities.push({
+              communityId: foundCommunity._id,
+              postIds: [savedPost._id],
+            });
+            await foundUser.save(); // Save the updated user
+          }
+        } else {
+          return res.status(404).json({ message: "User not found." });
+        }
+      } else {
+        return res.status(404).json({ message: "Community not found." });
+      }
+    }
 
     res.status(201).json({
       message: "Post created successfully",

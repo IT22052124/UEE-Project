@@ -7,13 +7,14 @@ import CreatePostScreen from "./CommunityConnect/Screen/CreatePostScreen";
 
 import CreateCommunityScreen from "./CommunityConnect/Screen/CreateCommunityScreen";
 import CommunityScreen from "./CommunityConnect/Screen/CommunityScreen";
+import ProfileScreen from "./CommunityConnect/Screen/ProfileScreen";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="CreatePostScreen">
+      <Stack.Navigator initialRouteName="ProfileScreen">
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
@@ -22,6 +23,11 @@ export default function App() {
         <Stack.Screen
           name="CreateCommunityScreen"
           component={CreateCommunityScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ProfileScreen"
+          component={ProfileScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -48,3 +54,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+

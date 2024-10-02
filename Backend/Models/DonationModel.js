@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const donationSchema = mongoose.Schema(
   {
     Id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     title: {
@@ -26,6 +25,10 @@ const donationSchema = mongoose.Schema(
       type: Number,
       required: [true, "Please Enter the Amount Required"],
     },
+    imageurl:{
+      type:String,
+      required:false,
+    },
     location: {
       type: String,
       required: [true, "Please Enter a Location"],
@@ -39,17 +42,17 @@ const donationSchema = mongoose.Schema(
     bankDetails: {
       accountNumber: {
         type: String,
-        required: [true, "Please Enter a Bank Account Number"],
+        required: [false, "Please Enter a Bank Account Number"],
         trim: true,
       },
       bankName: {
         type: String,
-        required: [true, "Please Enter a Bank Name"],
+        required: [false, "Please Enter a Bank Name"],
         trim: true,
       },
       accountHolderName: {
         type: String,
-        required: [true, "Please Enter an Account Holder Name"],
+        required: [false, "Please Enter an Account Holder Name"],
         trim: true,
       },
     },

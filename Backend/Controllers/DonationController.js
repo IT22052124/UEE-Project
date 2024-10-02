@@ -13,10 +13,23 @@ export const createDonation = async (req, res) => {
       bankDetails,
       directCash,
       organization,
+      userId, // Add this to capture the user ID
     } = req.body;
+
+    // Generate a new donation ID in the format "D0001"
+    const latestDonation = await Donation.find().sort({ createdAt: -1 }).limit(1);
+    let Id;
+
+    if (latestDonation.length !== 0) {
+      const latestId = parseInt(latestDonation[0].Id.slice(1)); // Get the latest ID
+      Id = "D" + String(latestId + 1).padStart(4, "0"); // Increment and format
+    } else {
+      Id = "D0001"; // Starting ID
+    }
 
     // Create the new donation object
     const newDonation = new Donation({
+      Id, // Set the generated donation ID // Set the user ID
       title,
       description,
       amountRaised: amountRaised || 0, // Default to 0 if not provided
@@ -36,6 +49,7 @@ export const createDonation = async (req, res) => {
       message: "Donation created successfully",
       donation: {
         _id: savedDonation._id,
+        Id: savedDonation.Id, // Include the custom ID in the response
         title: savedDonation.title,
         description: savedDonation.description,
         amountRaised: savedDonation.amountRaised,
@@ -95,6 +109,7 @@ export const updateDonation = async (req, res) => {
       message: "Donation updated successfully",
       donation: {
         _id: updatedDonation._id,
+        Id: updatedDonation.Id, // Include the custom ID in the response
         title: updatedDonation.title,
         description: updatedDonation.description,
         amountRaised: updatedDonation.amountRaised,

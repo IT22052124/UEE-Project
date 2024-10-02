@@ -1,23 +1,54 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ImageBackground,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SignInScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  const validateEmail = (email) => {
+    const re = /\S+@\S+\.\S+/;
+    if (!email) {
+      setEmailError('Email is required');
+    } else if (!re.test(email)) {
+      setEmailError('Invalid email format');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const validatePassword = (password) => {
+    if (!password) {
+      setPasswordError('Password is required');
+    } else if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+    } else {
+      setPasswordError('');
+    }
+  };
+
+  useEffect(() => {
+    setIsFormValid(email && password && !emailError && !passwordError);
+  }, [email, password, emailError, passwordError]);
+
+  const handleSignIn = () => {
+    if (isFormValid) {
+      // Implement your sign-in logic here
+      Alert.alert('Success', 'Sign in successful!');
+    }
+  };
+
   return (
     <ImageBackground
-      source={{ uri: "https://example.com/background-image.jpg" }}
+      source={{ uri: 'https://example.com/background-image.jpg' }}
       style={styles.backgroundImage}
     >
       <LinearGradient
-        colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.9)"]}
+        colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.9)']}
         style={styles.container}
       >
         <View style={styles.headerContainer}>
@@ -26,19 +57,35 @@ export default function SignInScreen({ navigation }) {
         </View>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, emailError && styles.inputError]}
             placeholder="Email"
             placeholderTextColor="#aaa"
             keyboardType="email-address"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              validateEmail(text);
+            }}
           />
+          {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
           <TextInput
-            style={styles.input}
+            style={[styles.input, passwordError && styles.inputError]}
             placeholder="Password"
             placeholderTextColor="#aaa"
             secureTextEntry
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              validatePassword(text);
+            }}
           />
+          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
         </View>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={[styles.button, !isFormValid && styles.buttonDisabled]}
+          onPress={handleSignIn}
+          disabled={!isFormValid}
+        >
           <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
         <TouchableOpacity>
@@ -46,7 +93,7 @@ export default function SignInScreen({ navigation }) {
         </TouchableOpacity>
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.signupLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -58,63 +105,74 @@ export default function SignInScreen({ navigation }) {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: 20,
   },
   headerContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 40,
   },
   headerText: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
+    fontWeight: 'bold',
+    color: 'white',
     marginTop: 10,
   },
   inputContainer: {
     marginBottom: 20,
   },
   input: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: 'rgba(255,255,255,0.1)',
     height: 50,
     borderRadius: 25,
     paddingHorizontal: 20,
     fontSize: 16,
-    color: "white",
+    color: 'white',
     marginBottom: 15,
   },
+  inputError: {
+    borderColor: 'red',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+  },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: '#4CAF50',
     height: 50,
     borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    backgroundColor: '#888',
   },
   buttonText: {
-    color: "white",
+    color: 'white',
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   forgotPassword: {
-    color: "white",
-    textAlign: "center",
+    color: 'white',
+    textAlign: 'center',
     marginTop: 20,
   },
   signupContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: 20,
   },
   signupText: {
-    color: "white",
+    color: 'white',
   },
   signupLink: {
-    color: "#4CAF50",
-    fontWeight: "bold",
+    color: '#4CAF50',
+    fontWeight: 'bold',
   },
 });

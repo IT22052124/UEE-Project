@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import UserRote from "./Routes/UserRoute.js";
 import PostRoute from "./Routes/PostRoute.js";
 import CommunityRoute from "./Routes/CommunityRoute.js";
+import DonationRoute from "./Routes/DonationRoute.js"
 
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -21,6 +22,7 @@ app.use(cors());
 app.use("/User", UserRote);
 app.use("/Post/", PostRoute);
 app.use("/Community", CommunityRoute);
+app.use("/Donation",DonationRoute)
 
 const PORT = process.env.PORT || 5000;
 mongoose

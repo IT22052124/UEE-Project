@@ -1,0 +1,154 @@
+import { Donation } from "../Models/DonationModel.js";
+
+// Create a new donation
+export const createDonation = async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      amountRaised,
+      amountRequired,
+      location,
+      category,
+      bankDetails,
+      directCash,
+      organization,
+    } = req.body;
+
+    // Create the new donation object
+    const newDonation = new Donation({
+      title,
+      description,
+      amountRaised: amountRaised || 0, // Default to 0 if not provided
+      amountRequired,
+      location,
+      category,
+      bankDetails,
+      directCash,
+      organization,
+    });
+
+    // Save the new donation to the database
+    const savedDonation = await newDonation.save();
+
+    // Return the created donation
+    res.status(201).json({
+      message: "Donation created successfully",
+      donation: {
+        _id: savedDonation._id,
+        title: savedDonation.title,
+        description: savedDonation.description,
+        amountRaised: savedDonation.amountRaised,
+        amountRequired: savedDonation.amountRequired,
+        location: savedDonation.location,
+        category: savedDonation.category,
+        bankDetails: savedDonation.bankDetails,
+        directCash: savedDonation.directCash,
+        organization: savedDonation.organization,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update an existing donation by ID
+export const updateDonation = async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      amountRaised,
+      amountRequired,
+      location,
+      category,
+      bankDetails,
+      directCash,
+      organization,
+    } = req.body;
+
+    // Find the donation by ID
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+
+    // Update the donation fields
+    const updatedDonation = await Donation.findByIdAndUpdate(
+      req.params.id,
+      {
+        title: title || donation.title,
+        description: description || donation.description,
+        amountRaised: amountRaised !== undefined ? amountRaised : donation.amountRaised,
+        amountRequired: amountRequired || donation.amountRequired,
+        location: location || donation.location,
+        category: category || donation.category,
+        bankDetails: bankDetails || donation.bankDetails,
+        directCash: directCash !== undefined ? directCash : donation.directCash,
+        organization: organization || donation.organization,
+      },
+      { new: true, runValidators: true }
+    );
+
+    // Return the updated donation
+    res.status(200).json({
+      message: "Donation updated successfully",
+      donation: {
+        _id: updatedDonation._id,
+        title: updatedDonation.title,
+        description: updatedDonation.description,
+        amountRaised: updatedDonation.amountRaised,
+        amountRequired: updatedDonation.amountRequired,
+        location: updatedDonation.location,
+        category: updatedDonation.category,
+        bankDetails: updatedDonation.bankDetails,
+        directCash: updatedDonation.directCash,
+        organization: updatedDonation.organization,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete a donation by ID
+export const deleteDonation = async (req, res) => {
+  try {
+    const donation = await Donation.findByIdAndDelete(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+    res.status(200).json({ message: "Donation deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Retrieve all donations
+export const getAllDonations = async (req, res) => {
+  try {
+    const donations = await Donation.find();
+    res.status(200).json({
+      message: "Donations retrieved successfully",
+      donations,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Retrieve a single donation by ID
+export const getDonationById = async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+    res.status(200).json({
+      message: "Donation retrieved successfully",
+      donation,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -13,8 +13,9 @@ export const createDonation = async (req, res) => {
       bankDetails,
       directCash,
       organization,
-      userId, // Add this to capture the user ID
+      // Add this to capture the user ID
     } = req.body;
+    console.log(req);
 
     // Generate a new donation ID in the format "D0001"
     const latestDonation = await Donation.find().sort({ createdAt: -1 }).limit(1);
@@ -43,9 +44,10 @@ export const createDonation = async (req, res) => {
 
     // Save the new donation to the database
     const savedDonation = await newDonation.save();
-
+      
     // Return the created donation
     res.status(201).json({
+      
       message: "Donation created successfully",
       donation: {
         _id: savedDonation._id,
@@ -63,6 +65,7 @@ export const createDonation = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+    console.log("not created")
   }
 };
 

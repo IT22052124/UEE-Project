@@ -73,6 +73,8 @@ export const createDonation = async (req, res) => {
 
 // Update an existing donation by ID
 export const updateDonation = async (req, res) => {
+  const { id } = req.params;
+   
   try {
     const {
       title,
@@ -88,14 +90,14 @@ export const updateDonation = async (req, res) => {
     } = req.body;
 
     // Find the donation by ID
-    const donation = await Donation.findById(req.params.id);
+    const donation = await Donation.findOne({Id:id});
     if (!donation) {
       return res.status(404).json({ message: "Donation not found" });
     }
 
     // Update the donation fields
-    const updatedDonation = await Donation.findByIdAndUpdate(
-      req.params.id,
+    const updatedDonation = await Donation.findOneAndUpdate(
+      {Id:id},
       {
         title: title || donation.title,
         description: description || donation.description,
@@ -165,8 +167,9 @@ export const getAllDonations = async (req, res) => {
 
 // Retrieve a single donation by ID
 export const getDonationById = async (req, res) => {
+  const { id } = req.params;
   try {
-    const donation = await Donation.findById(req.params.id);
+    const donation = await Donation.findOne({Id:id});
     if (!donation) {
       return res.status(404).json({ message: "Donation not found" });
     }

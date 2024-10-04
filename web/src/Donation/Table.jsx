@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const DonationTable = () => {
   const [donations, setDonations] = useState([]);
@@ -9,7 +10,7 @@ const DonationTable = () => {
   const [error, setError] = useState('');
   const [editDonation, setEditDonation] = useState(null); // State to handle the donation being edited
   const [showEditForm, setShowEditForm] = useState(false); // Toggle form visibility
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchDonations = async () => {
       try {
@@ -36,7 +37,7 @@ const DonationTable = () => {
       (donation) =>
         donation.title.toLowerCase().includes(query) ||
         donation.description.toLowerCase().includes(query) ||
-        donation.organization.toLowerCase().includes(query)
+        donation.location.toLowerCase().includes(query)
     );
     setFilteredDonations(filtered);
   };
@@ -55,9 +56,9 @@ const DonationTable = () => {
   };
 
   // Handle edit donation (pre-fill the edit form)
-  const handleEdit = (donation) => {
-    setEditDonation(donation);
-    setShowEditForm(true);
+  const handleEdit = (id) => {
+    navigate(`/update/${id}`);
+    
   };
 
   // Handle update donation
@@ -245,7 +246,7 @@ const DonationTable = () => {
                         <div className="flex space-x-2">
                           <button
                             className="text-blue-600 hover:text-blue-900"
-                            onClick={() => handleEdit(donation)}
+                            onClick={() => handleEdit(donation.Id)}
                           >
                             Edit
                           </button>

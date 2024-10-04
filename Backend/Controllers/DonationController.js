@@ -13,7 +13,7 @@ export const createDonation = async (req, res) => {
       bankDetails,
       directCash,
       organization,
-      // Add this to capture the user ID
+      emergency,
     } = req.body;
     console.log(req);
 
@@ -40,6 +40,7 @@ export const createDonation = async (req, res) => {
       bankDetails,
       directCash,
       organization,
+      emergency
     });
 
     // Save the new donation to the database
@@ -61,6 +62,7 @@ export const createDonation = async (req, res) => {
         bankDetails: savedDonation.bankDetails,
         directCash: savedDonation.directCash,
         organization: savedDonation.organization,
+        emergency:savedDonation.emergency
       },
     });
   } catch (error) {
@@ -82,6 +84,7 @@ export const updateDonation = async (req, res) => {
       bankDetails,
       directCash,
       organization,
+      emergency
     } = req.body;
 
     // Find the donation by ID
@@ -103,6 +106,8 @@ export const updateDonation = async (req, res) => {
         bankDetails: bankDetails || donation.bankDetails,
         directCash: directCash !== undefined ? directCash : donation.directCash,
         organization: organization || donation.organization,
+        emergency: emergency || donation.emergency,
+
       },
       { new: true, runValidators: true }
     );
@@ -122,6 +127,7 @@ export const updateDonation = async (req, res) => {
         bankDetails: updatedDonation.bankDetails,
         directCash: updatedDonation.directCash,
         organization: updatedDonation.organization,
+        emergency: updatedDonation.emergency,
       },
     });
   } catch (error) {
@@ -131,14 +137,16 @@ export const updateDonation = async (req, res) => {
 
 // Delete a donation by ID
 export const deleteDonation = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
   try {
-    const donation = await Donation.findByIdAndDelete(req.params.id);
+    const donation = await Donation.findOneAndDelete({Id:id});
     if (!donation) {
       return res.status(404).json({ message: "Donation not found" });
     }
     res.status(200).json({ message: "Donation deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "falied here bro" });
   }
 };
 

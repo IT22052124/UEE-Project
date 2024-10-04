@@ -55,15 +55,38 @@ const donationSchema = mongoose.Schema(
         required: [false, "Please Enter an Account Holder Name"],
         trim: true,
       },
+      bankBranch: {
+        type: String,
+        required: [false, "Please Enter Branch Name"],
+        trim: true,
+      },
     },
     directCash: {
-      type: String,
-      required: [false, "Please Specify if Direct Cash is Allowed"],
+      orgName: {
+        type: String,
+        required: [false, "Please Enter a Bank Account Number"],
+        trim: true,
+      },
+      phone: {
+        type: String,
+        required: [false, "Please Enter a Bank Name"],
+        trim: true,
+      },
+      address: {
+        type: String,
+        required: [false, "Please Enter an Account Holder Name"],
+        trim: true,
+      },
     },
     organization: {
       type: String,
       required: [true, "Please Enter the Organization Name"],
       trim: true,
+    },
+    emergency: {
+      type: String,
+      enum: ["yes", "no"],
+      required: [false, "Please Select a Category"],
     },
   },
   {

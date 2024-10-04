@@ -1,18 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import DonationForm from './Donation/Donation'
-import Table from "./Donation/Table"
+import { useState } from 'react';
+import './App.css';
+import DonationForm from './Donation/Donation'; // Ensure this path is correct
+import Table from './Donation/Table'; // Ensure this path is correct
+import Sidebar from '../shared/components/Sidebar'; // Ensure this path is correct
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import DD from "./Donation/dd";
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
   return (
-    <>
-      <Table/>
-      
-    </>
-  )
+    <Router>
+      <div className="flex">
+        <Sidebar /> {/* Sidebar is always visible in this layout */}
+        <div className="flex-grow">
+          <Routes>
+            <Route path="/i" element={<DD />} /> {/* This route shows DD component */}
+            <Route path="/donation" element={<DonationForm />} />
+            <Route path="/table" element={<Table />} />
+            {/* Add additional routes as needed */}
+          </Routes>
+        </div>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;

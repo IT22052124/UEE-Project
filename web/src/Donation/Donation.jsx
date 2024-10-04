@@ -18,6 +18,7 @@ const DonationForm = () => {
       phone: '',
       address: '',
     },
+    image: null,
     organization: '',
     emergency: '',
   });
@@ -26,8 +27,14 @@ const DonationForm = () => {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.startsWith('bankDetails.')) {
+    const { name, value,type } = e.target;
+   if (type === "file") {
+      setFormData((prev) => ({
+        ...prev,
+        image: e.target.files[0], // Store the selected file
+      }));
+    }
+     else if (name.startsWith('bankDetails.')) {
       const fieldName = name.split('.')[1];
       setFormData((prev) => ({
         ...prev,
@@ -55,8 +62,34 @@ const DonationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formDataToSend = new FormData();
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('amountRequired', formData.amountRequired);
+    formDataToSend.append('location', formData.location);
+    formDataToSend.append('category', formData.category);
+    formDataToSend.append('organization', formData.organization);
+    formDataToSend.append('emergency', formData.emergency);
+    formDataToSend.append('bankDetails[accountNumber]', formData.bankDetails.accountNumber);
+    formDataToSend.append('bankDetails[bankName]', formData.bankDetails.bankName);
+    formDataToSend.append('bankDetails[accountHolderName]', formData.bankDetails.accountHolderName);
+    formDataToSend.append('directCash[orgName]', formData.directCash.orgName);
+    formDataToSend.append('directCash[phone]', formData.directCash.phone);
+    formDataToSend.append('directCash[address]', formData.directCash.address);
+   
+
+
+    if (formData.image) {
+      formDataToSend.append('image', formData.image);
+    }
+
     try {
-      const response = await axios.post('http://localhost:5000/Donation', formData);
+      const response = await axios.post('http://localhost:5000/Donation', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Important for file uploads
+        },
+      });
       setSuccess('Donation created successfully!');
       setError('');
       setFormData({
@@ -144,6 +177,20 @@ const DonationForm = () => {
               required
             />
           </div>
+          
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="image">File</label>
+          <input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            onChange={handleChange} // Handle the file input
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            required
+          />
+        </div>
+
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -272,8 +319,8 @@ const DonationForm = () => {
             required
           >
             <option value="">Select</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="yes">yes</option>
+            <option value="no">no</option>
           </select>
         </div>
 

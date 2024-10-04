@@ -25,7 +25,7 @@ const donationSchema = mongoose.Schema(
       type: Number,
       required: [true, "Please Enter the Amount Required"],
     },
-    imageurl:{
+    image:{
       type:String,
       required:false,
     },

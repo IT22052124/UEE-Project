@@ -9,11 +9,12 @@ import {
 } from "../Controllers/DonationController.js";
 
 // Adjust the path as necessary
+import fileupload from "../middleware/file-upload.js"
 
 const router = express.Router();
 
 // Create a new group with admin
-router.post("/", createDonation);
+router.post("/",fileupload.single('image'), createDonation);
 
 //get donations
 router.get("/",getAllDonations)

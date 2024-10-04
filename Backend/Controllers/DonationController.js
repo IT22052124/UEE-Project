@@ -1,7 +1,9 @@
 import { Donation } from "../Models/DonationModel.js";
 
 // Create a new donation
-export const createDonation = async (req, res) => {
+export const createDonation = async (req, res,next) => {
+  console.log("hi");
+  
   try {
     const {
       title,
@@ -15,8 +17,8 @@ export const createDonation = async (req, res) => {
       organization,
       emergency,
     } = req.body;
-    console.log(req);
-
+    
+    console.log(emergency);
     // Generate a new donation ID in the format "D0001"
     const latestDonation = await Donation.find().sort({ createdAt: -1 }).limit(1);
     let Id;
@@ -27,47 +29,41 @@ export const createDonation = async (req, res) => {
     } else {
       Id = "D0001"; // Starting ID
     }
+    let path = 'uploads/images/No-Image-Placeholder.png' 
+  if(req.file && req.file.path )
+    path = req.file.path
+
+  
+    
 
     // Create the new donation object
     const newDonation = new Donation({
-      Id, // Set the generated donation ID // Set the user ID
-      title,
-      description,
+      Id:Id, // Set the generated donation ID // Set the user ID
+      title:title,
+      description:description,
       amountRaised: amountRaised || 0, // Default to 0 if not provided
-      amountRequired,
-      location,
-      category,
-      bankDetails,
-      directCash,
-      organization,
-      emergency
+      amountRequired:amountRequired,
+      location:location,
+      category:category,
+      bankDetails:bankDetails,
+      directCash:directCash,
+      organization:organization,
+      emergency:emergency,
+      image:path,
     });
 
-    // Save the new donation to the database
+    console.log(newDonation)
     const savedDonation = await newDonation.save();
       
     // Return the created donation
     res.status(201).json({
       
       message: "Donation created successfully",
-      donation: {
-        _id: savedDonation._id,
-        Id: savedDonation.Id, // Include the custom ID in the response
-        title: savedDonation.title,
-        description: savedDonation.description,
-        amountRaised: savedDonation.amountRaised,
-        amountRequired: savedDonation.amountRequired,
-        location: savedDonation.location,
-        category: savedDonation.category,
-        bankDetails: savedDonation.bankDetails,
-        directCash: savedDonation.directCash,
-        organization: savedDonation.organization,
-        emergency:savedDonation.emergency
-      },
+     donation: savedDonation,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
-    console.log("not created")
+    console.log(error);
   }
 };
 

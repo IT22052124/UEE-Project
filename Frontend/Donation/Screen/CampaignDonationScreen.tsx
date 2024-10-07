@@ -26,9 +26,9 @@ export default function DonateScreen({ route }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        <LinearGradient colors={['#63b3ed', '#4a90e2']} style={styles.header}>
+        <LinearGradient colors={['#F9F9F9', '#F9F9F9']} style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} accessibilityLabel="Go back">
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color="#4a90e2" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Donate</Text>
         </LinearGradient>
@@ -121,19 +121,18 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
-    marginLeft:0,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-  marginBottom:0 ,
-},
+    borderWidth: 2,
+    borderColor: '#4a90e2',
+  },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 21,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginLeft: 75,
-
+    color: '#000000',
+    marginLeft: 100,
   },
   causeContainer: {
     flexDirection: 'row',

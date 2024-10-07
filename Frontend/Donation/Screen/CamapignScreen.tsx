@@ -88,7 +88,7 @@ export default function CategoryScreen() {
       >
         {filteredDonations.map((campaign) => (
           <TouchableOpacity
-            key={campaign.id}
+            key={campaign.Id}
             style={styles.campaignCard}
             onPress={() => navigation.navigate('AboutScreen', { campaign })}
           >

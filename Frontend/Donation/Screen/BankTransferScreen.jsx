@@ -1,13 +1,50 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Button,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 const DirectTransferScreen = ({ route, navigation }) => {
   const { campaign, selectedAmount } = route.params; // Get campaign details and selected amount from route params
+  const [accountHolder, setAccountHolder] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [branch, setBranch] = useState('');
+  const [depositImage, setDepositImage] = useState('');
 
-  const handleUploadImage = () => {
-    // Logic for uploading the bank deposit image
-    alert('Upload Image functionality to be implemented!');
+  const handleTransfer = () => {
+    // Logic for processing the transfer can be added here
+    alert('Transfer Successful!');
+    navigation.goBack(); // Navigate back after transfer
+  };
+
+  const handleImageUpload = async () => {
+    const permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setDepositImage(result.assets[0].uri);
+    }
   };
 
   return (
@@ -26,28 +63,55 @@ const DirectTransferScreen = ({ route, navigation }) => {
         </View>
 
         <Text style={styles.sectionTitle}>Bank Details</Text>
-        <View style={styles.bankDetailsContainer}>
-          <Text style={styles.bankDetailText}>Account Holder Name: {campaign.bankDetails.accountHolderName}</Text>
-          <Text style={styles.bankDetailText}>Bank Name: {campaign.bankDetails.bankName}</Text>
-          <Text style={styles.bankDetailText}>Account Number: {campaign.bankDetails.accountNumber}</Text>
-          <Text style={styles.bankDetailText}>Branch: {campaign.bankDetails.branch}</Text>
+        <View style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Account Holder Name"
+            placeholderTextColor="#999"
+            value={accountHolder}
+            onChangeText={setAccountHolder}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Account Number"
+            placeholderTextColor="#999"
+            value={accountNumber}
+            onChangeText={setAccountNumber}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Bank Name"
+            placeholderTextColor="#999"
+            value={bankName}
+            onChangeText={setBankName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Branch"
+            placeholderTextColor="#999"
+            value={branch}
+            onChangeText={setBranch}
+          />
         </View>
 
-        <Text style={styles.sectionTitle}>Instructions for Bank Transfer</Text>
-        <View style={styles.instructionsContainer}>
-          <Text style={styles.instructionText}>
-            1. Transfer the amount to the above account details.
-          </Text>
-          <Text style={styles.instructionText}>
-            2. Use your name as the reference for the transfer.
-          </Text>
-          <Text style={styles.instructionText}>
-            3. Ensure you retain the receipt for confirmation.
-          </Text>
-        </View>
+        <Text style={styles.instructionTitle}>Instructions for Bank Transfer:</Text>
+        <Text style={styles.instructionText}>
+          1. Transfer the selected amount to the account details provided above.
+          {'\n'}2. Make sure to include your name in the transfer details.
+          {'\n'}3. Upload an image of your bank deposit receipt below.
+        </Text>
 
-        <TouchableOpacity style={styles.uploadButton} onPress={handleUploadImage}>
+        <TouchableOpacity style={styles.uploadButton} onPress={handleImageUpload}>
           <Text style={styles.uploadButtonText}>Upload Deposit Image</Text>
+        </TouchableOpacity>
+
+        {depositImage ? (
+          <Image source={{ uri: depositImage }} style={styles.imagePreview} />
+        ) : null}
+
+        <TouchableOpacity style={styles.transferButton} onPress={handleTransfer}>
+          <Text style={styles.transferButtonText}>Confirm Transfer</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -99,37 +163,59 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#007AFF',
   },
-  bankDetailsContainer: {
+  formContainer: {
     backgroundColor: '#ffffff',
     borderRadius: 8,
     padding: 16,
     elevation: 2,
     marginBottom: 24,
   },
-  bankDetailText: {
+  input: {
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
     fontSize: 16,
-    color: '#333',
-    marginBottom: 4,
-  },
-  instructionsContainer: {
     backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
-    elevation: 2,
-    marginBottom: 24,
+  },
+  instructionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#007AFF',
+    marginTop: 16,
   },
   instructionText: {
     fontSize: 16,
     color: '#333',
-    marginBottom: 4,
+    marginTop: 8,
+    marginBottom: 16,
   },
   uploadButton: {
     backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 16,
   },
   uploadButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  transferButton: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  transferButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',

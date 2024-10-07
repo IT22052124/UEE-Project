@@ -9,7 +9,10 @@ import CreateCommunityScreen from "./CommunityConnect/Screen/CreateCommunityScre
 import CommunityScreen from "./CommunityConnect/Screen/CommunityScreen";
 import ProfileScreen from "./CommunityConnect/Screen/ProfileScreen";
 import DonationHomepage from "./Donation/Screen/DHomepage"
-import CatergoryScreen from "./Donation/Screen/CatergoryScreen"
+import CatergoryScreen from "./Donation/Screen/CamapignScreen"
+import AboutScreen from "./Donation/Screen/AboutCampaignScreen"
+import CampaignDonation from "./Donation/Screen/CampaignDonationScreen"
+import BankDespoits from "./Donation/Screen/BankTransferScreen"
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -34,6 +37,21 @@ export default function App() {
          <Stack.Screen
           name="CatergoryScreen"
           component={CatergoryScreen}
+          options={{ headerShown: false }}
+        />
+         <Stack.Screen
+          name="BankDespoits"
+          component={BankDespoits}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AboutScreen"
+          component={AboutScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CampaignDonation"
+          component={CampaignDonation}
           options={{ headerShown: false }}
         />
         <Stack.Screen

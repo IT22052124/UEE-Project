@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
+import ImageUpload from "../shared/ImageUpload";
 
 const DonationForm = () => {
+  const [progress, setProgress] = useState(0);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [downloadURLs, setDownloadURLs] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -18,7 +22,7 @@ const DonationForm = () => {
       phone: "",
       address: "",
     },
-    image: null,
+    image: [""],
     organization: "",
     emergency: "",
   });
@@ -87,19 +91,22 @@ const DonationForm = () => {
     formDataToSend.append("directCash[address]", formData.directCash.address);
 
     if (formData.image) {
-      formDataToSend.append("image", formData.image);
+      formDataToSend.append("image", downloadURLs);
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/Donation",
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // Important for file uploads
-          },
-        }
-      );
+      const response = await axios.post("http://localhost:5000/Donation", {
+        title: formData.title,
+        description: formData.description,
+        amountRequired: formData.amountRequired,
+        location: formData.location,
+        category: formData.category,
+        bankDetails: formData.bankDetails,
+        directCash: formData.directCash,
+        organization: formData.organization,
+        emergency: formData.emergency,
+        image: downloadURLs.map((fileData) => fileData.url),
+      });
       setSuccess("Donation created successfully!");
       setError("");
       setFormData({
@@ -228,21 +235,68 @@ const DonationForm = () => {
           </div>
 
           <div>
-            <label
-              className="block text-sm font-medium text-gray-700 mb-2"
-              htmlFor="image"
-            >
-              File
-            </label>
-            <input
-              id="image"
-              name="image"
-              type="file"
-              accept="image/*"
-              onChange={handleChange} // Handle the file input
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-              required
-            />
+            <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg">
+              <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg">
+                <div className="flex space-x-4 overflow-x-auto w-full">
+                  {imageUploading && (
+                    <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
+                      <p className="text-center text-lg text-black">
+                        {progress}%
+                      </p>
+                    </div>
+                  )}
+                  {!imageUploading &&
+                    downloadURLs.map((fileData, index) => (
+                      <div
+                        key={index}
+                        className="relative w-36 h-36 flex-shrink-0"
+                      >
+                        <img
+                          src={fileData.url}
+                          alt={`Product ${index + 1}`}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => handleDelete(fileData.ref, index)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-700 focus:outline-none"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  s
+                  {downloadURLs.length === 0 && !imageUploading && (
+                    <>
+                      <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
+                        <p className="text-center text-lg text-black">
+                          Add media
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="mt-4">
+                <ImageUpload
+                  setDownloadURLs={setDownloadURLs}
+                  setProgress={setProgress}
+                  setLoading={setImageUploading}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

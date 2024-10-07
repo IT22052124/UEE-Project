@@ -25,9 +25,9 @@ const donationSchema = mongoose.Schema(
       type: Number,
       required: [true, "Please Enter the Amount Required"],
     },
-    image:{
-      type:String,
-      required:false,
+    image: {
+      type: [String],
+      required: false,
     },
     location: {
       type: String,
@@ -36,7 +36,7 @@ const donationSchema = mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["Hunger", "Medical", "Education", "Poverty","Disaster","Others"],
+      enum: ["Hunger", "Medical", "Education", "Poverty", "Disaster", "Others"],
       required: [true, "Please Select a Category"],
     },
     bankDetails: {

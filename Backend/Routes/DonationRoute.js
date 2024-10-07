@@ -1,33 +1,32 @@
 import express from "express";
 import {
-    createDonation,
-    updateDonation,
-    deleteDonation,
-    getAllDonations,
-    getDonationById,
-    getEmergencyDonations
-
+  createDonation,
+  updateDonation,
+  deleteDonation,
+  getAllDonations,
+  getDonationById,
+  getEmergencyDonations,
 } from "../Controllers/DonationController.js";
 
 // Adjust the path as necessary
-import fileupload from "../middleware/file-upload.js"
+import fileupload from "../middleware/file-upload.js";
 
 const router = express.Router();
 
 // Create a new group with admin
-router.post("/",fileupload.single('image'), createDonation);
+router.post("/", createDonation);
 
 //get donations
-router.get("/",getAllDonations)
+router.get("/", getAllDonations);
 
-router.get("/emergency",getEmergencyDonations)
+router.get("/emergency", getEmergencyDonations);
 
 // Get all communities
 
 router.get("/:id", getDonationById);
 
 // Add related posts to a community
-router.delete("/:id",deleteDonation)
+router.delete("/:id", deleteDonation);
 
 // Update the admin of a community
 router.put("/update/:id", updateDonation);

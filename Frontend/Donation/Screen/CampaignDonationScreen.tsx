@@ -82,13 +82,13 @@ export default function DonateScreen({ route }) {
             <Ionicons name="card-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Card Payment</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#FF9500' }]} onPress={() => navigation.navigate('BankDespoits', { campaign, selectedAmount })}>
+          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#FF9500' }]} onPress={() => navigation.navigate('BankDeposits', { campaign, selectedAmount })}>
             <Ionicons name="business-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Bank Transfer</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#007AFF' }]} onPress={() => navigation.navigate('BankDespoits', { campaign })}>
+          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#007AFF' }]} onPress={() => navigation.navigate('DirectTransfer', { campaign })}>
             <Ionicons name="cash-outline" size={24} color="white" style={styles.paymentIcon} />
-            <Text style={styles.paymentButtonText}>Direct Transfer</Text>
+            <Text style={styles.paymentButtonText}>Organization</Text>
           </TouchableOpacity>
         </View>
 
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingVertical: 5, // Reduced padding vertically to decrease header height
+    paddingVertical: 15, // Reduced padding vertically to decrease header height
 
     flexDirection: 'row',
     alignItems: 'center',
@@ -119,8 +119,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
     borderRadius: 20,
     backgroundColor: '#ffffff',
     justifyContent: 'center',

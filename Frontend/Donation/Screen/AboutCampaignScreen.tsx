@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f4f4',
   },
   header: {
-    paddingVertical: 5, // Reduced padding vertically to decrease header height
+    paddingVertical: 15, // Reduced padding vertically to decrease header height
 
     flexDirection: 'row',
     alignItems: 'center',
@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
     borderRadius: 20,
     backgroundColor: '#ffffff',
     justifyContent: 'center',

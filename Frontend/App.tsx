@@ -12,7 +12,8 @@ import DonationHomepage from "./Donation/Screen/DHomepage"
 import CatergoryScreen from "./Donation/Screen/CamapignScreen"
 import AboutScreen from "./Donation/Screen/AboutCampaignScreen"
 import CampaignDonation from "./Donation/Screen/CampaignDonationScreen"
-import BankDespoits from "./Donation/Screen/BankTransferScreen"
+import DirectTransfer from "./Donation/Screen/OrganizationScreen"
+import BankDeposits from "./Donation/Screen/BankTransferScreen"
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -40,8 +41,13 @@ export default function App() {
           options={{ headerShown: false }}
         />
          <Stack.Screen
-          name="BankDespoits"
-          component={BankDespoits}
+          name="BankDeposits"
+          component={BankDeposits}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="DirectTransfer"
+          component={DirectTransfer}
           options={{ headerShown: false }}
         />
         <Stack.Screen

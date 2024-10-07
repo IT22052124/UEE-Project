@@ -8,21 +8,32 @@ import CreatePostScreen from "./CommunityConnect/Screen/CreatePostScreen";
 import CreateCommunityScreen from "./CommunityConnect/Screen/CreateCommunityScreen";
 import CommunityScreen from "./CommunityConnect/Screen/CommunityScreen";
 import ProfileScreen from "./CommunityConnect/Screen/ProfileScreen";
-
+import DonationHomepage from "./Donation/Screen/DHomepage"
+import CatergoryScreen from "./Donation/Screen/CatergoryScreen"
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="ProfileScreen">
+      <Stack.Navigator initialRouteName="DonationHomepage">
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name="CreateCommunityScreen"
           component={CreateCommunityScreen}
+          options={{ headerShown: false }}
+        />
+         <Stack.Screen
+          name="DonationHomepage"
+          component={DonationHomepage}
+          options={{ headerShown: false }}
+        />
+         <Stack.Screen
+          name="CatergoryScreen"
+          component={CatergoryScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

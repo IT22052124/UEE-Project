@@ -36,7 +36,7 @@ const donationSchema = mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["food", "cloth", "money", "other"],
+      enum: ["Hunger", "Medical", "Education", "Poverty","Disaster","Others"],
       required: [true, "Please Select a Category"],
     },
     bankDetails: {

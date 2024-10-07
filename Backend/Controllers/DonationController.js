@@ -177,3 +177,17 @@ export const getDonationById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Retrieve all emergency donations
+export const getEmergencyDonations = async (req, res) => {
+  try {
+    // Filter donations by emergency field (set as 'yes')
+    const emergencyDonations = await Donation.find({ emergency: "yes" });
+    res.status(200).json({
+      message: "Emergency donations retrieved successfully",
+      donations: emergencyDonations,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

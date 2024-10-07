@@ -4,7 +4,8 @@ import {
     updateDonation,
     deleteDonation,
     getAllDonations,
-    getDonationById
+    getDonationById,
+    getEmergencyDonations
 
 } from "../Controllers/DonationController.js";
 
@@ -18,6 +19,8 @@ router.post("/",fileupload.single('image'), createDonation);
 
 //get donations
 router.get("/",getAllDonations)
+
+router.get("/emergency",getEmergencyDonations)
 
 // Get all communities
 

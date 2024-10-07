@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const EditDonation = () => {
   const { id } = useParams(); // Get donation ID from URL
   const navigate = useNavigate();
   const [donation, setDonation] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchDonation = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/Donation/${id}`);
+        const response = await axios.get(
+          `http://localhost:5000/Donation/${id}`
+        );
         setDonation(response.data.donation);
       } catch (err) {
-        setError('Failed to fetch donation');
+        setError("Failed to fetch donation");
       }
     };
 
@@ -27,17 +29,20 @@ const EditDonation = () => {
       // Send updated donation data (excluding id, amountRaised, and organization)
       const { amountRaised, organization, ...updateData } = donation; // Exclude these fields from update
 
-      await axios.put(`http://localhost:5000/Donation/update/${id}`, updateData);
-      navigate('/table');
+      await axios.put(
+        `http://localhost:5000/Donation/update/${id}`,
+        updateData
+      );
+      navigate("/table");
     } catch (err) {
-      setError('Failed to update donation');
+      setError("Failed to update donation");
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name.startsWith('bankDetails.')) {
-      const fieldName = name.split('.')[1];
+    if (name.startsWith("bankDetails.")) {
+      const fieldName = name.split(".")[1];
       setDonation((prev) => ({
         ...prev,
         bankDetails: {
@@ -45,8 +50,8 @@ const EditDonation = () => {
           [fieldName]: value,
         },
       }));
-    } else if (name.startsWith('directCash.')) {
-      const fieldName = name.split('.')[1];
+    } else if (name.startsWith("directCash.")) {
+      const fieldName = name.split(".")[1];
       setDonation((prev) => ({
         ...prev,
         directCash: {
@@ -125,19 +130,28 @@ const EditDonation = () => {
             value={donation.category}
             onChange={handleChange}
           >
-            <option value="food">Food</option>
-            <option value="cloth">Cloth</option>
-            <option value="money">Money</option>
-            <option value="other">Other</option>
+            <option value="Hunger">Hunger</option>
+            <option value="Medical">Medical</option>
+            <option value="Education">Education</option>
+            <option value="Poverty">Poverty</option>
+            <option value="Disaster">Disaster</option>
+            <option value="Others">Others</option>
           </select>
         </div>
 
         {/* Bank Details */}
         <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Bank Details
+          </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="bankDetails.accountNumber">Account Number</label>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor="bankDetails.accountNumber"
+              >
+                Account Number
+              </label>
               <input
                 type="text"
                 id="bankDetails.accountNumber"
@@ -149,7 +163,12 @@ const EditDonation = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="bankDetails.bankName">Bank Name</label>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor="bankDetails.bankName"
+              >
+                Bank Name
+              </label>
               <input
                 type="text"
                 id="bankDetails.bankName"
@@ -161,7 +180,12 @@ const EditDonation = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="bankDetails.accountHolderName">Account Holder Name</label>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor="bankDetails.accountHolderName"
+              >
+                Account Holder Name
+              </label>
               <input
                 type="text"
                 id="bankDetails.accountHolderName"
@@ -176,10 +200,17 @@ const EditDonation = () => {
 
         {/* Direct Deposits */}
         <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Direct Deposits</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Direct Deposits
+          </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="directCash.orgName">Organization Name</label>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor="directCash.orgName"
+              >
+                Organization Name
+              </label>
               <input
                 type="text"
                 id="directCash.orgName"
@@ -191,7 +222,12 @@ const EditDonation = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="directCash.phone">Phone Number</label>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor="directCash.phone"
+              >
+                Phone Number
+              </label>
               <input
                 type="text"
                 id="directCash.phone"
@@ -203,7 +239,12 @@ const EditDonation = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="directCash.address">Address</label>
+              <label
+                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor="directCash.address"
+              >
+                Address
+              </label>
               <input
                 type="text"
                 id="directCash.address"

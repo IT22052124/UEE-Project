@@ -137,15 +137,15 @@ const DonationForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-2xl mx-auto p-8 bg-grey shadow-lg rounded-lg"
+      className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-10 border border-gray-200"
     >
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-        Create Donation
+      <h2 className="text-4xl font-extrabold mb-6 text-center text-indigo-700">
+        Create a Donation
       </h2>
 
       {error && (
         <div
-          className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6"
+          className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6"
           role="alert"
         >
           {error}
@@ -153,7 +153,7 @@ const DonationForm = () => {
       )}
       {success && (
         <div
-          className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6"
+          className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded mb-6"
           role="alert"
         >
           {success}
@@ -161,6 +161,7 @@ const DonationForm = () => {
       )}
 
       <div className="space-y-6">
+        {/* Title */}
         <div>
           <label
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -174,11 +175,12 @@ const DonationForm = () => {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             required
           />
         </div>
 
+        {/* Description */}
         <div>
           <label
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -191,13 +193,14 @@ const DonationForm = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             rows="4"
             required
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Amount Required */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700 mb-2"
@@ -211,11 +214,12 @@ const DonationForm = () => {
               name="amountRequired"
               value={formData.amountRequired}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
             />
           </div>
 
+          {/* Location */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700 mb-2"
@@ -229,78 +233,71 @@ const DonationForm = () => {
               name="location"
               value={formData.location}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
             />
           </div>
+        </div>
 
-          <div>
-            <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg">
-              <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg">
-                <div className="flex space-x-4 overflow-x-auto w-full">
-                  {imageUploading && (
-                    <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
-                      <p className="text-center text-lg text-black">
-                        {progress}%
-                      </p>
-                    </div>
-                  )}
-                  {!imageUploading &&
-                    downloadURLs.map((fileData, index) => (
-                      <div
-                        key={index}
-                        className="relative w-36 h-36 flex-shrink-0"
-                      >
-                        <img
-                          src={fileData.url}
-                          alt={`Product ${index + 1}`}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                        <button
-                          onClick={() => handleDelete(fileData.ref, index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-700 focus:outline-none"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  s
-                  {downloadURLs.length === 0 && !imageUploading && (
-                    <>
-                      <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
-                        <p className="text-center text-lg text-black">
-                          Add media
-                        </p>
-                      </div>
-                    </>
-                  )}
+        {/* Image Upload Section */}
+        <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg">
+          <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg">
+            <div className="flex space-x-4 overflow-x-auto w-full">
+              {imageUploading && (
+                <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
+                  <p className="text-center text-lg text-black">{progress}%</p>
                 </div>
-              </div>
-              <div className="mt-4">
-                <ImageUpload
-                  setDownloadURLs={setDownloadURLs}
-                  setProgress={setProgress}
-                  setLoading={setImageUploading}
-                />
-              </div>
+              )}
+              {!imageUploading &&
+                downloadURLs.map((fileData, index) => (
+                  <div
+                    key={index}
+                    className="relative w-36 h-36 flex-shrink-0"
+                  >
+                    <img
+                      src={fileData.url}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => handleDelete(fileData.ref, index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-700 focus:outline-none"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              {downloadURLs.length === 0 && !imageUploading && (
+                <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
+                  <p className="text-center text-lg text-black">Add media</p>
+                </div>
+              )}
             </div>
+          </div>
+          <div className="mt-4">
+            <ImageUpload
+              setDownloadURLs={setDownloadURLs}
+              setProgress={setProgress}
+              setLoading={setImageUploading}
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Category */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700 mb-2"
@@ -313,7 +310,7 @@ const DonationForm = () => {
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
             >
               <option value="">Select a category</option>
@@ -326,6 +323,7 @@ const DonationForm = () => {
             </select>
           </div>
 
+          {/* Organization */}
           <div>
             <label
               className="block text-sm font-medium text-gray-700 mb-2"
@@ -339,16 +337,15 @@ const DonationForm = () => {
               name="organization"
               value={formData.organization}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               required
             />
           </div>
         </div>
 
+        {/* Bank Details Section */}
         <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Bank Details
-          </h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h3>
           <div className="space-y-4">
             <div>
               <label
@@ -363,7 +360,7 @@ const DonationForm = () => {
                 name="bankDetails.accountNumber"
                 value={formData.bankDetails.accountNumber}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
 
@@ -380,7 +377,7 @@ const DonationForm = () => {
                 name="bankDetails.bankName"
                 value={formData.bankDetails.bankName}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
 
@@ -397,16 +394,15 @@ const DonationForm = () => {
                 name="bankDetails.accountHolderName"
                 value={formData.bankDetails.accountHolderName}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
           </div>
         </div>
 
+        {/* Direct Cash Section */}
         <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Direct Deposits
-          </h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Direct Deposits</h3>
           <div className="space-y-4">
             <div>
               <label
@@ -421,7 +417,7 @@ const DonationForm = () => {
                 name="directCash.orgName"
                 value={formData.directCash.orgName}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
 
@@ -438,7 +434,7 @@ const DonationForm = () => {
                 name="directCash.phone"
                 value={formData.directCash.phone}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
 
@@ -455,12 +451,13 @@ const DonationForm = () => {
                 name="directCash.address"
                 value={formData.directCash.address}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
           </div>
         </div>
 
+        {/* Emergency */}
         <div>
           <label
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -473,15 +470,16 @@ const DonationForm = () => {
             name="emergency"
             value={formData.emergency}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             required
           >
             <option value="">Select</option>
-            <option value="yes">yes</option>
-            <option value="no">no</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
           </select>
         </div>
 
+        {/* Submit Button */}
         <div className="mt-8">
           <button
             type="submit"

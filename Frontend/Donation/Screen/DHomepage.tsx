@@ -51,7 +51,7 @@ export default function DonationScreen() {
               <Text style={styles.greeting}>Hello, Faizal</Text>
               <Text style={styles.subGreeting}>What do you want to donate today?</Text>
             </View>
-            <Image source={{ uri: 'https://example.com/profile-pic.jpg' }} style={styles.profilePic} />
+            <Image source={{ uri: '{https://example.com/profile-pic.jpg}' }} style={styles.profilePic} />
           </View>
         </LinearGradient>
       </Animated.View>
@@ -118,7 +118,7 @@ export default function DonationScreen() {
         <View style={styles.emergencyHelp}>
           {emergencyHelpData.map((item, index) => (
             <TouchableOpacity key={index} style={styles.emergencyItem} onPress={() => handleCampaignSelect(item)}>
-              <Image source={{ uri: `http://${item.image}` }} style={styles.emergencyImage} />
+              <Image source={{ uri: item.image[0] }} style={styles.emergencyImage} />
               <View style={styles.emergencyInfo}>
                 <Text style={styles.emergencyTitle}>{item.title}</Text>
                 <View style={styles.progressBar}>

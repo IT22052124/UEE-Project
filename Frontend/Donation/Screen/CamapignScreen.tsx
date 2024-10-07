@@ -92,7 +92,7 @@ export default function CategoryScreen() {
             style={styles.campaignCard}
             onPress={() => navigation.navigate('AboutScreen', { campaign })}
           >
-            <Image source={{ uri: campaign.image }} style={styles.campaignImage} />
+            <Image source={{ uri: campaign.image[0] }} style={styles.campaignImage} />
             <View style={styles.campaignInfo}>
               <Text style={styles.campaignTitle}>{campaign.title}</Text>
               <View style={styles.progressBar}>

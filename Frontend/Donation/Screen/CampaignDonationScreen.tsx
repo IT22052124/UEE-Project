@@ -35,7 +35,7 @@ export default function DonateScreen({ route }) {
 
         <View style={styles.causeContainer}>
           <Image
-            source={{ uri: campaign.image }} // Use campaign's image
+            source={{ uri: campaign.image[0] }} // Use campaign's image
             style={styles.causeImage}
             accessibilityLabel={campaign.title} // Set accessibility label based on campaign title
           />

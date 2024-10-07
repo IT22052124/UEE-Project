@@ -25,7 +25,7 @@ export default function DonationDetailsScreen() {
 
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: campaign.image }} // Use campaign's image
+            source={{ uri: campaign.image[0] }} // Use campaign's image
             style={styles.image}
             accessibilityLabel={campaign.title} // Set accessibility label based on campaign title
           />

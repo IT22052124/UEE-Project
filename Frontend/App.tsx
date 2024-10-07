@@ -2,12 +2,11 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import HomeScreen from "./Pages/CommunityConnect/Screen/HomeScreen";
-import CreatePostScreen from "./Pages/CommunityConnect/Screen/CreatePostScreen";
-
-import CreateCommunityScreen from "./Pages/CommunityConnect/Screen/CreateCommunityScreen";
-import CommunityScreen from "./Pages/CommunityConnect/Screen/CommunityScreen";
-import ProfileScreen from "./Pages/CommunityConnect/Screen/ProfileScreen";
+import HomeScreen from "./CommunityConnect/Screen/HomeScreen";
+import CreatePostScreen from "./CommunityConnect/Screen/CreatePostScreen";
+import CreateCommunityScreen from "./CommunityConnect/Screen/CreateCommunityScreen";
+import CommunityScreen from "./CommunityConnect/Screen/CommunityScreen";
+import ProfileScreen from "./CommunityConnect/Screen/ProfileScreen";
 import DonationHomepage from "./Donation/Screen/DHomepage";
 import CatergoryScreen from "./Donation/Screen/CamapignScreen";
 import AboutScreen from "./Donation/Screen/AboutCampaignScreen";
@@ -19,7 +18,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="CommunityScreen">
+      <Stack.Navigator initialRouteName="DonationHomepage">
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}

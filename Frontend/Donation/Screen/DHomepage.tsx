@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TextInput, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, TextInput, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function DonationScreen() {
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation();
   const [emergencyHelpData, setEmergencyHelpData] = useState([]);
-  const [showMoreCategories, setShowMoreCategories] = useState(false); // State to track if "See all" is clicked
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [scrollY] = useState(new Animated.Value(0));
 
   // Fetch data from backend
   useEffect(() => {
     axios
-      .get('http://172.20.10.2:5000/Donation/emergency')
+      .get('http://192.168.1.4:5000/Donation/emergency')
       .then((response) => {
         setEmergencyHelpData(response.data.donations);
       })
@@ -21,47 +23,72 @@ export default function DonationScreen() {
       });
   }, []);
 
-  // Function to handle category selection
   const handleCategorySelect = (category) => {
-    navigation.navigate('CatergoryScreen', { category }); // Navigate to CategoryScreen
+    navigation.navigate('CatergoryScreen', { category });
   };
 
-  // Function to toggle more categories
-  const toggleMoreCategories = () => {
+  const handleCampaignSelect = (campaign) => {
+    navigation.navigate('AboutScreen', { campaign });
+  };
+
+   // Function to toggle more categories
+   const toggleMoreCategories = () => {
     setShowMoreCategories((prev) => !prev);
   };
 
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [125, 100],
+    extrapolate: 'clamp',
+  });
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Hello, Faizal</Text>
-            <Text style={styles.subGreeting}>What do you want to donate today?</Text>
+      <Animated.View style={[styles.header, { height: headerHeight }]}>
+        <LinearGradient colors={['#4a90e2', '#63b3ed']} style={styles.headerGradient}>
+          <View style={styles.headerContent}>
+            <View>
+              <Text style={styles.greeting}>Hello, Faizal</Text>
+              <Text style={styles.subGreeting}>What do you want to donate today?</Text>
+            </View>
+            <Image source={{ uri: 'https://example.com/profile-pic.jpg' }} style={styles.profilePic} />
           </View>
-          <Image source={{ uri: 'https://example.com/profile-pic.jpg' }} style={styles.profilePic} />
-        </View>
+        </LinearGradient>
+      </Animated.View>
 
+      <Animated.ScrollView
+        style={styles.container}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#888" />
           <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor="#888" />
         </View>
 
         <Text style={styles.sectionTitle}>Categories</Text>
-        <View style={styles.categories}>
-          {['All', 'Hunger', 'Medical'].map((category, index) => (
-            <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
-              <View style={styles.categoryIcon}>
-                <Ionicons name={getCategoryIcon(category)} size={24} color="#007AFF" />
-              </View>
-              <Text style={styles.categoryText}>{category}</Text>
-            </TouchableOpacity>
-          ))}
-
-          {/* See all category */}
-          <TouchableOpacity style={styles.categoryItem} onPress={toggleMoreCategories}>
+        
+          <View style={styles.categories}>
+            {['All', 'Hunger', 'Medical'].map((category, index) => (
+              <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
+                <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
+                  <Ionicons name={getCategoryIcon(category)} size={24} color="#fff" />
+                </LinearGradient>
+                <Text style={styles.categoryText}>{category}</Text>
+              </TouchableOpacity>
+            ))}
+          
+            {/* See all category */}
+            <TouchableOpacity style={styles.categoryItem} onPress={toggleMoreCategories}>
             <View style={styles.categoryIcon}>
-              <Ionicons name={getCategoryIcon('See all')} size={24} color="#007AFF" />
+            <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
+
+              <Ionicons name={getCategoryIcon('See all')} size={24} color="#fff" />
+              </LinearGradient>
+
             </View>
             <Text style={styles.categoryText}>See all</Text>
           </TouchableOpacity>
@@ -73,7 +100,11 @@ export default function DonationScreen() {
             {['Education', 'Poverty', 'Disaster','Others'].map((category, index) => (
               <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
                 <View style={styles.categoryIcon}>
-                  <Ionicons name={getCategoryIcon(category)} size={24} color="#007AFF" />
+                <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
+
+                  <Ionicons name={getCategoryIcon(category)} size={24} color="#fff" />
+                  </LinearGradient>
+
                 </View>
                 <Text style={styles.categoryText}>{category}</Text>
               </TouchableOpacity>
@@ -81,11 +112,13 @@ export default function DonationScreen() {
           </View>
         )}
 
+        
+
         <Text style={styles.sectionTitle}>Emergency help</Text>
         <View style={styles.emergencyHelp}>
           {emergencyHelpData.map((item, index) => (
-            <View key={index} style={styles.emergencyItem}>
-              <Image source={{ uri: item.image }} style={styles.emergencyImage} />
+            <TouchableOpacity key={index} style={styles.emergencyItem} onPress={() => handleCampaignSelect(item)}>
+              <Image source={{ uri: `http://${item.image}` }} style={styles.emergencyImage} />
               <View style={styles.emergencyInfo}>
                 <Text style={styles.emergencyTitle}>{item.title}</Text>
                 <View style={styles.progressBar}>
@@ -93,15 +126,14 @@ export default function DonationScreen() {
                 </View>
                 <Text style={styles.fundRaised}>Fund Raised: Rs.{item.amountRaised}/-</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }
 
-// Function to return icons for categories
 const getCategoryIcon = (category: string) => {
   switch (category) {
     case 'All':
@@ -128,38 +160,54 @@ const getCategoryIcon = (category: string) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f7fafc',
+  },
+  header: {
+    overflow: 'hidden',
+  },
+  headerGradient: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 16,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   container: {
     flex: 1,
     padding: 16,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
   greeting: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
   },
   subGreeting: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: '#e6f2ff',
   },
   profilePic: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 20,
-    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    padding: 12,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   searchInput: {
     flex: 1,
@@ -167,14 +215,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 16,
+    color: '#2d3748',
+  },
+  categoriesScroll: {
+    marginBottom: 20,
   },
   categories: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
+
   },
   moreCategories: {
     flexDirection: 'row',
@@ -183,54 +236,61 @@ const styles = StyleSheet.create({
   },
   categoryItem: {
     alignItems: 'center',
+    
   },
   categoryIcon: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#E8F0FE',
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   categoryText: {
-    fontSize: 12,
+    fontSize: 14,
+    color: '#4a5568',
   },
   emergencyHelp: {
-    gap: 15,
+    gap: 20,
   },
   emergencyItem: {
     flexDirection: 'row',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 10,
+    backgroundColor: '#fff',
+    borderRadius: 12,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   emergencyImage: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
   },
   emergencyInfo: {
     flex: 1,
-    padding: 10,
+    padding: 16,
   },
   emergencyTitle: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8,
+    color: '#2d3748',
   },
   progressBar: {
-    height: 5,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 2.5,
-    marginBottom: 5,
+    height: 6,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 3,
+    marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#007AFF',
-    borderRadius: 2.5,
+    backgroundColor: '#4299e1',
+    borderRadius: 3,
   },
   fundRaised: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 14,
+    color: '#718096',
   },
 });

@@ -13,12 +13,14 @@ import AboutScreen from "./Donation/Screen/AboutCampaignScreen";
 import CampaignDonation from "./Donation/Screen/CampaignDonationScreen";
 import DirectTransfer from "./Donation/Screen/OrganizationScreen";
 import BankDeposits from "./Donation/Screen/BankTransferScreen";
+import JobProviderRegistration from "./Jobs/Screen/RegisterJobProvider";
+
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="DonationHomepage">
+      <Stack.Navigator initialRouteName="JobProviderRegistration">
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
@@ -72,6 +74,11 @@ export default function App() {
         <Stack.Screen
           name="CommunityScreen"
           component={CommunityScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobProviderRegistration"
+          component={JobProviderRegistration}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

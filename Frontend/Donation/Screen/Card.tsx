@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Path } from 'react-native-svg';
 
 interface Card {
   accountName: string;
@@ -10,11 +12,15 @@ interface Card {
   cvc: string;
 }
 
+const { width } = Dimensions.get('window');
+
 const AddCardScreen: React.FC = () => {
   const [cards, setCards] = useState<Card[]>([
     { accountName: '', cardNumber: '', expiryDate: '', cvc: '' },
   ]);
-  const [activeCardIndex, setActiveCardIndex] = useState(0); // Track the currently active card
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const updateCard = (index: number, field: keyof Card, value: string) => {
     const updatedCards = [...cards];
@@ -22,94 +28,124 @@ const AddCardScreen: React.FC = () => {
     setCards(updatedCards);
   };
 
-  // Format card number for display
   const formattedCardNumber = cards[activeCardIndex].cardNumber
     .replace(/\D/g, '')
     .replace(/(.{4})/g, '$1 ')
     .trim();
 
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  React.useEffect(() => {
+    fadeIn();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.header}>
-          <TouchableOpacity>
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add Card</Text>
-        </View>
-
-        <View style={styles.cardPreview}>
-          <Text style={styles.cardTitle}>CARD/BANK</Text>
-          <Text style={styles.cardNumber}>{formattedCardNumber || '•••• •••• •••• ••••'}</Text>
-          <View style={styles.cardBottom}>
-            <Text style={styles.cardHolder}>{cards[activeCardIndex].accountName || 'CARD HOLDER'}</Text>
-            <Text style={styles.cardCVC}>{cards[activeCardIndex].cvc || 'CVC'}</Text>
-          </View>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.formTitle}>Card Details</Text>
-
-          {/* Card Holder Input */}
-          <View style={styles.inputCard}>
-            <Text style={styles.label}>Account Name</Text>
-            <TextInput
-              style={styles.input}
-              value={cards[activeCardIndex].accountName}
-              onChangeText={(text) => updateCard(activeCardIndex, 'accountName', text)}
-            />
+        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+          <View style={styles.header}>
+            <TouchableOpacity>
+              <Ionicons name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Add Card</Text>
           </View>
 
-          {/* Card Number Input */}
-          <View style={styles.inputCard}>
-            <Text style={styles.label}>Card Number</Text>
-            <TextInput
-              style={styles.input}
-              value={cards[activeCardIndex].cardNumber}
-              onChangeText={(text) => updateCard(activeCardIndex, 'cardNumber', text)}
-              keyboardType="numeric"
-            />
-          </View>
+          <LinearGradient
+            colors={['#4a69bd', '#4a69bd']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.cardPreview}
+          >
+            <View style={styles.cardChip} />
+            <Text style={styles.cardTitle}>CARD/BANK</Text>
+            <Text style={styles.cardNumber}>{formattedCardNumber || '•••• •••• •••• ••••'}</Text>
+            <View style={styles.cardBottom}>
+              <Text style={styles.cardHolder}>{cards[activeCardIndex].accountName || 'CARD HOLDER'}</Text>
+              <Text style={styles.cardExpiry}>{cards[activeCardIndex].expiryDate || 'MM/YY'}</Text>
+            </View>
+          </LinearGradient>
 
-          {/* Expiry Date and CVC Input */}
-          <View style={styles.row}>
-            <View style={styles.inputCardHalf}>
-              <Text style={styles.label}>Expiry Date</Text>
+          <View style={styles.form}>
+            <Text style={styles.formTitle}>Card Details</Text>
+
+            <View style={styles.inputCard}>
+              <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                value={cards[activeCardIndex].expiryDate}
-                onChangeText={(text) => updateCard(activeCardIndex, 'expiryDate', text)}
+                placeholder="Account Name"
+                placeholderTextColor="#999"
+                value={cards[activeCardIndex].accountName}
+                onChangeText={(text) => updateCard(activeCardIndex, 'accountName', text)}
               />
             </View>
-            <View style={styles.inputCardHalf1}>
-              <Text style={styles.label}>CVC</Text>
+
+            <View style={styles.inputCard}>
+              <Ionicons name="card-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                value={cards[activeCardIndex].cvc}
-                onChangeText={(text) => updateCard(activeCardIndex, 'cvc', text)}
+                placeholder="Card Number"
+                placeholderTextColor="#999"
+                value={cards[activeCardIndex].cardNumber}
+                onChangeText={(text) => updateCard(activeCardIndex, 'cardNumber', text)}
                 keyboardType="numeric"
               />
             </View>
-          </View>
 
-          <TouchableOpacity
-            style={styles.checkboxContainer}
-            onPress={() => {/* Handle save card logic here */}}
-          >
-            <View style={styles.checkbox}>
-              {/* Checkbox for saving the card */}
+            <View style={styles.row}>
+              <View style={[styles.inputCard, styles.halfWidth]}>
+                <Ionicons name="calendar-outline" size={20} color="#666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM/YY"
+                  placeholderTextColor="#999"
+                  value={cards[activeCardIndex].expiryDate}
+                  onChangeText={(text) => updateCard(activeCardIndex, 'expiryDate', text)}
+                />
+              </View>
+              <View style={[styles.inputCard1, styles.halfWidth]}>
+                <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="CVC"
+                  placeholderTextColor="#999"
+                  value={cards[activeCardIndex].cvc}
+                  onChangeText={(text) => updateCard(activeCardIndex, 'cvc', text)}
+                  keyboardType="numeric"
+                />
+              </View>
             </View>
-            <Text style={styles.checkboxLabel}>Save Card for Later</Text>
-          </TouchableOpacity>
-        </View>
+
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() => setIsSaved(!isSaved)}
+            >
+              <View style={[styles.checkbox, isSaved && styles.checkboxChecked]}>
+                {isSaved && (
+                  <Svg width="12" height="9" viewBox="0 0 12 9">
+                    <Path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </Svg>
+                )}
+              </View>
+              <Text style={styles.checkboxLabel}>Save Card for Later</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.addButton} onPress={() => {
-        // Add new empty card when button is pressed
-        setCards([...cards, { accountName: '', cardNumber: '', expiryDate: '', cvc: '' }]);
-        setActiveCardIndex(cards.length); // Switch to the new card
-      }}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => {
+          setCards([...cards, { accountName: '', cardNumber: '', expiryDate: '', cvc: '' }]);
+          setActiveCardIndex(cards.length);
+        }}
+      >
         <Text style={styles.addButtonText}>ADD CARD</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -119,11 +155,14 @@ const AddCardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffff',
   },
   scrollView: {
+    flexGrow: 1,
+  },
+  content: {
     padding: 20,
-    paddingBottom: 80, // Added padding to prevent content from hiding behind the button
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
@@ -131,27 +170,34 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginLeft: 20,
+    color: 'white',
   },
   cardPreview: {
-    backgroundColor: '#4a69bd',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 20,
-    height: 160,
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 30,
+    height: 200,
+    justifyContent: 'space-between',
+  },
+  cardChip: {
+    width: 50,
+    height: 40,
+    backgroundColor: '#f0a500',
+    borderRadius: 8,
   },
   cardTitle: {
-    color: 'white',
+    color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 14,
     marginBottom: 10,
   },
   cardNumber: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 22,
     letterSpacing: 2,
-    marginBottom: 60,
+    marginBottom: 20,
   },
   cardBottom: {
     flexDirection: 'row',
@@ -159,89 +205,87 @@ const styles = StyleSheet.create({
   },
   cardHolder: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 14,
   },
-  cardCVC: {
+  cardExpiry: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 14,
   },
   form: {
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   formTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  inputCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    paddingTop:5,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  inputCardHalf: {
-    flex: 1,
-    marginTop: 1,
-    height:60,
-
-    paddingTop:5,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 15,
-    
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  inputCardHalf1: {
-    flex: 1,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 15,
-    marginLeft:8,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    paddingTop:5,
-    marginTop: 1,
-    height:60,
-
-  },
-  label: {
-    fontSize: 14,
-    marginTop: 1,
-    marginBottom: 8,
+    marginBottom: 24,
     color: '#333',
   },
+  inputCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    height: 60,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+
+  },
+  inputCard1: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    height: 60,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginLeft:8,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
   input: {
-    height: 15,
+    flex: 1,
     fontSize: 16,
-    
-    
+    color: '#333',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  halfWidth: {
+    width: (width - 64) / 2 - 8,
+  },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginTop: 16,
   },
   checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#999',
-    marginRight: 10,
+    borderColor: '#5f72bd',
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#5f72bd',
   },
   checkboxLabel: {
     fontSize: 16,
@@ -253,13 +297,22 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     backgroundColor: '#f0a500',
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 12,
+    height: 56,
+    justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   addButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

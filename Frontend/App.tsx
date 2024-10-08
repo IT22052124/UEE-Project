@@ -26,7 +26,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="DoneScreen">
+      <Stack.Navigator initialRouteName="CardPayment">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}

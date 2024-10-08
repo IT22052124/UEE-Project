@@ -1,23 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   ScrollView,
-  Image,
   TouchableOpacity,
   StyleSheet,
-  KeyboardAvoidingView, // Import KeyboardAvoidingView
-  Platform, // Import Platform for conditional behavior
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as ImagePicker from "expo-image-picker";
-import { storage } from "../../Storage/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import axios from "axios";
-import { IPAddress } from "../../globals";
+import { Ionicons } from "@expo/vector-icons";
 
 const schema = yup.object().shape({
   companyName: yup.string().required("Please Enter a Company Name"),
@@ -30,307 +25,196 @@ const schema = yup.object().shape({
     .string()
     .required("Please Enter a Password")
     .min(6, "Password must be at least 6 characters"),
-  telephone: yup
+  confirmPassword: yup
     .string()
-    .length(10, "Telephone must be exactly 10 digits")
-    .matches(/^[0-9]+$/, "Telephone must be a number")
-    .required("Please Enter a Telephone Number"),
-  address: yup.string().required("Please Enter an Address"),
+    .oneOf([yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
 });
 
-interface JobProviderFormInputs {
-  companyName: string;
-  contactPersonName: string;
-  email: string;
-  password: string;
-  telephone: string;
-  address: string;
-  website?: string;
-  description?: string;
-  companyLogo?: string;
-}
+export default function JobProviderRegistration({ navigation }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-export default function JobProviderRegistration() {
-  const [logoUri, setLogoUri] = useState<string | undefined>(undefined);
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<JobProviderFormInputs>({
+  } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = async (data: JobProviderFormInputs) => {
+  const onSubmit = async (data) => {
     const formData = { ...data };
-
-    if (logoUri) {
-      const response = await fetch(logoUri);
-      const blob = await response.blob();
-      const storageRef = ref(storage, `companyLogos/${data.companyName}.png`);
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      formData.companyLogo = downloadURL;
-    }
-
-    try {
-      const response = await axios.post(
-        `http://${IPAddress}:5000/JobProvider/jobProvider`,
-        formData
-      ); // Replace with your API endpoint
-      console.log("Job provider created successfully:", response.data);
-    } catch (error) {
-      console.error("Error creating job provider:", error);
-    }
+    console.log(formData);
+    navigation.navigate("JobProviderRegistration2", { formData: formData });
   };
-
-  const pickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      alert("Permission to access camera roll is required!");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync();
-    if (!result.cancelled) {
-      setLogoUri(result.assets[0].uri);
-    }
-  };
-
-  const removeImage = () => {
-    setLogoUri(undefined);
-  };
-
-  const CustomButton = ({ title, onPress, color }) => (
-    <TouchableOpacity
-      style={[styles.button, { backgroundColor: color }]}
-      onPress={onPress}
-    >
-      <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-  );
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }} // Ensure it takes full space
-      behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust for iOS and Android
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Job Provider Registration</Text>
+        <View style={styles.header}>
+          <TouchableOpacity>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Text style={styles.signInText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
 
-        {/* Company Name */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Company Name:</Text>
+        <Text style={styles.title}>Set up your profile ✏️</Text>
+        <Text style={styles.subtitle}>
+          Create an account so you can share your jobs
+        </Text>
+
+        <View style={styles.form}>
+          {/* Company Name Field */}
           <Controller
             control={control}
             name="companyName"
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[styles.input, errors.companyName && styles.errorBorder]}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Company Name"
-                placeholderTextColor="#888"
-              />
+              <>
+                <TextInput
+                  style={styles.input}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  placeholder="Company Name"
+                  placeholderTextColor="#999"
+                />
+                {errors.companyName && (
+                  <Text style={styles.errorText}>
+                    {errors.companyName.message}
+                  </Text>
+                )}
+              </>
             )}
           />
-          {errors.companyName && (
-            <Text style={styles.errorText}>{errors.companyName.message}</Text>
-          )}
-        </View>
 
-        {/* Contact Person Name */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Contact Person Name:</Text>
+          {/* Contact Person Name Field */}
           <Controller
             control={control}
             name="contactPersonName"
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[
-                  styles.input,
-                  errors.contactPersonName && styles.errorBorder,
-                ]}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Contact Person Name"
-                placeholderTextColor="#888"
-              />
+              <>
+                <TextInput
+                  style={styles.input}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  placeholder="Contact Person Name"
+                  placeholderTextColor="#999"
+                />
+                {errors.contactPersonName && (
+                  <Text style={styles.errorText}>
+                    {errors.contactPersonName.message}
+                  </Text>
+                )}
+              </>
             )}
           />
-          {errors.contactPersonName && (
-            <Text style={styles.errorText}>
-              {errors.contactPersonName.message}
-            </Text>
-          )}
-        </View>
 
-        {/* Email */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email:</Text>
+          {/* Email Field */}
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[styles.input, errors.email && styles.errorBorder]}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Email"
-                placeholderTextColor="#888"
-              />
+              <>
+                <TextInput
+                  style={styles.input}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  placeholder="Email"
+                  placeholderTextColor="#999"
+                  keyboardType="email-address"
+                />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email.message}</Text>
+                )}
+              </>
             )}
           />
-          {errors.email && (
-            <Text style={styles.errorText}>{errors.email.message}</Text>
-          )}
-        </View>
 
-        {/* Password */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password:</Text>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[styles.input, errors.password && styles.errorBorder]}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Password"
-                secureTextEntry
-                placeholderTextColor="#888"
+          {/* Password Field */}
+          <View style={styles.passwordContainer}>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <>
+                  <TextInput
+                    style={styles.passwordInput}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="Password"
+                    placeholderTextColor="#999"
+                    secureTextEntry={!showPassword}
+                  />
+                </>
+              )}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={24}
+                color="#999"
               />
-            )}
-          />
+            </TouchableOpacity>
+          </View>
           {errors.password && (
             <Text style={styles.errorText}>{errors.password.message}</Text>
           )}
-        </View>
 
-        {/* Telephone */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Telephone:</Text>
-          <Controller
-            control={control}
-            name="telephone"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[styles.input, errors.telephone && styles.errorBorder]}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Telephone Number"
-                placeholderTextColor="#888"
-                keyboardType="phone-pad" // Open number pad
-                maxLength={10} // Optional: Limit input to 10 digits
-              />
-            )}
-          />
-          {errors.telephone && (
-            <Text style={styles.errorText}>{errors.telephone.message}</Text>
-          )}
-        </View>
-
-        {/* Address */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Address:</Text>
-          <Controller
-            control={control}
-            name="address"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[styles.input, errors.address && styles.errorBorder]}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Address"
-                placeholderTextColor="#888"
-              />
-            )}
-          />
-          {errors.address && (
-            <Text style={styles.errorText}>{errors.address.message}</Text>
-          )}
-        </View>
-
-        {/* Company Logo */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Company Logo (Optional):</Text>
-          {!logoUri ? (
-            <CustomButton
-              title="Select Logo"
-              onPress={pickImage}
-              color="#28A745"
+          {/* Confirm Password Field */}
+          <View style={styles.passwordContainer}>
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <>
+                  <TextInput
+                    style={styles.passwordInput}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder="Confirm Password"
+                    placeholderTextColor="#999"
+                    secureTextEntry={!showConfirmPassword}
+                  />
+                </>
+              )}
             />
-          ) : (
-            <>
-              <Image
-                source={{ uri: logoUri }}
-                style={styles.logo}
-                resizeMode="contain"
+
+            <TouchableOpacity
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <Ionicons
+                name={showConfirmPassword ? "eye-off" : "eye"}
+                size={24}
+                color="#999"
               />
-              <CustomButton
-                title="Remove Logo"
-                onPress={removeImage}
-                color="#DC3545"
-              />
-            </>
+            </TouchableOpacity>
+          </View>
+          {errors.confirmPassword && (
+            <Text style={styles.errorText}>
+              {errors.confirmPassword.message}
+            </Text>
           )}
-        </View>
 
-        {/* Optional Fields */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Website (Optional):</Text>
-          <Controller
-            control={control}
-            name="website"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={styles.input}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Website (Optional)"
-                placeholderTextColor="#888"
-              />
-            )}
-          />
+          <TouchableOpacity
+            style={styles.continueButton}
+            onPress={handleSubmit(onSubmit)}
+          >
+            <Text style={styles.continueButtonText}>Continue</Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Description (Optional):</Text>
-          <Controller
-            control={control}
-            name="description"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[styles.input, { height: 100 }]} // Change height here
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder="Enter Description (Optional)"
-                placeholderTextColor="#888"
-                multiline // Ensure the TextInput is multiline
-                textAlignVertical="top" // Align text to the top
-              />
-            )}
-          />
-        </View>
-
-        {/* Submit Button */}
-        <CustomButton
-          title="Register"
-          onPress={handleSubmit(onSubmit)}
-          color="#007BFF"
-        />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -338,63 +222,74 @@ export default function JobProviderRegistration() {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    paddingTop: 20,
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 17,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  input: {
-    height: 45,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 20, // Make input fields more rounded
-    paddingHorizontal: 10,
+    flex: 1,
     backgroundColor: "#fff",
   },
-  logo: {
-    width: 100,
-    height: 100,
-    marginVertical: 10,
-    alignSelf:"center"
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  signInText: {
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "500",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#000",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 30,
+  },
+  form: {
+    width: "100%",
+  },
+  input: {
+    height: 50,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+    marginBottom: 20,
+    fontSize: 16,
+    color: "#000",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+    marginBottom: 20,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: "#000",
+  },
+  continueButton: {
+    backgroundColor: "#F0F0F0",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  continueButtonText: {
+    color: "#999",
+    fontSize: 18,
+    fontWeight: "600",
   },
   errorText: {
     color: "red",
     fontSize: 12,
-  },
-  errorBorder: {
-    borderColor: "red",
-  },
-  button: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 25, // Make buttons more rounded
-    marginTop: 10,
-    width: "70%", // Reduce width of buttons
-    alignSelf: "center", // Center the buttons
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2, // Add some elevation for Android
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    marginTop: -15,
+    marginBottom: 15,
   },
 });

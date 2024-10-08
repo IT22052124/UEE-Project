@@ -19,7 +19,8 @@ import * as ImagePicker from "expo-image-picker";
 import { ResizeMode, Video } from "expo-av"; // Import Video component from expo-av
 import axios from "axios";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../../Storage/firebase";
+import { storage } from "../../../Storage/firebase";
+import { IPAddress } from "../../../globals";
 
 export default function CreatePostScreen() {
   const userId = "66f3dda2bd01bea47d940c63";
@@ -40,7 +41,7 @@ export default function CreatePostScreen() {
     const fetchcommunities = async () => {
       try {
         const response = await axios.get(
-          `http://192.168.124.102:5000/User/users/${userId}/communities`
+          `http://${IPAddress}:5000/User/users/${userId}/communities`
         );
 
         if (Array.isArray(response.data.communities)) {
@@ -138,7 +139,7 @@ export default function CreatePostScreen() {
       // Logging the media URLs
 
       axios
-        .post("http://192.168.124.102:5000/Post/posts", {
+        .post(`http://${IPAddress}:5000/Post/posts`, {
           postTitle: title,
           descriptions: content,
           community,
@@ -326,6 +327,7 @@ export default function CreatePostScreen() {
             ))}
           </ScrollView>
 
+        </ScrollView>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.postButton}
@@ -334,7 +336,6 @@ export default function CreatePostScreen() {
               <Text style={styles.postButtonText}>Post</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
       </View>
     </SafeAreaView>
   );

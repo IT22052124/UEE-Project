@@ -16,8 +16,9 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../../Storage/firebase"; // Firebase configuration
+import { storage } from "../../../Storage/firebase"; // Firebase configuration
 import uuid from "react-native-uuid"; // Optional: For unique IDs
+import { IPAddress } from "../../../globals";
 
 export default function CreateCommunityScreen() {
   const [communityName, setCommunityName] = useState("");
@@ -98,7 +99,7 @@ export default function CreateCommunityScreen() {
         coverPic: uploadedCoverPic,
       });
       axios
-        .post("http://192.168.28.3:5000/Community/community", {
+        .post(`http://${IPAddress}:5000/Community/community`, {
           communityName,
           communityDescription: description,
           adminId: "66f3dda2bd01bea47d940c63", // Change to actual admin ID

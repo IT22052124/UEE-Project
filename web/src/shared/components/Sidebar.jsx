@@ -1,8 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaRegHeart, FaTable, FaChartBar,FaHome  } from 'react-icons/fa';
+import { FaRegHeart, FaTable, FaChartBar,FaHome ,FaSignOutAlt } from 'react-icons/fa';
 
 const Sidebar = () => {
+
+
+  const handleLogout = () => {
+    // Clear user data from local storage or any other logout logic
+    localStorage.removeItem("loggedInUser");
+    // Redirect to login page or home page after logout
+    navigate("/"); // Make sure to import and use `useNavigate` from react-router-dom
+  };
   return (
     <div className="w-64 h-100 fixed bg-gradient-to-b from-blue-900 to-blue-400 text-white flex flex-col shadow-xl relative overflow-hidden">
       {/* Pattern overlay */}
@@ -25,7 +33,7 @@ const Sidebar = () => {
           <ul className="space-y-2 px-4">
           <li>
               <Link
-                to="/"
+                to="/dashboard"
                 className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
               >
                 <FaHome className="mr-3 text-pink-300 group-hover:text-white transition-colors duration-200" />
@@ -38,7 +46,7 @@ const Sidebar = () => {
                 className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
               >
                 <FaTable className="mr-3 text-pink-300 group-hover:text-white transition-colors duration-200" />
-                <span className="group-hover:translate-x-1 transition-transform duration-200">Donation</span>
+                <span className="group-hover:translate-x-1 transition-transform duration-200">Donations</span>
               </Link>
             </li>
             <li>
@@ -50,6 +58,19 @@ const Sidebar = () => {
                 <span className="group-hover:translate-x-1 transition-transform duration-200">Create donation</span>
               </Link>
             </li>
+            <li>
+        <Link
+          to="/" // Update this path as necessary
+          className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
+          onClick={handleLogout}
+        >
+          <FaSignOutAlt className="mr-3 text-blue-300 group-hover:text-white transition-colors duration-200" /> {/* Logout Icon */}
+          <span className="group-hover:translate-x-1 transition-transform duration-200">Logout</span>
+        </Link>
+      </li>
+            
+  
+
           </ul>
         </nav>
 

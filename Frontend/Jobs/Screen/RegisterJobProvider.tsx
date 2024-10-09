@@ -31,9 +31,14 @@ const schema = yup.object().shape({
     .required("Confirm Password is required"),
 });
 
+
 export default function JobProviderRegistration({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const signPage = ()=>{
+    navigation.navigate("JobProviderSignIn");
+  }
 
   const {
     control,
@@ -61,7 +66,7 @@ export default function JobProviderRegistration({ navigation }) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={signPage}>
             <Text style={styles.signInText}>Sign In</Text>
           </TouchableOpacity>
         </View>

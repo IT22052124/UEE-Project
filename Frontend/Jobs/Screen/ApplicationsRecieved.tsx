@@ -61,14 +61,19 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({ applicatio
   return (
     <View style={styles.card}>
       <View style={styles.cardContent}>
-        <View>
-          <Text style={styles.jobTitle}>Job: {application.jobTitle}</Text>
+        <View style={styles.leftContent}>
+          <Text style={styles.jobTitle}>{application.jobTitle}</Text>
           <Text style={styles.applicantName}>{application.applicantName}</Text>
           <Text style={styles.date}>{application.date}</Text>
         </View>
         <View style={styles.rightContent}>
           <TouchableOpacity
             onPress={handleDownloadPdf}
+            style={styles.downloadButton}
+          >
+            <Ionicons name="download-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+          <View
             style={[
               styles.statusButton,
               { backgroundColor: application.status === 'Reviewed' ? '#e0e7ff' : '#fff0e6' }
@@ -82,7 +87,7 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({ applicatio
             >
               {application.status}
             </Text>
-          </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
@@ -94,12 +99,9 @@ export default function JobApplicationsScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.header}>
-        <Ionicons name="arrow-back" size={24} color="#000" />
-        <View style={styles.headerTextContainer}>
-          <Text style={styles.headerTitle}>Recent Applications</Text>
-          <Text style={styles.headerSubtitle}>Below are your most recent applications</Text>
-        </View>
+        <Text style={styles.headerTitle}>Recent Applications</Text>
       </View>
+      <View style={styles.separator} />
       <FlatList
         data={jobApplications}
         keyExtractor={(item) => item.id}
@@ -113,30 +115,25 @@ export default function JobApplicationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f7fafc',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 10,
-  },
-  headerTextContainer: {
-    marginLeft: 16,
+    paddingBottom: 15,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#2d3748',
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
+  separator: {
+    height: 1,
+    backgroundColor: '#e2e8f0',
   },
   listContainer: {
-    paddingHorizontal: 16,
+    padding: 16,
   },
   card: {
     backgroundColor: '#fff',
@@ -154,23 +151,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
   },
+  leftContent: {
+    flex: 1,
+  },
   jobTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#2d3748',
     marginBottom: 4,
   },
   applicantName: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: '#4a5568',
     marginBottom: 4,
   },
   date: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: 14,
+    color: '#718096',
   },
   rightContent: {
     alignItems: 'flex-end',
+  },
+  downloadButton: {
+    backgroundColor: '#4299e1',
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   statusButton: {
     paddingHorizontal: 12,

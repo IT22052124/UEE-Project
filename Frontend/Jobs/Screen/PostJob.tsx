@@ -16,8 +16,7 @@ import { IPAddress } from "../../globals";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function JobPostingScreen() {
-  const navigation = useNavigation();
+export default function JobPostingScreen({ navigation }) {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -67,6 +66,8 @@ export default function JobPostingScreen() {
       setLocation("");
       setSalary("");
       setSkills([]);
+
+      navigation.navigate("PostedJobs");
     } catch (error) {
       console.error(
         "Error posting job:",

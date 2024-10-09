@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
@@ -54,6 +55,10 @@ export default function JobProviderRegistration2({ route }) {
     resolver: yupResolver(schema),
   });
 
+  const signPage = ()=>{
+    navigation.navigate("JobProviderSignIn");
+  }
+
   // Function to handle form submission
   const onSubmit = async (data: JobProviderFormInputs) => {
     if (!isChecked) {
@@ -79,9 +84,39 @@ export default function JobProviderRegistration2({ route }) {
         `http://${IPAddress}:5000/JobProvider/jobProvider`,
         combinedFormData // Send combined form data to the backend
       );
+
       console.log("Job provider created successfully:", response.data);
+
+      navigation.navigate("JobProviderSignIn");
     } catch (error) {
-      console.error("Error creating job provider:", error);
+      // Improved error handling
+      if (error.response) {
+        // Check for specific error messages
+        const errorMessage = error.response.data.message;
+
+        if (
+          errorMessage.includes("Job provider with this email already exists")
+        ) {
+          Alert.alert(
+            "Registration Failed",
+            "This email is already registered. Please use a different email."
+          );
+        } else {
+          Alert.alert("Error", errorMessage); // Display other error messages
+        }
+      } else if (error.request) {
+        // No response was received
+        Alert.alert(
+          "Error",
+          "No response from the server. Please check your internet connection."
+        );
+      } else {
+        // Something happened while setting up the request
+        Alert.alert(
+          "Error",
+          "An unexpected error occurred. Please try again later."
+        );
+      }
     }
   };
 
@@ -113,7 +148,7 @@ export default function JobProviderRegistration2({ route }) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={signPage}>
             <Text style={styles.signInText}>Sign In</Text>
           </TouchableOpacity>
         </View>
@@ -135,6 +170,7 @@ export default function JobProviderRegistration2({ route }) {
               placeholder="Telephone"
               placeholderTextColor="#999"
               keyboardType="phone-pad"
+              maxLength={10}
             />
           )}
         />

@@ -13,14 +13,17 @@ import axios from "axios";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { IPAddress } from "../../globals";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function UpdatedPostedJobsScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchJobs();
+    }, [])
+  );
 
   const fetchJobs = async () => {
     try {
@@ -68,26 +71,38 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
         <Text style={styles.jobTitle}>{item.title}</Text>
         <Text style={styles.jobDescription}>{item.description}</Text>
         <View style={styles.jobDetails}>
-          <Text style={styles.jobLocation}>📍 {item.location}</Text>
-          <Text style={styles.jobSalary}>💰 RS.{item.salary}.00</Text>
+          <View style={styles.detailItem}>
+            <Ionicons name="location-outline" size={16} color="#4a5568" />
+            <Text style={styles.jobLocation}>{item.location}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Ionicons name="cash-outline" size={16} color="#4a5568" />
+            <Text style={styles.jobSalary}>RS.{item.salary}.00</Text>
+          </View>
         </View>
-        <Text style={styles.jobSkills}>
-          🛠️ Skills: {item.skills.join(", ")}
-        </Text>
+        <View style={styles.skillsContainer}>
+          <Ionicons name="construct-outline" size={16} color="#4a5568" />
+          <Text style={styles.jobSkills}>{item.skills.join(", ")}</Text>
+        </View>
       </View>
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={() => confirmDelete(item._id)}
       >
-        <MaterialIcons name="delete-outline" size={24} color="#ff6b6b" />
+        <MaterialIcons name="delete-outline" size={24} color="#e53e3e" />
       </TouchableOpacity>
     </View>
   );
 
+  const handleAddNewJob = () => {
+    // Navigate to the new job creation screen
+    navigation.navigate("JobPostingScreen");
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4facfe" />
+        <ActivityIndicator size="large" color="#4299e1" />
         <Text style={styles.loadingText}>Loading jobs...</Text>
       </View>
     );
@@ -98,13 +113,16 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Posted Jobs</Text>
       </View>
-
+      <View style={styles.separator} />
       <FlatList
         data={jobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContainer}
       />
+      <TouchableOpacity style={styles.addButton} onPress={handleAddNewJob}>
+        <Ionicons name="add" size={24} color="#ffffff" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -112,89 +130,111 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
-    padding: 10,
+    backgroundColor: "#f7fafc",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  backButton: {
-    marginRight: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 15,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#000",
-    alignSelf: "center",
-    marginTop: 12,
-    marginLeft: 30,
+    color: "#2d3748",
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#e2e8f0",
+    marginHorizontal: 20,
   },
   listContainer: {
-    padding: 16,
+    padding: 20,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#f7fafc",
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#4facfe",
+    color: "#4299e1",
   },
   jobItem: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    position: "relative",
   },
   jobContent: {
-    marginRight: 24, // Make space for the delete button
+    marginRight: 24,
   },
   jobTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
+    color: "#2d3748",
     marginBottom: 8,
   },
   jobDescription: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 12,
+    fontSize: 16,
+    color: "#4a5568",
+    marginBottom: 16,
   },
   jobDetails: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 12,
+  },
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   jobLocation: {
     fontSize: 14,
-    color: "#4facfe",
+    color: "#4a5568",
+    marginLeft: 4,
   },
   jobSalary: {
     fontSize: 14,
-    color: "#4facfe",
-    marginTop: -30,
-    marginRight: -30,
+    color: "#4a5568",
+    marginLeft: 4,
+  },
+  skillsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   jobSkills: {
     fontSize: 14,
-    color: "#666",
+    color: "#4a5568",
+    marginLeft: 4,
   },
   deleteButton: {
     position: "absolute",
     right: 12,
-    bottom: 12,
-    padding: 4,
+    top: 12,
+    padding: 8,
+  },
+  addButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    backgroundColor: "#4299e1",
+    borderRadius: 30,
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 });

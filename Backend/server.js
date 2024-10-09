@@ -7,6 +7,7 @@ import UserRote from "./Routes/UserRoute.js";
 import PostRoute from "./Routes/PostRoute.js";
 import CommunityRoute from "./Routes/CommunityRoute.js";
 import DonationRoute from "./Routes/DonationRoute.js"
+import ProgramRoute from "./Routes/ProgramRoute.js"
 
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -23,6 +24,7 @@ app.use("/User", UserRote);
 app.use("/Post/", PostRoute);
 app.use("/Community", CommunityRoute);
 app.use("/Donation",DonationRoute)
+app.use("/Program",ProgramRoute)
 
 const PORT = process.env.PORT || 5000;
 mongoose

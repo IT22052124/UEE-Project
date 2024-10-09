@@ -6,6 +6,9 @@ import Sidebar from "./shared/components/Sidebar"; // Ensure this path is correc
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import DD from "./Donation/dd";
 import EditDonation from "./Donation/EditDonation";
+import ProgramForm from "./Program/Program"; 
+import ProgramTable from "./Program/Table";
+import EditProgram from "./Program/UpdateProgram";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -21,6 +24,9 @@ function App() {
             <Route path="/donation" element={<DonationForm />} />
             <Route path="/table" element={<Table />} />
             <Route path="/update/:id" element={<EditDonation />} />
+            <Route path="/program" element={<ProgramForm />} />
+            <Route path="/programtable" element={<ProgramTable />} />
+            <Route path="/pupdate/:id" element={<EditProgram />} />
             {/* Add additional routes as needed */}
           </Routes>
         </div>

@@ -53,7 +53,8 @@ const ImageUpload = ({ setDownloadURLs, setProgress, setLoading, update }) => {
     });
   };
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.preventDefault();
     fileInputRef.current.click();
   };
 

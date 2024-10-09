@@ -19,6 +19,16 @@ const Sidebar = () => {
               Table
             </Link>
           </li>
+          <li className="hover:bg-gray-800 rounded-lg transition duration-200">
+            <Link to="/program" className="block py-3 px-4 text-lg font-semibold">
+              Program
+            </Link>
+          </li>
+          <li className="hover:bg-gray-800 rounded-lg transition duration-200">
+            <Link to="/programtable" className="block py-3 px-4 text-lg font-semibold">
+              Program Table
+            </Link>
+          </li>
         </ul>
       </nav>
       <div className="p-4 border-t border-gray-700 text-center text-gray-400">

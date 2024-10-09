@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import {
   Linking,
 } from "react-native";
 import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import axios from "axios";
+import { IPAddress } from "../../globals";
 
 // Mock data for job details
 const jobDetails = {
@@ -29,6 +31,33 @@ const jobDetails = {
 
 export default function JobDetailsScreen({ navigation, route }) {
   const { item } = route.params;
+  const [applied, setApplied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const user = "66f3dda2bd01bea47d940c63";
+
+  const checkApplicationStatus = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://${IPAddress}:5000/Job/check`, {
+        params: { item, user },
+      });
+
+      if (response.data.applied) {
+        setApplied(true);
+      } else {
+        setApplied(false);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error checking application status:", error);
+      setLoading(false);
+    }
+  };
+
+  // useEffect to run when component mounts or when applicantID/jobID changes
+  useEffect(() => {
+    checkApplicationStatus();
+  }, [item, user, applied]);
 
   const handleWebsitePress = () => {
     Linking.openURL(item.postedBy.website);
@@ -138,9 +167,15 @@ export default function JobDetailsScreen({ navigation, route }) {
           <Text style={styles.descriptionText}>{item.description}</Text>
         </View>
 
-        <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-          <Text style={styles.applyButtonText}>Apply Now</Text>
-        </TouchableOpacity>
+        {applied ? (
+          <TouchableOpacity style={styles.applyButtonDisable} disabled>
+            <Text style={styles.applyButtonText}>Applied</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
+            <Text style={styles.applyButtonText}>Apply Now</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -289,5 +324,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  applyButtonDisable: {
+    backgroundColor: "#bdbdbd",
+    borderRadius: 8,
+    padding: 16,
+    margin: 16,
+    alignItems: "center",
   },
 });

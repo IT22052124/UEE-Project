@@ -42,6 +42,7 @@ export default function ApplyJobScreen({ navigation, route }) {
   const { item } = route.params;
   const [documentUri, setDocumentUri] = useState(null);
   const user = "66f3dda2bd01bea47d940c63";
+  const [documentError, setDocumentError] = useState("");
   const [URL, setURL] = useState("");
 
   const {
@@ -54,6 +55,13 @@ export default function ApplyJobScreen({ navigation, route }) {
 
   // Function to handle form submission
   const onSubmit = async (data: JobProviderFormInputs) => {
+    if (!documentUri) {
+      setDocumentError("Please upload your resume"); // Set error if no document is selected
+      return; // Prevent submission
+    } else {
+      setDocumentError(""); // Clear the error if a document is selected
+    }
+
     const formData = { ...data };
     let downloadURL = "";
 
@@ -89,6 +97,8 @@ export default function ApplyJobScreen({ navigation, route }) {
       });
 
       console.log("Successfully applied for the job:", response.data);
+
+      navigation.navigate("JobDetailsScreen", { item: item });
     } catch (error) {
       console.error("Error applying job:", error);
     }
@@ -96,19 +106,19 @@ export default function ApplyJobScreen({ navigation, route }) {
 
   const pickDocument = async () => {
     let result = await DocumentPicker.getDocumentAsync({
-      type: 'application/pdf', // Change this to the type of documents you want to pick
+      type: "application/pdf", // Change this to the type of documents you want to pick
       copyToCacheDirectory: true,
     });
-  
-   console.log(result)
-  
-      // Set the URI of the picked document
-      setDocumentUri(result.assets[0].uri); // Replace with your state setter function
-    
+
+    if (!result.cancelled) {
+      setDocumentUri(result.assets[0].uri); // Use setLogoUri instead of setImage
+      setDocumentError("");
+    }
   };
-  console.log(documentUri)
+  console.log(documentUri);
   const removeDocument = () => {
     setDocumentUri(null);
+    setDocumentError("Please upload your resume");
   };
 
   return (
@@ -121,14 +131,11 @@ export default function ApplyJobScreen({ navigation, route }) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.signInText}>Sign In</Text>
-          </TouchableOpacity>
         </View>
 
         <Text style={styles.title}>Job Application</Text>
         <Text style={styles.subtitle}>
-          You are nearing the completion of your account setup.
+          Just a few more steps to complete your application.
         </Text>
 
         <Controller
@@ -204,12 +211,15 @@ export default function ApplyJobScreen({ navigation, route }) {
             </View>
           )}
         </TouchableOpacity>
+        {documentError ? ( // Display the document error
+          <Text style={styles.errorText}>{documentError}</Text>
+        ) : null}
 
         <TouchableOpacity
-          style={styles.signUpButton}
+          style={styles.applyButton}
           onPress={handleSubmit(onSubmit)}
         >
-          <Text style={styles.signUpButtonText}>Apply</Text>
+          <Text style={styles.applyButtonText}>Apply</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -285,16 +295,17 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#007AFF",
   },
-  signUpButton: {
-    backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 10,
+  applyButton: {
+    backgroundColor: "#4caf50",
+    borderRadius: 8,
+    padding: 16,
+    margin: 16,
     alignItems: "center",
   },
-  signUpButtonText: {
+  applyButtonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   errorText: {
     color: "red",

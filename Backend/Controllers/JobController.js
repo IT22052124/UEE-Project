@@ -15,16 +15,17 @@ export const getAllJobs = async (req, res) => {
 
 export const applyJob = async (req, res) => {
   try {
-    const {  formData, item, user, URL } =
-      req.body;
+    const { formData, item, user, URL } = req.body;
 
     console.log(req.body);
 
     // Generate a new job ID
-    const latestApplication = await Application.find().sort({ _id: -1 }).limit(1);
+    const latestApplication = await Application.find()
+      .sort({ _id: -1 })
+      .limit(1);
     let id;
 
-    if (latestJob.length !== 0) {
+    if (latestApplication.length !== 0) {
       const latestId = parseInt(latestJob[0].ID.slice(1));
       id = "A" + String(latestId + 1).padStart(4, "0");
     } else {
@@ -49,9 +50,38 @@ export const applyJob = async (req, res) => {
     const savedApplication = await newApplication.save();
 
     // Respond with the saved job details
-    res.status(201).json(savedJob);
+    res.status(201).json(savedApplication);
   } catch (error) {
     console.error("Error posting job:", error); // Log error details
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const checkJob = async (req, res) => {
+  try {
+    const { item, user } = req.query;
+
+    // Check if the application already exists in the database
+    const applicationExists = await Application.findOne({
+      applicantID: user,
+      JobID: item._id,
+    });
+
+    if (applicationExists) {
+      return res.status(200).json({
+        message: "User has already applied for this job",
+        applied: true,
+      });
+    } else {
+      return res.status(200).json({
+        message: "User has not applied for this job",
+        applied: false,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error checking application status",
+      error: error.message,
+    });
   }
 };

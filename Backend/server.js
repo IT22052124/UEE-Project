@@ -25,6 +25,7 @@ app.use("/Post/", PostRoute);
 app.use("/Community", CommunityRoute);
 app.use("/Donation",DonationRoute);
 app.use("/JobProvider", JobProviderRoute);
+app.use("/Job", JobProviderRoute);
 
 const PORT = process.env.PORT || 5000;
 mongoose

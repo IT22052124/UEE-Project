@@ -143,11 +143,28 @@ export const deleteJob = async (req, res) => {
 
     // Delete the job
     await Job.findByIdAndDelete(jobId);
-    
+
     // Send success response
     res.status(200).json({ message: "Job deleted successfully." });
   } catch (error) {
     console.error("Error deleting job:", error);
-    res.status(500).json({ message: "An error occurred while deleting the job." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while deleting the job." });
+  }
+};
+
+export const getJobProviderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobProvider = await JobProvider.findOne({ _id: id });
+
+    if (!jobProvider) {
+      return res.status(404).json({ message: "Job provider not found" });
+    }
+
+    res.status(200).json(jobProvider);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

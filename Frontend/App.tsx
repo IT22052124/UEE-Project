@@ -21,12 +21,14 @@ import HomeScreen from "./Pages/CommunityConnect/Screen/HomeScreen";
 import PostedJobsScreen from "./Jobs/Screen/PostedJobs";
 import CardPayment from "./Donation/Screen/Card"
 import DoneS from "./Donation/Screen/Done"
+import CompanyProfileScreen from "./Jobs/Screen/JobProviderProfile";
+import JobListScreen from "./Jobs/Screen/JobListing";
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="CardPayment">
+      <Stack.Navigator initialRouteName="JobListScreen">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}
@@ -115,6 +117,16 @@ export default function App() {
         <Stack.Screen
           name="PostedJobsScreen"
           component={PostedJobsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CompanyProfileScreen"
+          component={CompanyProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobListScreen"
+          component={JobListScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

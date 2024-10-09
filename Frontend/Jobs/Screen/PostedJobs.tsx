@@ -4,79 +4,80 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  ActivityIndicator,
-  Alert,
   TouchableOpacity,
-  ScrollView,
-  Modal,
-  Pressable,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { IPAddress } from "../../globals";
-import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 
-const PostedJobsScreen = () => {
+export default function UpdatedPostedJobsScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState(null);
   const user = "670546e451d26ca2592fc40a";
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `http://${IPAddress}:5000/JobProvider/getJobs`,
-          { params: { userId: user } }
-        );
-        setJobs(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-        Alert.alert("Error", "Could not fetch jobs. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchJobs();
-  }, [user]);
+  }, []);
 
-  const openDeleteModal = (jobId) => {
-    setSelectedJobId(jobId);
-    setModalVisible(true);
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `http://${IPAddress}:5000/JobProvider/getJobs`,
+        { params: { userId: user } }
+      );
+      setJobs(response.data);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      Alert.alert("Error", "Could not fetch jobs. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const confirmDelete = async () => {
-    try {
-      await axios.delete(
-        `http://${IPAddress}:5000/JobProvider/deleteJob/${selectedJobId}`
-      );
-      setJobs(jobs.filter((job) => job._id !== selectedJobId));
-      setModalVisible(false);
-      Alert.alert("Success", "Job deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting job:", error);
-      Alert.alert("Error", "Could not delete the job. Please try again.");
-    }
+  const confirmDelete = (jobId) => {
+    Alert.alert("Delete Job", "Are you sure you want to delete this job?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await axios.delete(
+              `http://${IPAddress}:5000/JobProvider/deleteJob/${jobId}`
+            );
+            setJobs(jobs.filter((job) => job._id !== jobId));
+            Alert.alert("Success", "Job deleted successfully!");
+          } catch (error) {
+            console.error("Error deleting job:", error);
+            Alert.alert("Error", "Could not delete the job. Please try again.");
+          }
+        },
+      },
+    ]);
   };
 
   const renderJobItem = ({ item }) => (
     <View style={styles.jobItem}>
-      <Text style={styles.jobTitle}>{item.title}</Text>
-      <Text style={styles.jobDescription}>{item.description}</Text>
-      <View style={styles.jobDetails}>
-        <Text style={styles.jobLocation}>📍 {item.location}</Text>
-        <Text style={styles.jobSalary}>💵 RS.{item.salary}.00</Text>
+      <View style={styles.jobContent}>
+        <Text style={styles.jobTitle}>{item.title}</Text>
+        <Text style={styles.jobDescription}>{item.description}</Text>
+        <View style={styles.jobDetails}>
+          <Text style={styles.jobLocation}>📍 {item.location}</Text>
+          <Text style={styles.jobSalary}>💰 RS.{item.salary}.00</Text>
+        </View>
+        <Text style={styles.jobSkills}>
+          🛠️ Skills: {item.skills.join(", ")}
+        </Text>
       </View>
-      <Text style={styles.jobSkills}>🛠️ Skills: {item.skills.join(", ")}</Text>
-
       <TouchableOpacity
-        style={styles.deleteIcon}
-        onPress={() => openDeleteModal(item._id)}
+        style={styles.deleteButton}
+        onPress={() => confirmDelete(item._id)}
       >
-        <MaterialIcons name="delete" size={24} color="red" />
+        <MaterialIcons name="delete-outline" size={24} color="#ff6b6b" />
       </TouchableOpacity>
     </View>
   );
@@ -84,176 +85,120 @@ const PostedJobsScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6200ee" />
+        <ActivityIndicator size="large" color="#4facfe" />
         <Text style={styles.loadingText}>Loading jobs...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
+        <Text style={styles.title}>Posted Jobs</Text>
       </View>
-      <Text style={styles.title}>Posted Jobs 📋</Text>
+
       <FlatList
         data={jobs}
         renderItem={renderJobItem}
-        keyExtractor={(item) => item.ID}
-        contentContainerStyle={styles.container}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.listContainer}
       />
-
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-              Are you sure you want to delete this job?
-            </Text>
-            <View style={styles.modalButtons}>
-              <Pressable
-                style={[styles.button, styles.buttonCancel]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.button, styles.buttonConfirm]}
-                onPress={confirmDelete}
-              >
-                <Text style={styles.buttonText}>Delete</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </ScrollView>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 20,
+    backgroundColor: "#f8f9fa",
+    padding: 10,
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 10,
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
     marginBottom: 20,
+    color: "#000",
+    alignSelf: "center",
+    marginTop: 12,
+    marginLeft: 10,
+  },
+  listContainer: {
+    padding: 16,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#000",
-    alignSelf: "center",
+    backgroundColor: "#f8f9fa",
   },
   loadingText: {
-    marginTop: 10,
+    marginTop: 16,
     fontSize: 16,
-    color: "#6200ee",
+    color: "#4facfe",
   },
   jobItem: {
     backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 15,
-    marginVertical: 10,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowRadius: 4,
     elevation: 3,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
     position: "relative",
   },
+  jobContent: {
+    marginRight: 24, // Make space for the delete button
+  },
   jobTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 5,
+    marginBottom: 8,
   },
   jobDescription: {
-    fontSize: 15,
-    color: "#555",
-    marginBottom: 10,
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 12,
   },
   jobDetails: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   jobLocation: {
     fontSize: 14,
-    color: "#777",
+    color: "#4facfe",
   },
   jobSalary: {
     fontSize: 14,
-    color: "#777",
+    color: "#4facfe",
+    marginTop: -30,
+    marginRight: -30,
   },
   jobSkills: {
     fontSize: 14,
-    color: "#555",
+    color: "#666",
   },
-  deleteIcon: {
+  deleteButton: {
     position: "absolute",
-    right: 10,
-    bottom: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalView: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: "70%",
-  },
-  modalText: {
-    marginBottom: 15,
-    fontSize: 18,
-    textAlign: "center",
-  },
-  modalButtons: {
-    flexDirection: "row",
-  },
-  button: {
-    padding: 10,
-    borderRadius: 5,
-    marginHorizontal: 10,
-  },
-  buttonCancel: {
-    backgroundColor: "#ccc",
-  },
-  buttonConfirm: {
-    backgroundColor: "red",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    right: 12,
+    bottom: 12,
+    padding: 4,
   },
 });
-
-export default PostedJobsScreen;

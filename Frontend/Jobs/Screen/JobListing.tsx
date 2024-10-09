@@ -48,6 +48,7 @@ export default function JobListScreen({ navigation }) {
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
+  
 
   useEffect(() => {
     fetchJobs();
@@ -81,10 +82,17 @@ export default function JobListScreen({ navigation }) {
     <TouchableOpacity
       style={styles.jobItem}
       onPress={() => {
-        /* Navigate to job details */
+        navigation.navigate("JobDetailsScreen", { item: item });
       }}
     >
-      <Image source={{ uri: item.postedBy?.companyLogo }} style={styles.logo} />
+      <Image
+        source={
+          item.postedBy?.companyLogo
+            ? { uri: item.postedBy.companyLogo } // If logo exists
+            : require("../../assets/notAvailable.jpg") // Fallback image
+        }
+        style={styles.logo}
+      />
       <View style={styles.jobInfo}>
         <Text style={styles.jobTitle}>{item.title}</Text>
         <Text style={styles.jobRecruiter}>{item.postedBy?.companyName}</Text>

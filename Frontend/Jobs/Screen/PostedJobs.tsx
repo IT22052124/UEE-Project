@@ -96,12 +96,6 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
         <Text style={styles.title}>Posted Jobs</Text>
       </View>
 
@@ -132,11 +126,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 10,
     color: "#000",
     alignSelf: "center",
     marginTop: 12,
-    marginLeft: 10,
+    marginLeft: 30,
   },
   listContainer: {
     padding: 16,

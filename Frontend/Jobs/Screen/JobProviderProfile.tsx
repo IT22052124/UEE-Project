@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import { IPAddress } from "../../globals";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Mock data for the profile
 const profile = {
@@ -30,15 +31,20 @@ const profile = {
 export default function CompanyProfileScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [jobDetails, setJobDetails] = useState({});
-  const user = "670546e451d26ca2592fc40a";
+
+  const logout = () => {
+    navigation.navigate("JobProviderSignIn");
+  };
 
   useEffect(() => {
     fetchJobById();
-  }, [user]);
+  }, []);
 
   const fetchJobById = async () => {
     try {
       setLoading(true);
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
       const response = await axios.get(
         `http://${IPAddress}:5000/JobProvider/job-providers/${user}` // Send userId and jobId in the URL
       );
@@ -56,12 +62,6 @@ export default function CompanyProfileScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
 
@@ -112,9 +112,7 @@ export default function CompanyProfileScreen({ navigation }) {
           </View>
 
           {jobDetails.website ? (
-            <TouchableOpacity
-              style={styles.infoItem}
-            >
+            <TouchableOpacity style={styles.infoItem}>
               <MaterialIcons
                 name="language"
                 size={20}
@@ -140,6 +138,12 @@ export default function CompanyProfileScreen({ navigation }) {
             ""
           )}
         </View>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={logout}
+        >
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -155,7 +159,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
   },
@@ -165,11 +168,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 1,
     color: "#000",
     alignSelf: "center",
     marginTop: 12,
-    marginLeft: 10,
+    marginRight: 180,
   },
   logoContainer: {
     alignItems: "center",
@@ -235,5 +238,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     lineHeight: 24,
+  },
+  logoutButton: {
+    backgroundColor: "#FF3B30",
+    paddingVertical: 15,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  logoutButtonText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });

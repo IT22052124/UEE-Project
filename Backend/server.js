@@ -6,9 +6,8 @@ import mongoose from "mongoose";
 import UserRote from "./Routes/UserRoute.js";
 import PostRoute from "./Routes/PostRoute.js";
 import CommunityRoute from "./Routes/CommunityRoute.js";
-import DonationRoute from "./Routes/DonationRoute.js"
-import ProgramRoute from "./Routes/ProgramRoute.js"
-
+import DonationRoute from "./Routes/DonationRoute.js";
+import ProgramRoute from "./Routes/ProgramRoute.js";
 import JobProviderRoute from "./Routes/JobProviderRoute.js";
 import JobRoute from "./Routes/JobRoute.js";
 
@@ -26,8 +25,8 @@ app.use(cors());
 app.use("/User", UserRote);
 app.use("/Post/", PostRoute);
 app.use("/Community", CommunityRoute);
-app.use("/Donation",DonationRoute)
-app.use("/Program",ProgramRoute)
+app.use("/Donation", DonationRoute);
+app.use("/Program", ProgramRoute);
 app.use("/Donation", DonationRoute);
 app.use("/JobProvider", JobProviderRoute);
 app.use("/Job", JobRoute);

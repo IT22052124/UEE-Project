@@ -79,9 +79,6 @@ export const createJobProvider = async (req, res) => {
 export const jobProviderLogin = async (req, res) => {
   const { password, email } = req.body;
 
-  console.log(email)
-  console.log(password)
-
   try {
     // Convert the email from the request to lowercase for case-insensitive comparison
     const lowerCaseEmail = email.toLowerCase();
@@ -94,8 +91,6 @@ export const jobProviderLogin = async (req, res) => {
     if (user) {
       // If email exists, check if the password matches the hashed password
       const isMatch = await bcrypt.compare(password, user.password); // Compare the passwords
-
-      console.log(isMatch)
 
       if (isMatch) {
         // Passwords match, login successful

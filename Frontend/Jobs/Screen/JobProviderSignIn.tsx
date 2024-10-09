@@ -55,8 +55,6 @@ export default function JobProviderSignIn({ navigation }) {
         { password, email }
       );
 
-      console.log(response.data); // Check the entire response data
-
       if (response.data.success) {
         await AsyncStorage.setItem(
           "user",
@@ -70,7 +68,7 @@ export default function JobProviderSignIn({ navigation }) {
           visibilityTime: 2000,
           autoHide: true,
         });
-        navigation.navigate("PostedJobsScreen");
+        navigation.replace("JPMainTabs");
       } else {
         Toast.show({
           type: "error",

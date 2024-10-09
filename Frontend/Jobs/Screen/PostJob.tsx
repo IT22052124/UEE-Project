@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import { IPAddress } from "../../globals";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function JobPostingScreen() {
   const navigation = useNavigation();
@@ -23,7 +24,6 @@ export default function JobPostingScreen() {
   const [salary, setSalary] = useState("");
   const [skill, setSkill] = useState("");
   const [skills, setSkills] = useState([]);
-  const user = "670546e451d26ca2592fc40a";
 
   const addSkill = () => {
     if (skill.trim()) {
@@ -53,6 +53,8 @@ export default function JobPostingScreen() {
     }
 
     try {
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
       const response = await axios.post(
         `http://${IPAddress}:5000/JobProvider/postJob`,
         { jobTitle, jobDescription, location, salary, skills, user }

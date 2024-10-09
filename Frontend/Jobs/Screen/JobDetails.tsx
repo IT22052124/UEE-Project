@@ -13,6 +13,7 @@ import {
 import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import axios from "axios";
 import { IPAddress } from "../../globals";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Mock data for job details
 const jobDetails = {
@@ -33,11 +34,12 @@ export default function JobDetailsScreen({ navigation, route }) {
   const { item } = route.params;
   const [applied, setApplied] = useState(false);
   const [loading, setLoading] = useState(false);
-  const user = "66f3dda2bd01bea47d940c63";
 
   const checkApplicationStatus = async () => {
     try {
       setLoading(true);
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
       const response = await axios.get(`http://${IPAddress}:5000/Job/check`, {
         params: { item, user },
       });

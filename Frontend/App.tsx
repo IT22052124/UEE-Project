@@ -49,6 +49,8 @@ function JPBottomTabNavigator({ route }) {
             iconName = focused ? "briefcase" : "briefcase-outline"; // Icon for posted jobs
           } else if (route.name === "Profile") {
             iconName = focused ? "business" : "business-outline"; // Icon for company profile
+          } else if (route.name === "Applications") {
+            iconName = focused ? "document" : "document-outline"; // Icon for company profile
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -65,6 +67,11 @@ function JPBottomTabNavigator({ route }) {
         component={CompanyProfileScreen}
         options={{ headerShown: false }}
       />
+      <Tab.Screen
+        name="Applications"
+        component={JobApplicationsScreen}
+        options={{ headerShown: false }}
+      />
     </Tab.Navigator>
   );
 }
@@ -72,7 +79,7 @@ function JPBottomTabNavigator({ route }) {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="JobApplicationsScreen">
+      <Stack.Navigator initialRouteName="JobProviderSignIn">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}
@@ -178,11 +185,7 @@ export default function App() {
           component={JPBottomTabNavigator}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="JobApplicationsScreen"
-          component={JobApplicationsScreen}
-          options={{ headerShown: false }}
-        />
+
         <Stack.Screen
           name="JobListScreen"
           component={JobListScreen}

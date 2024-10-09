@@ -10,6 +10,7 @@ const DonationTable = () => {
   const [error, setError] = useState("");
   const [editDonation, setEditDonation] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [expandedDescription, setExpandedDescription] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,6 +52,12 @@ const DonationTable = () => {
     } catch (err) {
       setError("Failed to delete donation");
     }
+  };
+  const toggleDescription = (id) => {
+    setExpandedDescription((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   const handleEdit = (id) => {
@@ -209,6 +216,9 @@ const DonationTable = () => {
                     Location
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                    Emergency
+                  </th>
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -228,8 +238,29 @@ const DonationTable = () => {
                       {donation.title}
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 text-sm">
-                      {donation.description}
+                      {expandedDescription[donation.Id] ? (
+                        <>
+                          {donation.description}
+                          <button
+                            onClick={() => toggleDescription(donation.Id)}
+                            className="ml-2 text-blue-500"
+                          >
+                            Show less
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {donation.description.slice(0, 100)}...
+                          <button
+                            onClick={() => toggleDescription(donation.Id)}
+                            className="ml-2 text-blue-500"
+                          >
+                            Show more
+                          </button>
+                        </>
+                      )}
                     </td>
+
                     <td className="px-5 py-5 border-b border-gray-200 text-sm">
                       {donation.amountRequired}
                     </td>
@@ -237,56 +268,84 @@ const DonationTable = () => {
                       {donation.amountRaised}
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 text-sm">
-                      {donation.category}
+                      <span
+                        className={`px-2 py-1 rounded-full text-white ${
+                          donation.category === "Health"
+                            ? "bg-green-500"
+                            : donation.category === "Education"
+                            ? "bg-blue-500"
+                            : donation.category === "Environment"
+                            ? "bg-teal-500"
+                            : donation.category === "Disaster"
+                            ? "bg-yellow-500"
+                            : donation.category === "Hunger"
+                            ? "bg-green-500"
+                            : "bg-gray-500"
+                        }`}
+                      >
+                        {donation.category}
+                      </span>
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 text-sm">
                       {donation.location}
                     </td>
-                     <td className="px-5 py-5 border-b border-gray-200  text-sm">
-                        <div className="flex space-x-4">
-                          {/* Edit Button */}
-                          <div className="group relative">
-                            <button onClick={() => handleEdit(donation.Id)}>
-                              <svg
-                                stroke-linejoin="round"
-                                stroke-linecap="round"
-                                strokeWidth="2"
-                                stroke="currentColor"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                className="w-6 h-6 hover:scale-125 duration-200 hover:stroke-blue-500" // Decreased size
-                              >
-                                <path d="M4 21h16M15 2l5 5-10 10H4v-5L15 2z" />
-                              </svg>
-                            </button>
-                            <span className="absolute -top-14 left-[50%] -translate-x-[50%] z-20 origin-left scale-0 px-3 rounded-lg border border-gray-300 bg-white py-2 text-sm font-bold shadow-md transition-all duration-300 ease-in-out group-hover:scale-100">
-                              Edit
-                              <span></span>
-                            </span>
-                          </div>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm text-center">
+                      <span
+                        className={`px-2 py-1 rounded-full text-white ${
+                          donation.emergency === "yes"
+                            ? "bg-red-500"
+                            : "bg-blue-500"
+                        }`}
+                      >
+                        {donation.emergency}
+                      </span>
+                    </td>
 
-                          {/* Delete Button */}
-                          <div className="group relative">
-                            <button onClick={() => handleDelete(donation.Id)}>
-                              <svg
-                                stroke-linejoin="round"
-                                stroke-linecap="round"
-                                strokeWidth="2"
-                                stroke="currentColor"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                className="w-6 h-6 hover:scale-125 duration-200 hover:stroke-red-500" // Decreased size
-                              >
-                                <path d="M3 6h18M3 6h1.5a1 1 0 011-1h12a1 1 0 011 1H21m-3 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6M9 10v4M15 10v4" />
-                              </svg>
-                            </button>
-                            <span className="absolute -top-14 left-[50%] -translate-x-[50%] z-20 origin-left scale-0 px-3 rounded-lg border border-gray-300 bg-white py-2 text-sm font-bold shadow-md transition-all duration-300 ease-in-out group-hover:scale-100">
-                              Delete
-                              <span></span>
-                            </span>
-                          </div>
+                    <td className="px-5 py-5 border-b border-gray-200  text-sm">
+                      <div className="flex space-x-4">
+                        {/* Edit Button */}
+                        <div className="group relative">
+                          <button onClick={() => handleEdit(donation.Id)}>
+                            <svg
+                              stroke-linejoin="round"
+                              stroke-linecap="round"
+                              strokeWidth="2"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              className="w-6 h-6 hover:scale-125 duration-200 hover:stroke-blue-500" // Decreased size
+                            >
+                              <path d="M4 21h16M15 2l5 5-10 10H4v-5L15 2z" />
+                            </svg>
+                          </button>
+                          <span className="absolute -top-14 left-[50%] -translate-x-[50%] z-20 origin-left scale-0 px-3 rounded-lg border border-gray-300 bg-white py-2 text-sm font-bold shadow-md transition-all duration-300 ease-in-out group-hover:scale-100">
+                            Edit
+                            <span></span>
+                          </span>
                         </div>
-                      </td>
+
+                        {/* Delete Button */}
+                        <div className="group relative">
+                          <button onClick={() => handleDelete(donation.Id)}>
+                            <svg
+                              stroke-linejoin="round"
+                              stroke-linecap="round"
+                              strokeWidth="2"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              className="w-6 h-6 hover:scale-125 duration-200 hover:stroke-red-500" // Decreased size
+                            >
+                              <path d="M3 6h18M3 6h1.5a1 1 0 011-1h12a1 1 0 011 1H21m-3 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6M9 10v4M15 10v4" />
+                            </svg>
+                          </button>
+                          <span className="absolute -top-14 left-[50%] -translate-x-[50%] z-20 origin-left scale-0 px-3 rounded-lg border border-gray-300 bg-white py-2 text-sm font-bold shadow-md transition-all duration-300 ease-in-out group-hover:scale-100">
+                            Delete
+                            <span></span>
+                          </span>
+                        </div>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

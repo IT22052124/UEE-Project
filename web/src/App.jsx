@@ -9,7 +9,7 @@ import EditDonation from "./Donation/EditDonation";
 import ProgramForm from "./Program/Program"; 
 import ProgramTable from "./Program/Table";
 import EditProgram from "./Program/UpdateProgram";
-
+import Dashboard from "./Donation/Dashboard"
 function App() {
   const [count, setCount] = useState(0);
 
@@ -22,6 +22,7 @@ function App() {
             <Route path="/i" element={<DD />} />{" "}
             {/* This route shows DD component */}
             <Route path="/donation" element={<DonationForm />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/table" element={<Table />} />
             <Route path="/update/:id" element={<EditDonation />} />
             <Route path="/program" element={<ProgramForm />} />

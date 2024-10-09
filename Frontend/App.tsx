@@ -24,6 +24,7 @@ import DoneS from "./Donation/Screen/Done";
 import CompanyProfileScreen from "./Jobs/Screen/JobProviderProfile";
 import JobListScreen from "./Jobs/Screen/JobListing";
 import JobDetailsScreen from "./Jobs/Screen/JobDetails";
+import ApplyJobScreen from "./Jobs/Screen/ApplyJob";
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -133,6 +134,11 @@ export default function App() {
         <Stack.Screen
           name="JobDetailsScreen"
           component={JobDetailsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ApplyJobScreen"
+          component={ApplyJobScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

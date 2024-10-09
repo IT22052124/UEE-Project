@@ -43,8 +43,7 @@ export default function JobDetailsScreen({ navigation, route }) {
   };
 
   const handleApply = () => {
-    // Implement apply logic here
-    console.log("Applying for job");
+    navigation.navigate("ApplyJobScreen", { item: item });
   };
 
   const handleShare = async () => {

@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import { IPAddress } from "../../../globals";
+import { ParentPost } from "../Components/ParentPost";
 
 interface Admin {
   _id: string;
@@ -43,7 +45,7 @@ export default function CommunityScreen() {
   const handleJoinToggle = async () => {
     try {
       const response = await axios.post(
-        `http://192.168.124.102:5000/User/users/${userId}/toggle-community`, // Replace with your API endpoint
+        `http://${IPAddress}:5000/User/users/${userId}/toggle-community`, // Replace with your API endpoint
         { communityId: community?._id } // Include necessary data
       );
       setIsMember(!isMember);
@@ -58,11 +60,11 @@ export default function CommunityScreen() {
     const fetchCommunity = async () => {
       try {
         const response = await axios.get(
-          `http://192.168.124.102:5000/Community/${communityName}`
+          `http://${IPAddress}:5000/Community/${communityName}`
         );
         const communityData = response.data.data;
         setCommunity(communityData);
-
+        console.log(communityData);
         const isUserMember = communityData.members.some(
           (member: any) => member._id === userId
         );
@@ -78,6 +80,37 @@ export default function CommunityScreen() {
 
     fetchCommunity();
   }, [communityName, userId]);
+
+  const timeAgo = (dateString: Date) => {
+    const now: any = new Date();
+    const pastDate: any = new Date(dateString);
+    const diffInSeconds = Math.floor((now - pastDate) / 1000); // Time difference in seconds
+
+    if (diffInSeconds < 60) {
+      return diffInSeconds === 1
+        ? "1 second ago"
+        : `${diffInSeconds} seconds ago`;
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      return diffInMinutes === 1
+        ? "1 minute ago"
+        : `${diffInMinutes} minutes ago`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return diffInHours === 1 ? "1 hour ago" : `${diffInHours} hours ago`;
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) {
+      return "1 day ago";
+    }
+
+    return `${diffInDays} days ago`;
+  };
 
   if (loading) {
     return (
@@ -157,36 +190,62 @@ export default function CommunityScreen() {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.sortContainer}>
+          {/* <View style={styles.sortContainer}>
             <Text style={styles.sortText}>HOT POSTS</Text>
             <Ionicons name="chevron-down" size={20} color="#FFFFFF" />
-          </View>
+          </View> */}
 
-          <View style={styles.post}>
-            <View style={styles.postHeader}>
-              <Text style={styles.postAuthor}>
-                Posted by u/Sane-Ni-Wa-To-Ri • 4d ago
-              </Text>
-              <TouchableOpacity>
-                <Ionicons name="ellipsis-vertical" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.spoilerTag}>
-              <Text style={styles.spoilerTagText}>Spoiler</Text>
-            </View>
-            <Text style={styles.postTitle}>Discussion Chapter 134</Text>
-            <Text style={styles.postFlair}>NEW CHAPTER SPOILERS</Text>
-            <View style={styles.postStats}>
-              <Ionicons name="arrow-up" size={16} color="#FF4500" />
-              <Text style={styles.postStatText}>3.7k</Text>
-              <Ionicons name="arrow-down" size={16} color="#FFFFFF" />
-              <Ionicons name="chatbubble-outline" size={16} color="#FFFFFF" />
-              <Text style={styles.postStatText}>1.3k</Text>
-              <TouchableOpacity style={styles.shareButton}>
-                <Text style={styles.shareButtonText}>Share</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          {community.relatedPosts.map((post) => {
+            console.log(post);
+            return (
+              <>
+                <View style={styles.post}>
+                  <View style={styles.postHeader}>
+                    <View style={styles.headerLeft}>
+                      <Image
+                        source={{ uri: post.author.profilePic }}
+                        style={styles.profilePic}
+                      />
+                      <Text style={styles.postAuthor}>
+                        Posted by {post.author.username} •{" "}
+                        {timeAgo(post.createdAt)}
+                      </Text>
+                    </View>
+                    <TouchableOpacity>
+                      <Ionicons
+                        name="ellipsis-vertical"
+                        size={16}
+                        color="#FFFFFF"
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* <View style={styles.spoilerTag}>
+                    <Text style={styles.spoilerTagText}>Spoiler</Text>
+                  </View> */}
+                  <Text style={styles.postTitle}>{post.postTitle}</Text>
+                  <Text style={styles.postFlair}>{post.descriptions}</Text>
+                  {post.medias && post.medias.length > 0 ? (
+                    <ParentPost post={post} />
+                  ) : null}
+                  <View style={styles.postStats}>
+                    <Ionicons name="arrow-up" size={16} color="#FF4500" />
+                    <Text style={styles.postStatText}>{post.upVotes}</Text>
+                    <Ionicons name="arrow-down" size={16} color="#FFFFFF" />
+                    <Ionicons
+                      name="chatbubble-outline"
+                      size={16}
+                      color="#FFFFFF"
+                    />
+                    <Text style={styles.postStatText}>{post.downVotes}</Text>
+                    <TouchableOpacity style={styles.shareButton}>
+                      <Text style={styles.shareButtonText}>Share</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </>
+            );
+          })}
         </ScrollView>
 
         <View style={styles.bottomNav}>
@@ -321,10 +380,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 10,
+  },
+  headerLeft: {
+    flexDirection: "row", // Aligns profile pic and username horizontally
+    alignItems: "center", // Ensures they are centered vertically
+  },
+  profilePic: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   postAuthor: {
     color: "#818384",
     fontSize: 12,
+    marginLeft: 10,
   },
   spoilerTag: {
     backgroundColor: "#FF4500",
@@ -349,6 +419,18 @@ const styles = StyleSheet.create({
     color: "#FF4500",
     fontSize: 12,
     marginTop: 5,
+  },
+  mediaContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 10,
+  },
+  mediaItem: {
+    width: "48%",
+    aspectRatio: 16 / 9,
+    marginBottom: 10,
+    marginRight: "2%",
+    borderRadius: 15,
   },
   postStats: {
     flexDirection: "row",

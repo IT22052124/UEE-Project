@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, Image, Alert,StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient'; // Add gradient support
 
@@ -11,17 +11,41 @@ export default function DonateScreen({ route }) {
 
   const { campaign } = route.params; // Get campaign details from route params
   const [selectedAmount, setSelectedAmount] = useState('');
+  const { amountRaised, amountRequired } = campaign; // Destructure amountRaised and amountRequired
+
   const [customAmount, setCustomAmount] = useState('');
+  const [value,setValue]=useState('');
+  
+  // Calculate the maximum donation amount
+  const maxDonation = amountRequired - amountRaised;
 
   const handleAmountSelect = (amount) => {
+    if (parseInt(amount) > maxDonation) {
+      Alert.alert('Invalid Amount', `You can only donate up to Rs ${maxDonation}/-`);
+      return;
+    }
     setSelectedAmount(amount);
+    setValue(amount);
     setCustomAmount('');
   };
 
   const handleCustomAmountChange = (text) => {
     setCustomAmount(text);
     setSelectedAmount('');
+    setValue(text);
+
   };
+
+  const handleDonatePress = (paymentMethod) => {
+    const donationAmount = selectedAmount || customAmount;
+    if (parseInt(donationAmount) > maxDonation) {
+      Alert.alert('Invalid Amount', `You can only donate up to Rs ${maxDonation}/-`);
+      return;
+    }
+    navigation.navigate(paymentMethod, { campaign, value: donationAmount });
+  };
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -78,15 +102,15 @@ export default function DonateScreen({ route }) {
 
         <Text style={styles.sectionTitle}>Choose Payment</Text>
         <View style={styles.paymentMethodsContainer}>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#4CD964' }]}>
+          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#4CD964' }]}  onPress={() =>handleDonatePress('CardPayment')}>
             <Ionicons name="card-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Card Payment</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#FF9500' }]} onPress={() => navigation.navigate('BankDeposits', { campaign, selectedAmount })}>
+          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#FF9500' }]} onPress={() =>  handleDonatePress('BankDeposits')}>
             <Ionicons name="business-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Bank Transfer</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#007AFF' }]} onPress={() => navigation.navigate('DirectTransfer', { campaign })}>
+          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#007AFF' }]} onPress={() => handleDonatePress('DirectTransfer')}>
             <Ionicons name="cash-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Organization</Text>
           </TouchableOpacity>
@@ -137,7 +161,7 @@ const styles = StyleSheet.create({
   causeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 5,
     backgroundColor: '#FFF',
     borderRadius: 10,
     margin: 16,
@@ -145,15 +169,16 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
+    marginBottom:0
   },
   causeImage: {
-    width: 80,
-    height: 80,
+    width: 110,
+    height: 110,
     borderRadius: 8,
     marginRight: 16,
   },
   causeTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     flex: 1,
     color: '#333',
@@ -201,7 +226,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     color: '#8E8E93',
-    marginVertical: 16,
+    marginVertical: 4,
+    marginBottom:15,
   },
   customAmountContainer: {
     paddingHorizontal: 16,

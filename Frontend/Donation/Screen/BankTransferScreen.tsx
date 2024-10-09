@@ -6,14 +6,13 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function BankTransferScreen({ route, navigation }) {
-  const { campaign, selectedAmount } = route.params;
+  const { campaign, value } = route.params;
   const [depositImage, setDepositImage] = useState('');
 
   const handleTransfer = () => {
@@ -54,7 +53,7 @@ export default function BankTransferScreen({ route, navigation }) {
         <View style={styles.content}>
           <View style={styles.causeContainer}>
             <Text style={styles.causeTitle}>{campaign.title}</Text>
-            <Text style={styles.donationAmount}>Amount: ${selectedAmount}</Text>
+            <Text style={styles.donationAmount}>Amount(Rs): {value}</Text>
           </View>
 
           <View style={styles.section}>
@@ -63,22 +62,26 @@ export default function BankTransferScreen({ route, navigation }) {
               <DetailCard
                 icon="person-outline"
                 label="Account Holder"
-                value={campaign.bankDetails.accountHolder}
+                value={campaign.bankDetails.accountHolderName}
+                color="green"
               />
               <DetailCard
                 icon="card-outline"
                 label="Account Number"
                 value={campaign.bankDetails.accountNumber}
+                color="blue"
               />
               <DetailCard
                 icon="business-outline"
                 label="Bank Name"
                 value={campaign.bankDetails.bankName}
+                color="red"
               />
               <DetailCard
                 icon="location-outline"
                 label="Branch"
-                value={campaign.bankDetails.branch}
+                value={campaign.bankDetails.bankBranch}
+                color="green"
               />
             </View>
           </View>
@@ -89,22 +92,26 @@ export default function BankTransferScreen({ route, navigation }) {
               <Text style={styles.instructionText}>
                 1. Transfer the selected amount to the account details provided above.
                 {'\n'}2. Include your name in the transfer details.
-                {'\n'}3. Upload an image of your bank deposit receipt below.
+                {'\n'}3. Once after funds are received, it will be given to the specific cause.
               </Text>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.uploadButton} onPress={handleImageUpload}>
-            <Ionicons name="cloud-upload-outline" size={24} color="#FFFFFF" />
-            <Text style={styles.uploadButtonText}>Upload Deposit Image</Text>
-          </TouchableOpacity>
-
-          {depositImage && (
-            <Image source={{ uri: depositImage }} style={styles.imagePreview} />
-          )}
+          {/* Thank You Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Thank You!</Text>
+            <View style={styles.instructionContainer}>
+              <Text style={styles.instructionText}>
+                Your generous donation will help make a difference in the lives of those in need. 
+                {'\n'}1. Every contribution counts, and your support allows us to provide essential resources.
+                {'\n'}2. Together, we can create positive change in our community.
+                {'\n'}3. Thank you for being a part of this cause!
+              </Text>
+            </View>
+          </View>
 
           <TouchableOpacity style={styles.transferButton} onPress={handleTransfer}>
-            <Text style={styles.transferButtonText}>Confirm Transfer</Text>
+            <Text style={styles.transferButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -112,10 +119,10 @@ export default function BankTransferScreen({ route, navigation }) {
   );
 }
 
-const DetailCard = ({ icon, label, value }) => (
+const DetailCard = ({ icon, label, value, color }) => (
   <View style={styles.detailCard}>
     <View style={styles.iconContainer}>
-      <Ionicons name={icon} size={24} color="#007AFF" />
+      <Ionicons name={icon} size={24} color={color} />
     </View>
     <View style={styles.detailContent}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -176,8 +183,8 @@ const styles = StyleSheet.create({
   },
   causeTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontWeight: '600',
+    color: 'black',
     marginBottom: 8,
   },
   donationAmount: {
@@ -221,13 +228,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
     marginBottom: 4,
   },
   detailValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
     color: '#333',
   },
   instructionContainer: {

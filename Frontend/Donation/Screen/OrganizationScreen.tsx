@@ -13,7 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function DirectTransferScreen({ route, navigation }) {
-  const { campaign, selectedAmount } = route.params;
+  const { campaign, value } = route.params;
   const [depositImage, setDepositImage] = useState('');
 
   const handleTransfer = () => {
@@ -54,7 +54,7 @@ export default function DirectTransferScreen({ route, navigation }) {
         <View style={styles.content}>
           <View style={styles.causeContainer}>
             <Text style={styles.causeTitle}>{campaign.title}</Text>
-            <Text style={styles.donationAmount}>Amount: ${selectedAmount}</Text>
+            <Text style={styles.donationAmount}>Amount: ${value}</Text>
           </View>
 
           <View style={styles.section}>
@@ -82,41 +82,59 @@ export default function DirectTransferScreen({ route, navigation }) {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Instructions</Text>
-            <View style={styles.instructionContainer}>
-              <View style={styles.instructionItem}>
-                <Ionicons name="cash-outline" size={24} color="#4a90e2" style={styles.instructionIcon} />
-                <View style={styles.instructionTextContainer}>
-                  <Text style={styles.instructionTextBold}>Donate in Person:</Text>
-                  <Text style={styles.instructionText}>
-                - If you prefer, you can visit the nearest government organization to make a direct donation.
-                  </Text>
-                  <Text style={styles.instructionText}>
-                    - Ensure you carry proper identification and reference the donation campaign:{" "}
-                    <Text style={styles.highlight}>{campaign.title}</Text>.
-                  </Text>
-                  <Text style={styles.instructionText}>
-                    - Request a receipt or proof of donation from the organization upon completion.
-                  </Text>
-                  <Text style={styles.instructionText}>
-                    - For assistance, feel free to contact the organization's representative.
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
+  <Text style={styles.sectionTitle}>Instructions</Text>
+  <View style={styles.instructionContainer}>
+    <View style={styles.instructionItem}>
+      <Ionicons name="cash-outline" size={24} color="#4a90e2" style={styles.instructionIcon} />
+      <View style={styles.instructionTextContainer}>
+        <Text style={styles.instructionTextBold}>Instructions for Donation:</Text>
+        
+        <Text style={styles.instructionText}>
+          - If you prefer, you can visit the above government organization to make a direct donation.
+        </Text>
+        <Text style={styles.instructionText}>
+          - Ensure you carry proper identification and reference the donation campaign:{" "}
+          <Text style={styles.highlight}>{campaign.title}</Text>.
+        </Text>
+        <Text style={styles.instructionText}>
+          - Request a receipt or proof of donation from the organization upon completion.
+        </Text>
+        <Text style={styles.instructionText}>
+          - For assistance, feel free to contact the organization's representative.
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
 
-          <TouchableOpacity style={styles.uploadButton} onPress={handleImageUpload}>
-            <Ionicons name="cloud-upload-outline" size={24} color="#FFFFFF" />
-            <Text style={styles.uploadButtonText}>Upload Deposit Image</Text>
-          </TouchableOpacity>
+<View style={styles.section}>
+  <Text style={styles.sectionTitle1}>Thank You!</Text>
+  <View style={styles.instructionContainer}>
+    <View style={styles.instructionItem}>
+      <Ionicons name="heart-outline" size={24} color="green" style={styles.instructionIcon} />
+      <View style={styles.instructionTextContainer}>
+        <Text style={styles.instructionTextBold}>Your Support Makes a Difference:</Text>
+        <Text style={styles.instructionText}>
+          - Your donation helps provide essential resources to those in need.
+        </Text>
+        <Text style={styles.instructionText}>
+          - It contributes to community development and better living conditions.
+        </Text>
+        <Text style={styles.instructionText}>
+          - Every contribution counts and plays a vital role in supporting various initiatives.
+        </Text>
+        <Text style={styles.instructionText}>
+          - Your kindness inspires others to join the cause and create a positive impact.
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
 
-          {depositImage && (
-            <Image source={{ uri: depositImage }} style={styles.imagePreview} />
-          )}
 
+         
           <TouchableOpacity style={styles.transferButton} onPress={handleTransfer}>
-            <Text style={styles.transferButtonText}>Confirm Transfer</Text>
+            <Text style={styles.transferButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -188,8 +206,8 @@ const styles = StyleSheet.create({
   },
   causeTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontWeight: '600',
+    color: 'black',
     marginBottom: 8,
   },
   donationAmount: {
@@ -200,10 +218,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
+    
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
     color: '#007AFF',
+  },
+  sectionTitle1: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: 'green',
+    textAlign: 'center',
   },
   formContainer: {
     gap: 12,
@@ -233,13 +259,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    fontWeight: '500',
     marginBottom: 4,
   },
   detailValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
     color: '#333',
   },
   instructionContainer: {
@@ -302,7 +327,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   transferButton: {
-    backgroundColor: '#28A745',
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -312,4 +337,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+ 
 });

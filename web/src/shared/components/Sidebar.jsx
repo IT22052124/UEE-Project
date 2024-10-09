@@ -1,38 +1,53 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Ensure you have react-router-dom installed
+import { Link } from 'react-router-dom';
+import { FaRegHeart, FaTable, FaChartBar } from 'react-icons/fa';
 
 const Sidebar = () => {
   return (
-    <div className="w-64 h-screen bg-gray-900 text-white flex flex-col">
-      <div className="p-6 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-center">Dashboard</h1>
-      </div>
-      <nav className="mt-10 flex-grow">
-        <ul className="space-y-4 px-4">
-          <li className="hover:bg-gray-800 rounded-lg transition duration-200">
-            <Link to="/donation" className="block py-3 px-4 text-lg font-semibold">
-              Donation
-            </Link>
-          </li>
-          <li className="hover:bg-gray-800 rounded-lg transition duration-200">
-            <Link to="/table" className="block py-3 px-4 text-lg font-semibold">
-              Table
-            </Link>
-          </li>
-          <li className="hover:bg-gray-800 rounded-lg transition duration-200">
-            <Link to="/program" className="block py-3 px-4 text-lg font-semibold">
-              Program
-            </Link>
-          </li>
-          <li className="hover:bg-gray-800 rounded-lg transition duration-200">
-            <Link to="/programtable" className="block py-3 px-4 text-lg font-semibold">
-              Program Table
-            </Link>
-          </li>
-        </ul>
-      </nav>
-      <div className="p-4 border-t border-gray-700 text-center text-gray-400">
-        © 2024 MyApp
+    <div className="w-64 h-100 fixed bg-gradient-to-b from-blue-900 to-blue-400 text-white flex flex-col shadow-xl relative overflow-hidden">
+      {/* Pattern overlay */}
+      <div className="absolute inset-0 bg-pattern opacity-10"></div>
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Header */}
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+              <FaChartBar className="text-purple-600 text-xl" />
+            </div>
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="mt-8 flex-grow">
+          <ul className="space-y-2 px-4">
+            <li>
+              <Link
+                to="/donation"
+                className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
+              >
+                <FaRegHeart className="mr-3 text-pink-300 group-hover:text-white transition-colors duration-200" />
+                <span className="group-hover:translate-x-1 transition-transform duration-200">Donation</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/table"
+                className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
+              >
+                <FaTable className="mr-3 text-blue-300 group-hover:text-white transition-colors duration-200" />
+                <span className="group-hover:translate-x-1 transition-transform duration-200">Table</span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-white/10 text-center">
+          <p className="text-sm text-indigo-200">© 2024 MyApp</p>
+        </div>
       </div>
     </div>
   );

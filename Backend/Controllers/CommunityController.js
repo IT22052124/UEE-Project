@@ -59,7 +59,12 @@ export const getAllCommunityByName = async (req, res) => {
     })
       .populate("admin", "username email _id") // Populates admin field with username and email from the User model
       .populate("members", "username email _id") // Populates members with username and email from the User model
-      .populate("relatedPosts") // Populates related posts (assuming Post model has all necessary fields)
+      .populate({
+        path: "relatedPosts",
+        populate: {
+          path: "author",
+        },
+      }) 
       .exec();
 
     res.status(200).json({

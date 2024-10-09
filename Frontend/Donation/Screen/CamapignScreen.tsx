@@ -9,7 +9,7 @@ interface DonationCampaign {
   id: string;
   title: string;
   image: string;
-  fundRaised: number;
+  amountRaised: number;
   category: string;
 }
 
@@ -24,7 +24,7 @@ export default function CategoryScreen() {
   const { category } = route.params;
 
   useEffect(() => {
-    axios.get('http://192.168.1.4:5000/Donation')
+    axios.get('http://192.168.1.4:5000/Donation/all')
       .then(response => {
         setAllDonations(response.data.donations);
       })
@@ -96,9 +96,9 @@ export default function CategoryScreen() {
             <View style={styles.campaignInfo}>
               <Text style={styles.campaignTitle}>{campaign.title}</Text>
               <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${(campaign.fundRaised / 10000) * 100}%` }]} />
+                <View style={[styles.progressFill, { width: `${(campaign.amountRaised / 10000) * 100}%` }]} />
               </View>
-              <Text style={styles.fundRaised}>Fund Raised: Rs.{campaign.fundRaised}/-</Text>
+              <Text style={styles.fundRaised}>Fund Raised: Rs.{campaign.amountRaised}/-</Text>
             </View>
           </TouchableOpacity>
         ))}
@@ -174,17 +174,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    paddingTop:2
+
   },
   campaignImage: {
     width: 120,
     height: 120,
+    borderRadius: 16,
+
   },
   campaignInfo: {
     flex: 1,
     padding: 16,
   },
   campaignTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
     marginBottom: 8,
     color: '#2D3748',

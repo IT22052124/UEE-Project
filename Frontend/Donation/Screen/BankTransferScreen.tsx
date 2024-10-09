@@ -86,27 +86,50 @@ export default function BankTransferScreen({ route, navigation }) {
             </View>
           </View>
 
+          
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Instructions</Text>
             <View style={styles.instructionContainer}>
-              <Text style={styles.instructionText}>
-                1. Transfer the selected amount to the account details provided above.
-                {'\n'}2. Include your name in the transfer details.
-                {'\n'}3. Once after funds are received, it will be given to the specific cause.
-              </Text>
+              <View style={styles.instructionItem}>
+               
+                <View style={styles.instructionTextContainer1}>
+                  
+                  <Text style={styles.instructionText}>
+                    - Transfer the selected amount to the account details provided above.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    -  Include your name in the transfer details.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Once after funds are received, it will be given to the specific cause.
+                  </Text>
+                  
+                </View>
+              </View>
             </View>
           </View>
 
-          {/* Thank You Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Thank You!</Text>
+            <Text style={styles.sectionTitle1}>Thank You!</Text>
             <View style={styles.instructionContainer}>
-              <Text style={styles.instructionText}>
-                Your generous donation will help make a difference in the lives of those in need. 
-                {'\n'}1. Every contribution counts, and your support allows us to provide essential resources.
-                {'\n'}2. Together, we can create positive change in our community.
-                {'\n'}3. Thank you for being a part of this cause!
-              </Text>
+              <View style={styles.instructionItem}>
+                <Ionicons name="heart-outline" size={24} color="green" style={styles.instructionIcon} />
+                <View style={styles.instructionTextContainer}>
+                  <Text style={styles.instructionTextBold}>Your Support Makes a Difference:</Text>
+                  <Text style={styles.instructionText}>
+                    - Your donation helps provide essential resources to those in need.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - It contributes to community development and better living conditions.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Every contribution counts and plays a vital role in supporting various initiatives.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Your kindness inspires others to join the cause and create a positive impact.
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
 
@@ -198,7 +221,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#007AFF',
+    color: '#2980B9',
+    textAlign: 'center',
+  },
+  sectionTitle1: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: 'green',
+    textAlign: 'center',
   },
   formContainer: {
     gap: 12,
@@ -229,7 +260,7 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
     marginBottom: 4,
   },
   detailValue: {
@@ -237,45 +268,51 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   instructionContainer: {
-    backgroundColor: '#F0F8FF',
+    backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: 10,
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  instructionItem: {
+    flexDirection: 'row',
+    marginBottom: 14,
+  },
+  instructionIcon: {
+    marginRight: 16,
+  },
+  instructionTextContainer: {
+    flex: 1,
+  },
+  instructionTextContainer1: {
+    flex: 1,
+    marginLeft: 40,
+  },
+  instructionTextBold: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
   },
   instructionText: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-  },
-  uploadButton: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  uploadButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  imagePreview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
+    fontSize: 14,
+    color: '#666',
+    marginLeft: -40,
+    marginBottom: 10,
   },
   transferButton: {
-    backgroundColor: '#28A745',
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   transferButtonText: {
-    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#ffffff',
   },
 });

@@ -157,7 +157,7 @@ const getCategoryIcon = (category) => {
     case 'Disaster':
       return 'leaf-outline';
     case 'Others':
-      return 'leaf-outline';
+      return 'nuclear-outline';
     case 'See all':
       return 'chevron-forward-outline';
     default:

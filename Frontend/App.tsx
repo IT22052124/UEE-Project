@@ -33,7 +33,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="JobListScreen">
+      <Stack.Navigator initialRouteName="DonationHomepage">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}

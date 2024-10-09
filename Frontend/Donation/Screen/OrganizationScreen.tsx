@@ -215,14 +215,15 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 35,
   },
   sectionTitle: {
+    textAlign: 'center',
     
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#007AFF',
+    color: '#2980B9',
   },
   sectionTitle1: {
     fontSize: 20,
@@ -245,6 +246,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    
   },
   iconContainer: {
     width: 40,

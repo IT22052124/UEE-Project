@@ -12,11 +12,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { IPAddress } from "../../globals";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function UpdatedPostedJobsScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const user = "670546e451d26ca2592fc40a";
 
   useEffect(() => {
     fetchJobs();
@@ -25,6 +25,8 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
   const fetchJobs = async () => {
     try {
       setLoading(true);
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
       const response = await axios.get(
         `http://${IPAddress}:5000/JobProvider/getJobs`,
         { params: { userId: user } }

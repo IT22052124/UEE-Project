@@ -76,6 +76,56 @@ export const createJobProvider = async (req, res) => {
   }
 };
 
+export const jobProviderLogin = async (req, res) => {
+  const { password, email } = req.body;
+
+  console.log(email)
+  console.log(password)
+
+  try {
+    // Convert the email from the request to lowercase for case-insensitive comparison
+    const lowerCaseEmail = email.toLowerCase();
+
+    // Use $regex with 'i' flag to perform a case-insensitive search
+    const user = await JobProvider.findOne({
+      email: { $regex: new RegExp(`^${lowerCaseEmail}$`, "i") },
+    });
+
+    if (user) {
+      // If email exists, check if the password matches the hashed password
+      const isMatch = await bcrypt.compare(password, user.password); // Compare the passwords
+
+      console.log(isMatch)
+
+      if (isMatch) {
+        // Passwords match, login successful
+        return res.json({
+          success: true,
+          user, // Return user data
+        });
+      } else {
+        // Password doesn't match
+        return res.json({
+          success: false,
+          message: "Invalid password",
+        });
+      }
+    } else {
+      // If email doesn't exist
+      return res.json({
+        success: false,
+        message: "Email not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error sign in", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 export const postJob = async (req, res) => {
   try {
     const { jobTitle, jobDescription, location, salary, skills, user } =

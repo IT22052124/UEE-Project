@@ -49,6 +49,11 @@ export const applyJob = async (req, res) => {
     // Save the new job to the database
     const savedApplication = await newApplication.save();
 
+    await Job.updateOne(
+      { _id: item._id }, // Find the job by its JobID (item._id)
+      { $inc: { applications: 1 } } // Increment 'applications' by 1
+    );
+
     // Respond with the saved job details
     res.status(201).json(savedApplication);
   } catch (error) {

@@ -41,8 +41,27 @@ const Sidebar = () => {
                 <span className="group-hover:translate-x-1 transition-transform duration-200">Table</span>
               </Link>
             </li>
+            <li>
+              <Link
+                to="/program"
+                className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
+              >
+                <FaRegHeart className="mr-3 text-blue-300 group-hover:text-white transition-colors duration-200" />
+                <span className="group-hover:translate-x-1 transition-transform duration-200">Program</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/programtable"
+                className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
+              >
+                <FaTable className="mr-3 text-blue-300 group-hover:text-white transition-colors duration-200" />
+                <span className="group-hover:translate-x-1 transition-transform duration-200">Program Table</span>
+              </Link>
+            </li>
           </ul>
         </nav>
+        
 
         {/* Footer */}
         <div className="p-4 border-t border-white/10 text-center">

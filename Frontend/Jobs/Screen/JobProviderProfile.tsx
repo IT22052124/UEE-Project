@@ -32,10 +32,6 @@ export default function CompanyProfileScreen({ navigation }) {
   const [jobDetails, setJobDetails] = useState({});
   const user = "670546e451d26ca2592fc40a";
 
-  const handleWebsitePress = () => {
-    Linking.openURL(profile.website);
-  };
-
   useEffect(() => {
     fetchJobById();
   }, [user]);
@@ -117,7 +113,6 @@ export default function CompanyProfileScreen({ navigation }) {
 
           {jobDetails.website ? (
             <TouchableOpacity
-              onPress={handleWebsitePress}
               style={styles.infoItem}
             >
               <MaterialIcons

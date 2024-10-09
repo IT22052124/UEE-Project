@@ -86,6 +86,10 @@ const DonationForm = () => {
       "bankDetails[accountHolderName]",
       formData.bankDetails.accountHolderName
     );
+    formDataToSend.append(
+      "bankDetails[bankBranch]",
+      formData.bankDetails.bankBranch
+    );
     formDataToSend.append("directCash[orgName]", formData.directCash.orgName);
     formDataToSend.append("directCash[phone]", formData.directCash.phone);
     formDataToSend.append("directCash[address]", formData.directCash.address);
@@ -119,6 +123,7 @@ const DonationForm = () => {
           accountNumber: "",
           bankName: "",
           accountHolderName: "",
+          bankBranch:""
         },
         directCash: {
           orgName: "",
@@ -439,9 +444,9 @@ const DonationForm = () => {
               </label>
               <input
                 type="text"
-                id="bankDetails.branch"
-                name="bankDetails.branch"
-                value={formData.bankDetails.branch}
+                id="bankDetails.bankBranch"
+                name="bankDetails.bankBranch"
+                value={formData.bankDetails.bankBranch}
                 onChange={handleChange}
                 placeholder="eg. Malabe"
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -9,9 +9,11 @@ export default function DonationDetailsScreen() {
   const route = useRoute();
   const { campaign } = route.params; // Get campaign details from route params
 
+  const [isExpanded, setIsExpanded] = useState(false); // State to toggle description
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContainer}>
         <LinearGradient colors={['#F9F9F9', '#F9F9F9']} style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -34,43 +36,74 @@ export default function DonationDetailsScreen() {
         <Text style={styles.title}>{campaign.title}</Text>
 
         <Text style={styles.description}>
-          {campaign.description} {/* Ensure your campaign has a description field */}
-          <Text style={styles.moreLink}>More</Text>
+          {isExpanded ? campaign.description : `${campaign.description.substring(0, 100)}... `}
+          <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
+            <Text style={styles.moreLink}>{isExpanded ? ' Show Less' : ' More'}</Text>
+          </TouchableOpacity>
         </Text>
 
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${(campaign.fundRaised / campaign.amountRequired) * 100}%` }]} />
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${((campaign.amountRaised / campaign.amountRequired) * 100).toFixed(0)}%`,
+                },
+              ]}
+            />
           </View>
           <View style={styles.progressLabels}>
             <Text style={styles.progressText}>
-              {campaign.fundRaised}/{campaign.amountRequired}
+              Rs {campaign.amountRaised}/{campaign.amountRequired}
             </Text>
             <Text style={styles.progressPercentage}>
-              {((campaign.fundRaised / campaign.amountRequired) * 100).toFixed(0)}%
+              {((campaign.amountRaised / campaign.amountRequired) * 100).toFixed(0)}%
             </Text>
           </View>
         </View>
 
-        <View style={styles.amountInfo}>
-          <View style={styles.amountRow}>
-            <Text style={styles.amountLabel}>Amount Required :</Text>
-            <Text style={styles.amountValue}>Rs {campaign.amountRequired}/-</Text>
-          </View>
-          <View style={styles.amountRow}>
-            <Text style={styles.amountLabel}>Amount Raised :</Text>
-            <Text style={styles.amountValue}>Rs {campaign.fundRaised}/-</Text>
+        {/* Smaller Cards with Icons */}
+        <View style={styles.card}>
+          <Ionicons name="cash-outline" size={24} color="green" style={styles.cardIcon} />
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Amount Required</Text>
+            <Text style={styles.cardValue}>Rs {campaign.amountRequired}/-</Text>
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.donateButton}
-          accessibilityLabel="Donate Now"
-          onPress={() => navigation.navigate('CampaignDonation', { campaign })}
-        >
-          <Text style={styles.donateButtonText}>Donate Now</Text>
-        </TouchableOpacity>
+        <View style={styles.card}>
+          <Ionicons name="trending-up-outline" size={24} color="orange" style={styles.cardIcon} />
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Amount Raised</Text>
+            <Text style={styles.cardValue}>Rs {campaign.amountRaised}/-</Text>
+          </View>
+        </View>
+
+        {/* Card for Location */}
+        <View style={styles.card}>
+          <Ionicons name="location-outline" size={24} color="blue" style={styles.cardIcon} />
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Location</Text>
+            <Text style={styles.cardValue}>{campaign.location || 'Not specified'}</Text>
+          </View>
+        </View>
+        <View style={styles.card}>
+          <Ionicons name="business-outline" size={24} color="red" style={styles.cardIcon} />
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Orgainzation Posted</Text>
+            <Text style={styles.cardValue}>{campaign.organization || 'Not specified'}</Text>
+          </View>
+        </View>
       </ScrollView>
+
+      <TouchableOpacity
+        style={styles.donateButton}
+        accessibilityLabel="Donate Now"
+        onPress={() => navigation.navigate('CampaignDonation', { campaign })}
+      >
+        <Text style={styles.donateButtonText}>Donate Now</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -83,18 +116,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f4f4',
+    paddingBottom: 80, // Make space for the fixed button
+  },
+  scrollContainer: {
+    paddingBottom: 80, // Ensures scrollable area has space for the button
   },
   header: {
-    paddingVertical: 15, // Reduced padding vertically to decrease header height
-
+    paddingVertical: 15,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    elevation: 5, // Adds shadow for Android
+    elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 }, // Adds shadow for iOS
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
   },
   backButton: {
@@ -128,10 +164,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   title: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: 'bold',
     marginHorizontal: 16,
-    marginTop: 16,
+    marginTop: 2,
     color: '#333333',
   },
   description: {
@@ -156,7 +192,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#007AFF',
+    backgroundColor: 'green',
     borderRadius: 6,
   },
   progressLabels: {
@@ -173,40 +209,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333333',
   },
-  amountInfo: {
-    marginTop: 16,
+  card: {
+    marginTop: 14,
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
-    padding: 16,
+    padding: 10, // Smaller padding for smaller card
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    flexDirection: 'row', // Align icon and text side by side
+    alignItems: 'center',
   },
-  amountRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+  cardIcon: {
+    marginRight: 10,
   },
-  amountLabel: {
+  cardContent: {
+    flex: 1, // Ensure text takes the rest of the space
+  },
+  cardTitle: {
     fontSize: 16,
+    fontWeight: '500',
     color: '#3C3C43',
   },
-  amountValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  cardValue: {
+    fontSize: 14,
     color: '#333333',
   },
   donateButton: {
+    position: 'absolute', // Fixed positioning
+    bottom: 30,
+    left: 0,
+    right: 0,
     backgroundColor: '#007AFF',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
-    marginTop: 32,
     marginHorizontal: 16,
-    marginBottom: 32,
     elevation: 5,
     shadowColor: '#007AFF',
     shadowOffset: { width: 0, height: 2 },

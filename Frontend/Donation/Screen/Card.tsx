@@ -1,32 +1,76 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Animated, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Dimensions, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
-
-interface Card {
-  accountName: string;
-  cardNumber: string;
-  expiryDate: string;
-  cvc: string;
-}
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
-const AddCardScreen: React.FC = () => {
-  const [cards, setCards] = useState<Card[]>([
-    { accountName: '', cardNumber: '', expiryDate: '', cvc: '' },
-  ]);
+export default function AddCardScreen({ route }) {
+  const { campaign, value } = route.params; 
+  const navigation = useNavigation();
+  const [cards, setCards] = useState([{ accountName: '', cardNumber: '', expiryDate: '', cvc: '' }]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [loading, setLoading] = useState(false); // Loading state
 
-  const updateCard = (index: number, field: keyof Card, value: string) => {
+  const updateCard = (index: number, field: keyof typeof cards[0], value: string) => {
     const updatedCards = [...cards];
     updatedCards[index][field] = value;
     setCards(updatedCards);
-  };
+    validateForm(updatedCards[index]);
+};
+
+const validateForm = (card: typeof cards[0]) => {
+    const isValid =
+        card.accountName.trim() !== '' &&
+        card.cardNumber.length === 12 &&
+        /^\d{2}\/\d{2}$/.test(card.expiryDate) && // Check if the format is MM/YY
+        card.cvc.length === 3;
+
+    setIsFormValid(isValid);
+};
+
+const handleDonate = async () => {
+  if (!isFormValid) return; // Do not proceed if form is not valid
+
+  setLoading(true); // Set loading to true
+
+  try {
+    // Assuming you have the donation ID and selectedAmount from your props or state
+    const id = campaign.Id; // Replace this with the actual donation ID
+    const sanitizedAmount = parseFloat(value.replace(/[^0-9.]/g, ''));
+
+    // Check if sanitizedAmount is a valid number
+    if (isNaN(sanitizedAmount)) {
+      throw new Error("Invalid amount. Please enter a numeric value.");
+    }
+
+ // Use the selected amount from your props
+
+    // Update the donation amount using Axios PUT request
+    const response = await axios.put(`http://192.168.1.4:5000/Donation/update/amount/${id}`, {
+      amountRaised: sanitizedAmount, // Assuming the field to update is named 'amountRaised'
+    });
+
+    console.log('Donation amount updated successfully:', response.data);
+
+    // Navigate to DoneScreen after successful update
+    navigation.navigate("DoneScreen", { campaign, value });
+  } catch (error) {
+    console.error('Error updating donation amount:', error.response ? error.response.data : error.message);
+    // Handle error as needed (e.g., show an alert or error message)
+  } finally {
+    setLoading(false); // Always set loading to false at the end
+  }
+};
+
+
 
   const formattedCardNumber = cards[activeCardIndex].cardNumber
     .replace(/\D/g, '')
@@ -46,134 +90,158 @@ const AddCardScreen: React.FC = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-          <View style={styles.header}>
-            <TouchableOpacity>
-              <Ionicons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Add Card</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container}>
+        <StatusBar style="light" />
+        <LinearGradient colors={['#F9F9F9', '#F9F9F9']} style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#4a90e2" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Add Card</Text>
+        </LinearGradient>
+
+        <LinearGradient colors={['#4a69bd', '#4a69bd']} style={styles.cardPreview}>
+          <View style={styles.cardChip} />
+          <Text style={styles.cardTitle}>CARD/BANK</Text>
+          <Text style={styles.cardNumber}>{formattedCardNumber || '•••• •••• •••• ••••'}</Text>
+          <View style={styles.cardBottom}>
+            <Text style={styles.cardHolder}>{cards[activeCardIndex].accountName || 'CARD HOLDER'}</Text>
+            <Text style={styles.cardExpiry}>{cards[activeCardIndex].expiryDate || 'MM/YY'}</Text>
+          </View>
+        </LinearGradient>
+
+        <View style={styles.form}>
+          <Text style={styles.formTitle}>Card Details</Text>
+
+          <View style={styles.inputCard}>
+            <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Account Name"
+              placeholderTextColor="#999"
+              value={cards[activeCardIndex].accountName}
+              onChangeText={(text) => updateCard(activeCardIndex, 'accountName', text)}
+            />
           </View>
 
-          <LinearGradient
-            colors={['#4a69bd', '#4a69bd']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cardPreview}
-          >
-            <View style={styles.cardChip} />
-            <Text style={styles.cardTitle}>CARD/BANK</Text>
-            <Text style={styles.cardNumber}>{formattedCardNumber || '•••• •••• •••• ••••'}</Text>
-            <View style={styles.cardBottom}>
-              <Text style={styles.cardHolder}>{cards[activeCardIndex].accountName || 'CARD HOLDER'}</Text>
-              <Text style={styles.cardExpiry}>{cards[activeCardIndex].expiryDate || 'MM/YY'}</Text>
-            </View>
-          </LinearGradient>
+          <View style={styles.inputCard}>
+            <Ionicons name="card-outline" size={20} color="#666" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Card Number"
+              placeholderTextColor="#999"
+              value={cards[activeCardIndex].cardNumber}
+              onChangeText={(text) => {
+                const filteredText = text.replace(/\D/g, '').slice(0, 12); // Allow only numbers and limit to 12 digits
+                updateCard(activeCardIndex, 'cardNumber', filteredText);
+              }}
+              keyboardType="numeric"
+            />
+          </View>
 
-          <View style={styles.form}>
-            <Text style={styles.formTitle}>Card Details</Text>
-
-            <View style={styles.inputCard}>
-              <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
+          <View style={styles.row}>
+            <View style={[styles.inputCard, styles.halfWidth]}>
+              <Ionicons name="calendar-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Account Name"
+                placeholder="MM/YY"
                 placeholderTextColor="#999"
-                value={cards[activeCardIndex].accountName}
-                onChangeText={(text) => updateCard(activeCardIndex, 'accountName', text)}
+                value={cards[activeCardIndex].expiryDate}
+                onChangeText={(text) => {
+                  const filteredText = text.replace(/[^0-9\/]/g, '').slice(0, 5); // Allow only numbers and '/' and limit to 5 characters
+                  updateCard(activeCardIndex, 'expiryDate', filteredText);
+                }}
               />
             </View>
 
-            <View style={styles.inputCard}>
-              <Ionicons name="card-outline" size={20} color="#666" style={styles.inputIcon} />
+            <View style={[styles.inputCard, styles.halfWidth]}>
+              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Card Number"
+                placeholder="CVC"
                 placeholderTextColor="#999"
-                value={cards[activeCardIndex].cardNumber}
-                onChangeText={(text) => updateCard(activeCardIndex, 'cardNumber', text)}
+                value={cards[activeCardIndex].cvc}
+                onChangeText={(text) => {
+                  const filteredText = text.replace(/\D/g, '').slice(0, 3); // Allow only numbers and limit to 3 digits
+                  updateCard(activeCardIndex, 'cvc', filteredText);
+                }}
                 keyboardType="numeric"
               />
             </View>
-
-            <View style={styles.row}>
-              <View style={[styles.inputCard, styles.halfWidth]}>
-                <Ionicons name="calendar-outline" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="MM/YY"
-                  placeholderTextColor="#999"
-                  value={cards[activeCardIndex].expiryDate}
-                  onChangeText={(text) => updateCard(activeCardIndex, 'expiryDate', text)}
-                />
-              </View>
-              <View style={[styles.inputCard1, styles.halfWidth]}>
-                <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="CVC"
-                  placeholderTextColor="#999"
-                  value={cards[activeCardIndex].cvc}
-                  onChangeText={(text) => updateCard(activeCardIndex, 'cvc', text)}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={styles.checkboxContainer}
-              onPress={() => setIsSaved(!isSaved)}
-            >
-              <View style={[styles.checkbox, isSaved && styles.checkboxChecked]}>
-                {isSaved && (
-                  <Svg width="12" height="9" viewBox="0 0 12 9">
-                    <Path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </Svg>
-                )}
-              </View>
-              <Text style={styles.checkboxLabel}>Save Card for Later</Text>
-            </TouchableOpacity>
           </View>
-        </Animated.View>
+
+          <TouchableOpacity style={styles.checkboxContainer} onPress={() => setIsSaved(!isSaved)}>
+            <View style={[styles.checkbox, isSaved && styles.checkboxChecked]}>
+              {isSaved && (
+                <Svg width="12" height="9" viewBox="0 0 12 9">
+                  <Path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              )}
+            </View>
+            <Text style={styles.checkboxLabel}>Save Card for Later</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => {
-          setCards([...cards, { accountName: '', cardNumber: '', expiryDate: '', cvc: '' }]);
-          setActiveCardIndex(cards.length);
-        }}
+        style={[styles.addButton, !isFormValid && styles.disabledButton]}
+        onPress={handleDonate}
+        disabled={!isFormValid || loading}
       >
-        <Text style={styles.addButtonText}>ADD CARD</Text>
+        <Text style={styles.addButtonText}>Donate Now</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
-};
+}
+
+
+
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9F9F9',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#ffff',
+    padding:10
   },
-  scrollView: {
-    flexGrow: 1,
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
-  content: {
-    padding: 20,
-    paddingBottom: 100,
+  disabledButton: {
+    opacity: 0.5,
   },
+  
   header: {
+    paddingVertical: 15,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    padding: 16,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+  },
+  backButton: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#4a90e2',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 21,
     fontWeight: 'bold',
-    marginLeft: 20,
-    color: 'white',
+    color: '#000000',
+    marginLeft: 100,
   },
   cardPreview: {
     borderRadius: 16,
@@ -215,11 +283,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
@@ -240,19 +305,6 @@ const styles = StyleSheet.create({
     height: 60,
     borderWidth: 1,
     borderColor: '#e0e0e0',
-
-  },
-  inputCard1: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    height: 60,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginLeft:8,
   },
   inputIcon: {
     marginRight: 12,
@@ -267,7 +319,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   halfWidth: {
-    width: (width - 64) / 2 - 8,
+    width: '48%',
   },
   checkboxContainer: {
     flexDirection: 'row',
@@ -277,38 +329,29 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 24,
     height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#5f72bd',
-    marginRight: 12,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#666',
+    marginRight: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#5f72bd',
+    backgroundColor: '#4a90e2',
+    borderColor: '#4a90e2',
   },
   checkboxLabel: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 14,
+    color: '#666',
   },
   addButton: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: '#f0a500',
-    borderRadius: 12,
-    height: 56,
+    backgroundColor: '#4a90e2',
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderRadius: 12,
+    marginTop: 20,
+    marginHorizontal: 20,
   },
   addButtonText: {
     color: 'white',
@@ -316,5 +359,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-export default AddCardScreen;

@@ -269,8 +269,8 @@ const EditDonation = () => {
               </label>
               <input
                 type="text"
-                name="bankDetails.branch"
-                value={donation.bankDetails?.branch || ""}
+                name="bankDetails.bankBranch"
+                value={donation.bankDetails?.bankBranch || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               />

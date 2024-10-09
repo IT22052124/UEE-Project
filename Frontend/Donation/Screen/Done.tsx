@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient'; // Gradient support
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 interface PaymentSuccessProps {
   refNumber: string;
@@ -13,92 +14,130 @@ interface PaymentSuccessProps {
   onShare: () => void;
 }
 
-const PaymentSuccessScreen: React.FC<PaymentSuccessProps> = ({
-  refNumber,
-  date,
-  time,
-  cardLastFour,
-  amount,
-  onDone,
-  onShare
-}) => {
+export default function PaymentSuccessScreen({ route }) {
+  const { campaign, value } = route.params; // Get campaign details from route params
+  const navigation = useNavigation();
+
+  function generateRefNumber(length: number): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let refNumber = '';
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      refNumber += characters[randomIndex];
+    }
+
+    return refNumber;
+  }
+
+  // time
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+  const day = currentDate.getDate().toString().padStart(2, '0');
+  const formattedDate = `${year}-${month}-${day}`;
+  const hours = currentDate.getHours().toString().padStart(2, '0');
+  const minutes = currentDate.getMinutes().toString().padStart(2, '0');
+  const formattedTime = `${hours}:${minutes}`;
+
+  const referenceNumber = generateRefNumber(8); // Generate a reference number of length 8
+  console.log(referenceNumber);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="auto" />
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#007AFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Payment</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <LinearGradient colors={['#F9F9F9', '#F9F9F9']} style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} accessibilityLabel="Go back">
+            <Ionicons name="arrow-back" size={24} color="#007AFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Payment</Text>
+        </LinearGradient>
 
-      <View style={styles.content}>
-        <View style={styles.successIcon}>
-          <Ionicons name="checkmark" size={80} color="white" />
-        </View>
+        <View style={styles.content}>
+          <View style={styles.successIcon}>
+            <Ionicons name="checkmark" size={80} color="white" />
+          </View>
 
-        <Text style={styles.successText}>Payment success!</Text>
+          <Text style={styles.successText}>Payment Success!</Text>
 
-        <View style={styles.detailsCard}>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Ref number</Text>
-            <Text style={styles.detailValue}>{refNumber}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Date</Text>
-            <Text style={styles.detailValue}>{date}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Time</Text>
-            <Text style={styles.detailValue}>{time}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Card</Text>
-            <View style={styles.cardInfo}>
-              <View style={styles.visaLogo}>
-                <Text style={styles.visaText}>VISA</Text>
+          <View style={styles.detailsCard}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Ref number</Text>
+              <Text style={styles.detailValue}>{referenceNumber}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Date</Text>
+              <Text style={styles.detailValue}>{formattedDate}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Time</Text>
+              <Text style={styles.detailValue}>{formattedTime}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Card</Text>
+              <View style={styles.cardInfo}>
+                <View style={styles.visaLogo}>
+                  <Text style={styles.visaText}>VISA</Text>
+                </View>
+                <Text style={styles.detailValue}>****** </Text>
               </View>
-              <Text style={styles.detailValue}>****** {cardLastFour}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Amount (Rs)</Text>
+              <Text style={styles.detailValue}>{value}</Text>
             </View>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Amount(Rs)</Text>
-            <Text style={styles.detailValue}>{amount}</Text>
-          </View>
+
+          <TouchableOpacity style={styles.shareButton}>
+            <Ionicons name="share-outline" size={20} color="#4CAF50" />
+            <Text style={styles.shareButtonText}>Share</Text>
+          </TouchableOpacity>
         </View>
+      </ScrollView>
 
-        <TouchableOpacity style={styles.shareButton} onPress={onShare}>
-          <Ionicons name="share-outline" size={20} color="#4CAF50" />
-          <Text style={styles.shareButtonText}>Share</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.doneButton} onPress={onDone}>
+      <TouchableOpacity style={styles.doneButton} onPress={() => navigation.navigate("DonationHomepage")}>
         <Text style={styles.doneButtonText}>Done</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F9F9',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'space-between', // Add space between content and done button
   },
   header: {
+    paddingVertical: 15,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
+    padding: 16,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
   },
   backButton: {
-    padding: 8,
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#007AFF',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: 'bold',
-    marginLeft: 16,
+    color: '#000000',
+    marginLeft: 100,
   },
   content: {
     flex: 1,
@@ -167,11 +206,13 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   doneButton: {
+    position: 'absolute', // Position fixed at the bottom
+    bottom: 20,
+    left: 24,
+    right: 24,
     backgroundColor: '#007AFF',
     borderRadius: 8,
     paddingVertical: 16,
-    marginHorizontal: 24,
-    marginBottom: 24,
   },
   doneButtonText: {
     color: '#FFFFFF',
@@ -180,5 +221,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
-export default PaymentSuccessScreen;

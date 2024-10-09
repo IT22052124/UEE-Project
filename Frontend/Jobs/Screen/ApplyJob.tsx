@@ -98,7 +98,7 @@ export default function ApplyJobScreen({ navigation, route }) {
 
       console.log("Successfully applied for the job:", response.data);
 
-      navigation.navigate("JobDetailsScreen", { item: item });
+      navigation.navigate("JobListScreen", { item: item });
     } catch (error) {
       console.error("Error applying job:", error);
     }

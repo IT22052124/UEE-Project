@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Share,
+  Linking,
 } from "react-native";
 import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 
@@ -29,6 +30,10 @@ const jobDetails = {
 export default function JobDetailsScreen({ navigation, route }) {
   const { item } = route.params;
 
+  const handleWebsitePress = () => {
+    Linking.openURL(item.postedBy.website);
+  };
+
   const getDaysAgo = (createdAt) => {
     const createdDate = new Date(createdAt);
     const currentDate = new Date();
@@ -45,7 +50,7 @@ export default function JobDetailsScreen({ navigation, route }) {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this job opportunity: ${item.title} at ${item.companyName}`,
+        message: `Check out this job opportunity: ${item.title} at ${item.postedBy.companyName}`,
       });
     } catch (error) {
       console.error(error);
@@ -62,7 +67,7 @@ export default function JobDetailsScreen({ navigation, route }) {
           >
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Job Details</Text>
+          <Text style={styles.headerTitle}>{item.title}</Text>
           <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
             <Ionicons name="share-outline" size={24} color="#333" />
           </TouchableOpacity>
@@ -73,21 +78,34 @@ export default function JobDetailsScreen({ navigation, route }) {
             source={
               item.postedBy?.companyLogo
                 ? { uri: item.postedBy.companyLogo }
-                : require("../../assets/notAvailable.jpg")
+                : require("./../notAvailabe.jpg")
             }
             style={styles.logo}
           />
           <View style={styles.companyText}>
             <Text style={styles.companyName}>{item.postedBy.companyName}</Text>
-            <Text style={styles.jobTitle}>{item.title}</Text>
+            <View style={styles.statItem}>
+              <MaterialIcons name="location-on" size={20} color="#666" />
+              <Text style={styles.statText}>{item.location}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <MaterialIcons name="email" size={20} color="#666" />
+              <Text style={styles.statText}>{item.postedBy.email}</Text>
+            </View>
+            {item.postedBy.website ? (
+              <TouchableOpacity onPress={handleWebsitePress}>
+                <View style={styles.statItem}>
+                  <MaterialIcons name="language" size={20} color="#666" />
+                  <Text style={styles.statText}>{item?.postedBy?.website}</Text>
+                </View>
+              </TouchableOpacity>
+            ) : (
+              ""
+            )}
           </View>
         </View>
 
         <View style={styles.jobStats}>
-          <View style={styles.statItem}>
-            <MaterialIcons name="location-on" size={20} color="#666" />
-            <Text style={styles.statText}>{item.postedBy.address}</Text>
-          </View>
           <View style={styles.statItem}>
             <MaterialIcons name="access-time" size={20} color="#666" />
             <Text style={styles.statText}>
@@ -102,7 +120,7 @@ export default function JobDetailsScreen({ navigation, route }) {
 
         <View style={styles.salaryContainer}>
           <Text style={styles.salaryLabel}>Salary</Text>
-          <Text style={styles.salaryAmount}>{item.salary}</Text>
+          <Text style={styles.salaryAmount}>{item.salary}.00 LKR</Text>
         </View>
 
         <View style={styles.skillsContainer}>
@@ -168,7 +186,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 5,
     marginRight: 16,
   },
   companyText: {

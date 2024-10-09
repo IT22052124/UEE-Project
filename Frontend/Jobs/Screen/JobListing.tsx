@@ -10,9 +10,9 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { IPAddress } from "../../globals";
+import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 
 // Mock data for job listings
 const jobListings = [
@@ -48,11 +48,10 @@ export default function JobListScreen({ navigation }) {
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
-  
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [jobs]);
 
   const fetchJobs = async () => {
     try {
@@ -88,18 +87,24 @@ export default function JobListScreen({ navigation }) {
       <Image
         source={
           item.postedBy?.companyLogo
-            ? { uri: item.postedBy.companyLogo } // If logo exists
-            : require("../../assets/notAvailable.jpg") // Fallback image
+            ? { uri: item.postedBy.companyLogo }
+            : require("./../notAvailabe.jpg")
         }
         style={styles.logo}
       />
       <View style={styles.jobInfo}>
         <Text style={styles.jobTitle}>{item.title}</Text>
         <Text style={styles.jobRecruiter}>{item.postedBy?.companyName}</Text>
-        <Text style={styles.jobAddress}>{item.postedBy?.address}</Text>
-        <Text style={styles.jobApplications}>
-          {item?.applications} applications
-        </Text>
+        <View style={styles.statItem}>
+          <MaterialIcons name="location-on" size={20} color="#666" />
+          <Text style={styles.jobAddress}>{item.location}</Text>
+        </View>
+        <View style={styles.statItem}>
+          <FontAwesome5 name="users" size={18} color="#4a90e2" />
+          <Text style={styles.jobApplications}>
+            {item?.applications} applications
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -168,6 +173,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
+
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -220,6 +226,10 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 4,
   },
+  statItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   jobRecruiter: {
     fontSize: 16,
     color: "#666",
@@ -233,5 +243,6 @@ const styles = StyleSheet.create({
   jobApplications: {
     fontSize: 14,
     color: "#4a90e2",
+    paddingLeft: 5,
   },
 });

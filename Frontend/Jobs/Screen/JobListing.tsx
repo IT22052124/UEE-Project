@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,131 +8,171 @@ import {
   TextInput,
   TouchableOpacity,
   SafeAreaView,
-} from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { IPAddress } from "../../globals";
 
 // Mock data for job listings
 const jobListings = [
   {
-    id: '1',
-    title: 'Senior Software Engineer',
-    address: 'San Francisco, CA',
-    recruiter: 'TechCorp Inc.',
+    id: "1",
+    title: "Senior Software Engineer",
+    address: "San Francisco, CA",
+    recruiter: "TechCorp Inc.",
     applications: 45,
-    logo: 'https://example.com/techcorp-logo.png',
+    logo: "https://example.com/techcorp-logo.png",
   },
   {
-    id: '2',
-    title: 'UX Designer',
-    address: 'New York, NY',
-    recruiter: 'DesignHub',
+    id: "2",
+    title: "UX Designer",
+    address: "New York, NY",
+    recruiter: "DesignHub",
     applications: 32,
-    logo: 'https://example.com/designhub-logo.png',
+    logo: "https://example.com/designhub-logo.png",
   },
   {
-    id: '3',
-    title: 'Data Scientist',
-    address: 'Seattle, WA',
-    recruiter: 'DataTech Solutions',
+    id: "3",
+    title: "Data Scientist",
+    address: "Seattle, WA",
+    recruiter: "DataTech Solutions",
     applications: 28,
-    logo: 'https://example.com/datatech-logo.png',
+    logo: "https://example.com/datatech-logo.png",
   },
   // Add more job listings as needed
-]
+];
 
 export default function JobListScreen({ navigation }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filteredJobs, setFilteredJobs] = useState(jobListings)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://${IPAddress}:5000/Job/Jobs`);
+      setJobs(response.data);
+      setFilteredJobs(response.data);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      Alert.alert("Error", "Could not fetch jobs. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (query) => {
-    setSearchQuery(query)
-    const filtered = jobListings.filter(job =>
-      job.title.toLowerCase().includes(query.toLowerCase()) ||
-      job.recruiter.toLowerCase().includes(query.toLowerCase())
-    )
-    setFilteredJobs(filtered)
-  }
+    setSearchQuery(query);
+    const filtered = jobs.filter(
+      (job) =>
+        job.title.toLowerCase().includes(query.toLowerCase()) ||
+        job.postedBy.companyName.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredJobs(filtered);
+  };
 
   const renderJobItem = ({ item }) => (
-    <TouchableOpacity style={styles.jobItem} onPress={() => {/* Navigate to job details */}}>
-      <Image source={{ uri: item.logo }} style={styles.logo} />
+    <TouchableOpacity
+      style={styles.jobItem}
+      onPress={() => {
+        /* Navigate to job details */
+      }}
+    >
+      <Image source={{ uri: item.postedBy?.companyLogo }} style={styles.logo} />
       <View style={styles.jobInfo}>
         <Text style={styles.jobTitle}>{item.title}</Text>
-        <Text style={styles.jobRecruiter}>{item.recruiter}</Text>
-        <Text style={styles.jobAddress}>{item.address}</Text>
-        <Text style={styles.jobApplications}>{item.applications} applications</Text>
+        <Text style={styles.jobRecruiter}>{item.postedBy?.companyName}</Text>
+        <Text style={styles.jobAddress}>{item.postedBy?.address}</Text>
+        <Text style={styles.jobApplications}>
+          {item?.applications} applications
+        </Text>
       </View>
     </TouchableOpacity>
-  )
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search jobs or companies"
-          value={searchQuery}
-          onChangeText={handleSearch}
-        />
-      </View>
-        
+          <Ionicons
+            name="search"
+            size={20}
+            color="#999"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search jobs or companies"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+        </View>
       </View>
       <Text style={styles.headerTitle}>Recently Added</Text>
 
-      
-
-      <FlatList
-        data={filteredJobs}
-        renderItem={renderJobItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-      />
+      {loading ? (
+        <Text>Loading jobs...</Text> // You can add a spinner or loader here
+      ) : (
+        <FlatList
+          data={filteredJobs}
+          renderItem={renderJobItem}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.listContainer}
+        />
+      )}
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#f8f9fa',
+    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#f8f9fa",
   },
   backButton: {
     marginRight: 12,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginLeft:20,
-    marginTop:10,
-    marginBottom:10
+    fontWeight: "bold",
+    color: "#333",
+    marginLeft: 20,
+    marginTop: 10,
+    marginBottom: 10,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
     borderRadius: 8,
     margin: 1,
     paddingHorizontal: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    width:'90%'
+    width: "90%",
   },
   searchIcon: {
     marginRight: 8,
@@ -146,21 +186,21 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   jobItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    backgroundColor: "#fff",
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 70,
+    height: 70,
+    borderRadius: 5,
     marginRight: 16,
   },
   jobInfo: {
@@ -168,22 +208,22 @@ const styles = StyleSheet.create({
   },
   jobTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 4,
   },
   jobRecruiter: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginBottom: 4,
   },
   jobAddress: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
     marginBottom: 4,
   },
   jobApplications: {
     fontSize: 14,
-    color: '#4a90e2',
+    color: "#4a90e2",
   },
-})
+});

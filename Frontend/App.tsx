@@ -19,16 +19,17 @@ import JobProviderRegistration2 from "./Jobs/Screen/RegisterJobProvider2";
 import JobPostingScreen from "./Jobs/Screen/PostJob";
 import HomeScreen from "./Pages/CommunityConnect/Screen/HomeScreen";
 import PostedJobsScreen from "./Jobs/Screen/PostedJobs";
-import CardPayment from "./Donation/Screen/Card"
-import DoneS from "./Donation/Screen/Done"
+import CardPayment from "./Donation/Screen/Card";
+import DoneS from "./Donation/Screen/Done";
 import CompanyProfileScreen from "./Jobs/Screen/JobProviderProfile";
 import JobListScreen from "./Jobs/Screen/JobListing";
+import JobDetailsScreen from "./Jobs/Screen/JobDetails";
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="JobListScreen">
+      <Stack.Navigator initialRouteName="JobDetailsScreen">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}
@@ -74,7 +75,7 @@ export default function App() {
           component={AboutScreen}
           options={{ headerShown: false }}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="CardPayment"
           component={CardPayment}
           options={{ headerShown: false }}
@@ -127,6 +128,11 @@ export default function App() {
         <Stack.Screen
           name="JobListScreen"
           component={JobListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobDetailsScreen"
+          component={JobDetailsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

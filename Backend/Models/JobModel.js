@@ -31,6 +31,11 @@ const jobSchema = mongoose.Schema(
       type: [String], // Array of strings for skills
       required: [true, "Please Enter at least one skill"], // Ensure at least one skill is provided
     },
+    applications: {
+      type: Number,
+      required: false,
+      default: 0
+    },
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "JobProvider",

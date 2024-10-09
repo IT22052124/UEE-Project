@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { IPAddress } from "../../globals";
 
 export default function DonationScreen() {
   const navigation = useNavigation();
@@ -14,7 +15,7 @@ export default function DonationScreen() {
   // Fetch data from backend
   useEffect(() => {
     axios
-      .get('http://192.168.1.4:5000/Donation/emergency')
+      .get('http://${IPAddress}:5000/Donation/emergency')
       .then((response) => {
         setEmergencyHelpData(response.data.donations);
       })

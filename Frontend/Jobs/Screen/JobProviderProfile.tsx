@@ -8,42 +8,35 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import { IPAddress } from "../../globals";
-
-// Mock data for the profile
-const profile = {
-  id: "COMP123456",
-  companyName: "TechInnovate Solutions",
-  email: "contact@techinnovate.com",
-  telephone: "+1 (555) 123-4567",
-  address: "123 Tech Park, Silicon Valley, CA 94000",
-  website: "https://www.techinnovate.com",
-  description:
-    "TechInnovate Solutions is a leading software development company specializing in cutting-edge technologies. We provide innovative solutions for businesses of all sizes, focusing on AI, IoT, and cloud computing.",
-  logo: "https://example.com/company-logo.png", // Replace with actual logo URL
-};
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function CompanyProfileScreen({ navigation }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [jobDetails, setJobDetails] = useState({});
-  const user = "670546e451d26ca2592fc40a";
+
+  const logout = () => {
+    navigation.navigate("JobProviderSignIn");
+  };
 
   useEffect(() => {
     fetchJobById();
-  }, [user]);
+  }, []);
 
   const fetchJobById = async () => {
     try {
       setLoading(true);
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
       const response = await axios.get(
-        `http://${IPAddress}:5000/JobProvider/job-providers/${user}` // Send userId and jobId in the URL
+        `http://${IPAddress}:5000/JobProvider/job-providers/${user}`
       );
       setJobDetails(response.data);
-      console.log(jobDetails);
     } catch (error) {
       console.error("Error fetching job by ID:", error);
       Alert.alert("Error", "Could not fetch job details. Please try again.");
@@ -52,124 +45,107 @@ export default function CompanyProfileScreen({ navigation }) {
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4299e1" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Profile</Text>
+      </View>
+      <View style={styles.separator} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile</Text>
-        </View>
-
-        {jobDetails.companyLogo ? (
+        {jobDetails.companyLogo && (
           <View style={styles.logoContainer}>
             <Image
-              source={{ uri: jobDetails?.companyLogo }}
+              source={{ uri: jobDetails.companyLogo }}
               style={styles.logo}
               resizeMode="contain"
             />
           </View>
-        ) : (
-          ""
         )}
 
         <View style={styles.infoContainer}>
           <Text style={styles.companyName}>{jobDetails.companyName}</Text>
           <Text style={styles.id}>ID: {jobDetails.ID}</Text>
 
-          <View style={styles.infoItem}>
-            <MaterialIcons
-              name="email"
-              size={20}
-              color="#4a4a4a"
-              style={styles.icon}
-            />
-            <Text style={styles.infoText}>{jobDetails.email}</Text>
-          </View>
+          <InfoItem icon="email" text={jobDetails.email} />
+          <InfoItem icon="phone" text={jobDetails.telephone} />
+          <InfoItem icon="location-on" text={jobDetails.address} />
 
-          <View style={styles.infoItem}>
-            <MaterialIcons
-              name="phone"
-              size={20}
-              color="#4a4a4a"
-              style={styles.icon}
-            />
-            <Text style={styles.infoText}>{jobDetails.telephone}</Text>
-          </View>
-
-          <View style={styles.infoItem}>
-            <MaterialIcons
-              name="location-on"
-              size={20}
-              color="#4a4a4a"
-              style={styles.icon}
-            />
-            <Text style={styles.infoText}>{jobDetails.address}</Text>
-          </View>
-
-          {jobDetails.website ? (
+          {jobDetails.website && (
             <TouchableOpacity
-              style={styles.infoItem}
+              onPress={() => Linking.openURL(jobDetails.website)}
             >
-              <MaterialIcons
-                name="language"
-                size={20}
-                color="#4a4a4a"
-                style={styles.icon}
-              />
-              <Text style={[styles.infoText, styles.website]}>
-                {jobDetails?.website}
-              </Text>
+              <InfoItem icon="language" text={jobDetails.website} isWebsite />
             </TouchableOpacity>
-          ) : (
-            ""
           )}
 
-          {jobDetails.description ? (
+          {jobDetails.description && (
             <View style={styles.descriptionContainer}>
               <Text style={styles.descriptionTitle}>About Us</Text>
               <Text style={styles.descriptionText}>
-                {jobDetails?.description}
+                {jobDetails.description}
               </Text>
             </View>
-          ) : (
-            ""
           )}
         </View>
+        
+        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+const InfoItem = ({ icon, text, isWebsite }) => (
+  <View style={styles.infoItem}>
+    <MaterialIcons
+      name={icon}
+      size={20}
+      color="#4a4a4a"
+      style={styles.icon}
+    />
+    <Text style={[styles.infoText, isWebsite && styles.website]}>{text}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
-    padding: 10,
+    backgroundColor: "#f7fafc",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f7fafc",
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  backButton: {
-    marginRight: 16,
+    backgroundColor: "#fff",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: "#000",
-    alignSelf: "center",
-    marginTop: 12,
-    marginLeft: 10,
+    color: "#2d3748",
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#e2e8f0",
   },
   logoContainer: {
     alignItems: "center",
@@ -183,9 +159,9 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    margin: 10,
+    borderRadius: 12,
+    padding: 20,
+    margin: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -195,45 +171,63 @@ const styles = StyleSheet.create({
   companyName: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: "#2d3748",
     marginBottom: 8,
     textAlign: "center",
   },
   id: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 16,
+    color: "#718096",
+    marginBottom: 20,
     textAlign: "center",
   },
   infoItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   icon: {
     marginRight: 12,
   },
   infoText: {
     fontSize: 16,
-    color: "#333",
+    color: "#4a5568",
     flex: 1,
   },
   website: {
-    color: "#007bff",
+    color: "#4299e1",
     textDecorationLine: "underline",
   },
   descriptionContainer: {
-    marginTop: 16,
+    marginTop: 20,
   },
   descriptionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: "#2d3748",
     marginBottom: 8,
   },
   descriptionText: {
     fontSize: 16,
-    color: "#666",
+    color: "#4a5568",
     lineHeight: 24,
+  },
+  logoutButton: {
+    backgroundColor: "#e53e3e",
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });

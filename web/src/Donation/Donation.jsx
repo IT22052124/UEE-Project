@@ -142,7 +142,7 @@ const DonationForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-6xl mx-auto p-8 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-xl rounded-lg mt-10 border border-indigo-100"
+      className="max-w-6xl ml-80 mr-15 mx-auto p-8 bg-gradient-to-br from-blue-50 to-blue-200 shadow-xl rounded-lg mt-5 border border-indigo-100"
     >
       <h2 className="text-4xl font-extrabold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
         Create a Donation
@@ -199,7 +199,7 @@ const DonationForm = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-lg border pl-3 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            className="mt-1 pl-3 block w-full rounded-lg border pl-3 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             rows="3"
             placeholder="Enter the Description here..."
 
@@ -555,7 +555,7 @@ const DonationForm = () => {
             name="emergency"
             value={formData.emergency}
             onChange={handleChange}
-            className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            className="mt-1 pl-3 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             required
           >
             <option value="">Select</option>

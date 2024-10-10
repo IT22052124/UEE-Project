@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,18 +11,42 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useNavigation, useRoute } from "@react-navigation/native"; // Import useNavigation and useRoute
 import { IPAddress } from "../../globals";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function JobPostingScreen({ navigation }) {
+export default function UpdateJobScreen({navigation, route}) {
+  const {jobId}  =  route.params; // Get job ID from route params
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [location, setLocation] = useState("");
   const [salary, setSalary] = useState("");
   const [skill, setSkill] = useState("");
   const [skills, setSkills] = useState([]);
+
+
+  // Fetch job details based on jobId
+  useEffect(() => {
+    const fetchJobDetails = async () => {
+      try {
+        const response = await axios.get(
+          `http://${IPAddress}:5000/JobProvider/getJob/${jobId}`
+        );
+        const job = response.data;
+        setJobTitle(job.title);
+        setJobDescription(job.description);
+        setLocation(job.location);
+        setSalary(job.salary.toString());
+        setSkills(job.skills);
+      } catch (error) {
+        console.error("Error fetching job details:", error);
+        Alert.alert("Error", "Could not fetch job details.");
+      }
+    };
+
+    fetchJobDetails();
+  }, [jobId]);
 
   const addSkill = () => {
     if (skill.trim()) {
@@ -36,7 +60,7 @@ export default function JobPostingScreen({ navigation }) {
     setSkills(updatedSkills);
   };
 
-  const postJob = async () => {
+  const updateJob = async () => {
     if (
       !jobTitle ||
       !jobDescription ||
@@ -54,11 +78,11 @@ export default function JobPostingScreen({ navigation }) {
     try {
       const userDetails = await AsyncStorage.getItem("user");
       const user = JSON.parse(userDetails)?._id;
-      const response = await axios.post(
-        `http://${IPAddress}:5000/JobProvider/postJob`,
+      const response = await axios.patch(
+        `http://${IPAddress}:5000/JobProvider/updateJob/${jobId}`,
         { jobTitle, jobDescription, location, salary, skills, user }
       );
-      Alert.alert("Success", "Job posted successfully!");
+      Alert.alert("Success", "Job updated successfully!");
 
       // Reset form
       setJobTitle("");
@@ -70,12 +94,12 @@ export default function JobPostingScreen({ navigation }) {
       navigation.navigate("PostedJobs");
     } catch (error) {
       console.error(
-        "Error posting job:",
+        "Error updating job:",
         error.response?.data || error.message
       );
       Alert.alert(
         "Error",
-        "There was an issue posting the job. Please try again."
+        "There was an issue updating the job. Please try again."
       );
     }
   };
@@ -91,7 +115,7 @@ export default function JobPostingScreen({ navigation }) {
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.title}>Post a New Job 💼</Text>
+        <Text style={styles.title}>Update Job 💼</Text>
 
         <Text style={styles.label}>Job Title</Text>
         <TextInput
@@ -152,8 +176,8 @@ export default function JobPostingScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.postButton} onPress={postJob}>
-          <Text style={styles.postButtonText}>Post Job</Text>
+        <TouchableOpacity style={styles.postButton} onPress={updateJob}>
+          <Text style={styles.postButtonText}>Update Job</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

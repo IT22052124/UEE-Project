@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // Comment Schema
-const commentSchema = mongoose.Schema(
+const commentSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -38,13 +38,7 @@ const commentSchema = mongoose.Schema(
         ref: "User",
       },
     ],
-    replies: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Comment",
-        default: [],
-      },
-    ],
+    replies: [], // Initialize as an empty array, we will use commentSchema later
   },
   {
     timestamps: true,
@@ -54,8 +48,13 @@ const commentSchema = mongoose.Schema(
 // Create the Comment model separately
 export const Comment = mongoose.model("Comment", commentSchema);
 
+// Update the replies to use the Comment model
+commentSchema.add({
+  replies: [commentSchema], // Add the replies using the Comment schema
+});
+
 // Post Schema
-const postSchema = mongoose.Schema(
+const postSchema = new mongoose.Schema(
   {
     postTitle: {
       type: String,
@@ -103,4 +102,5 @@ const postSchema = mongoose.Schema(
   }
 );
 
+// Create the Post model
 export const Post = mongoose.model("Post", postSchema);

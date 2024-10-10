@@ -1,9 +1,17 @@
 import React, { useState } from "react";
-import { Image, View, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Image,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
 import { Video } from "expo-av";
 import { MediaPreview } from "./MediaPreview";
 
-// Convert renderMedia to a functional component
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const MARGIN = 2;
+
 export const MediaRenderer = ({
   medias,
   mediaTypes,
@@ -14,13 +22,11 @@ export const MediaRenderer = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Open the modal and set the current image index
   const openModal = (index: number) => {
     setCurrentIndex(index);
     setModalVisible(true);
   };
 
-  // Close the modal
   const closeModal = () => {
     setModalVisible(false);
   };
@@ -33,25 +39,28 @@ export const MediaRenderer = ({
     }
   };
 
-  // Render the media item (either image or video)
-  const renderItem = (
+  const renderMediaLayout = (
     media: string,
     type: string | null,
     style: any,
     index: number
   ) => {
     return (
-      <TouchableOpacity key={index} onPress={() => openModal(index)}>
+      <TouchableOpacity
+        key={index}
+        style={style}
+        onPress={() => openModal(index)}
+      >
         {type === "image" ? (
           <Image
             source={{ uri: media }}
             resizeMode="cover"
-            style={[styles.mediaItem, style]}
+            style={[styles.image]}
           />
         ) : (
           <Video
             source={{ uri: media }}
-            style={[styles.mediaItem, style]}
+            style={[styles.image]}
             useNativeControls
             resizeMode="cover"
             isLooping
@@ -61,64 +70,82 @@ export const MediaRenderer = ({
     );
   };
 
-  // Render different layouts based on the number of media items
-  const renderMediaLayout = () => {
-    if (medias.length === 1) {
-      return (
-        <View>
-          {renderItem(medias[0], mediaTypes[0], styles.singleMedia, 0)}
-        </View>
-      );
-    }
+  const renderSingleMedia = () =>
+    renderMediaLayout(medias[0], mediaTypes[0], styles.singleMedia, 0);
 
-    if (medias.length === 2) {
-      return (
-        <View style={styles.mediaContainer}>
-          {medias.map((media, index) =>
-            renderItem(media, mediaTypes[index], styles.twoMedia, index)
+  const renderTwoMedia = () => (
+    <View style={styles.row}>
+      {medias.map((media, index) =>
+        renderMediaLayout(media, mediaTypes[index], styles.halfMedia, index)
+      )}
+    </View>
+  );
+
+  const renderThreeMedia = () => (
+    <View style={styles.row}>
+      {renderMediaLayout(medias[0], mediaTypes[0], styles.halfMedia, 0)}
+      <View style={styles.halfColumn}>
+        {medias
+          .slice(1)
+          .map((media, index) =>
+            renderMediaLayout(
+              media,
+              mediaTypes[index + 1],
+              styles.quarterMedia,
+              index + 1
+            )
           )}
-        </View>
-      );
-    }
+      </View>
+    </View>
+  );
 
-    if (medias.length === 3) {
-      return (
-        <View style={styles.mediaContainer}>
-          {renderItem(medias[0], mediaTypes[0], styles.singleMedia, 0)}
-          <View style={{ width: "48%" }}>
-            {medias
-              .slice(1)
-              .map((media, index) =>
-                renderItem(
-                  media,
-                  mediaTypes[index + 1],
-                  styles.threeMediaRight,
-                  index + 1
-                )
-              )}
-          </View>
-        </View>
-      );
-    }
+  const renderFourMedia = () => (
+    <View style={styles.row}>
+      <View style={styles.halfColumn}>
+        {medias
+          .slice(0, 2)
+          .map((media, index) =>
+            renderMediaLayout(
+              media,
+              mediaTypes[index],
+              styles.quarterMedia,
+              index
+            )
+          )}
+      </View>
+      <View style={styles.halfColumn}>
+        {medias
+          .slice(2, 4)
+          .map((media, index) =>
+            renderMediaLayout(
+              media,
+              mediaTypes[index + 2],
+              styles.quarterMedia,
+              index + 2
+            )
+          )}
+      </View>
+    </View>
+  );
 
-    if (medias.length >= 4) {
-      return (
-        <View style={styles.mediaContainer}>
-          {medias
-            .slice(0, 4)
-            .map((media, index) =>
-              renderItem(media, mediaTypes[index], styles.fourMedia, index)
-            )}
-        </View>
-      );
+  const renderMediaGrid = () => {
+    switch (medias.length) {
+      case 1:
+        return renderSingleMedia();
+      case 2:
+        return renderTwoMedia();
+      case 3:
+        return renderThreeMedia();
+      case 4:
+        return renderFourMedia();
+      default:
+        return null;
     }
-
-    return null;
   };
 
   return (
-    <>
-      {renderMediaLayout()}
+    <View style={styles.container}>
+      {renderMediaGrid()}
       <MediaPreview
         medias={medias}
         mediaTypes={mediaTypes}
@@ -127,39 +154,48 @@ export const MediaRenderer = ({
         currentIndex={currentIndex}
         swipeImage={swipeImage}
       />
-    </>
+    </View>
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
-  mediaContainer: {
-    flexDirection: "row", // Keep media items in a row
-    flexWrap: "wrap", // Allow items to wrap to the next line
-    justifyContent: "space-between", // Ensure space between items
-    marginVertical: 10,
+  container: {
+    marginBottom: MARGIN,
+    marginTop: MARGIN,
   },
-  mediaItem: {
+  row: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  image: {
+    flex: 1,
+    borderRadius: 8,
+  },
+  postImage: {
+    width: "80%",
+    height: 200,
     borderRadius: 10,
-    marginBottom: 5,
-    width: "48%", // Adjust the width for items to fit side by side
-    height: 150, // Set height to make items visually balanced
+    marginTop: 8,
   },
   singleMedia: {
-    marginTop: 10,
     width: "100%",
-    height: 300,
+    height: SCREEN_HEIGHT * 0.4, // Reduced height
+    marginBottom: MARGIN,
   },
-  twoMedia: {
-    width: "48%", // Ensure two items fit side by side
-    height: 200,
+  halfMedia: {
+    width: "50%",
+    height: SCREEN_WIDTH * 0.6, // Reduced height
+    marginRight: MARGIN,
+    marginBottom: MARGIN,
+    padding: 2,
   },
-  threeMediaRight: {
-    width: "100%", // Full width for the right item
-    height: 150,
+  halfColumn: {
+    width: "50%",
   },
-  fourMedia: {
-    width: "49%", // Two items in a row with slight spacing
-    height: 155,
+  quarterMedia: {
+    width: "100%",
+    height: (SCREEN_WIDTH * 0.6 - MARGIN) / 2, // Adjusted for proportion
+    marginBottom: MARGIN,
+    padding: 2,
   },
 });

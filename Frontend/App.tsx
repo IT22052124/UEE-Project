@@ -2,11 +2,11 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import HomeScreen from "./CommunityConnect/Screen/HomeScreen";
-import CreatePostScreen from "./CommunityConnect/Screen/CreatePostScreen";
-import CreateCommunityScreen from "./CommunityConnect/Screen/CreateCommunityScreen";
-import CommunityScreen from "./CommunityConnect/Screen/CommunityScreen";
-import ProfileScreen from "./CommunityConnect/Screen/ProfileScreen";
+import HomeScreen from "./Pages/CommunityConnect/Screen/HomeScreen";
+import CreatePostScreen from "./Pages/CommunityConnect/Screen/CreatePostScreen";
+import CreateCommunityScreen from "./Pages/CommunityConnect/Screen/CreateCommunityScreen";
+import CommunityScreen from "./Pages/CommunityConnect/Screen/CommunityScreen";
+import ProfileScreen from "./Pages/CommunityConnect/Screen/ProfileScreen";
 import DonationHomepage from "./Donation/Screen/DHomepage";
 import CatergoryScreen from "./Donation/Screen/CamapignScreen";
 import AboutScreen from "./Donation/Screen/AboutCampaignScreen";
@@ -14,17 +14,24 @@ import CampaignDonation from "./Donation/Screen/CampaignDonationScreen";
 import DirectTransfer from "./Donation/Screen/OrganizationScreen";
 import BankDeposits from "./Donation/Screen/BankTransferScreen";
 import JobProviderRegistration from "./Jobs/Screen/RegisterJobProvider";
+import { DetailedPostScreen } from "./Pages/CommunityConnect/Screen/DetailedPostScreen";
+import SearchScreen from "./Pages/CommunityConnect/Screen/SearchScreen";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="JobProviderRegistration">
+      <Stack.Navigator initialRouteName="SearchScreen">
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
-          options={{ headerShown: true }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SearchScreen"
+          component={SearchScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="CreateCommunityScreen"
@@ -74,6 +81,11 @@ export default function App() {
         <Stack.Screen
           name="CommunityScreen"
           component={CommunityScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="DetailedPostScreen"
+          component={DetailedPostScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

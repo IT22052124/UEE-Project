@@ -5,6 +5,9 @@ import {
   deleteUser,
   getUserCommunities,
   toggleCommunityMembership,
+  getUserDetailsById,
+  getUserProfilePosts,
+  getAllUsers,
 } from "../Controllers/UserController.js"; // Import your user controller
 
 const router = express.Router();
@@ -12,8 +15,14 @@ const router = express.Router();
 // Create a new user
 router.post("/users", createUser);
 
+router.get("/users", getAllUsers);
+
 // Update an existing user by ID
 router.put("/users/:id", updateUser);
+
+router.get("/users/:id", getUserDetailsById);
+
+router.get("/users/:id/profile-posts", getUserProfilePosts);
 
 // Delete a user by ID
 router.delete("/users/:id", deleteUser);

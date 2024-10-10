@@ -96,7 +96,7 @@ export default function CategoryScreen() {
             <View style={styles.campaignInfo}>
               <Text style={styles.campaignTitle}>{campaign.title}</Text>
               <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${(campaign.amountRaised / 10000) * 100}%` }]} />
+              <View style={[styles.progressFill, { width: `${((campaign.amountRaised / campaign.amountRequired) * 100).toFixed(0)}%` }]} />
               </View>
               <Text style={styles.fundRaised}>Fund Raised: Rs.{campaign.amountRaised}/-</Text>
             </View>
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    marginBottom: 16,
+    marginBottom: 15,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Dimensions, Animated } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity,ActivityIndicator, StyleSheet, SafeAreaView, ScrollView, Dimensions, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import Toast from 'react-native-toast-message'; // Import Toast
+import LottieView from 'lottie-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -59,14 +61,23 @@ const handleDonate = async () => {
     });
 
     console.log('Donation amount updated successfully:', response.data);
-
+   
     // Navigate to DoneScreen after successful update
-    navigation.navigate("DoneScreen", { campaign, value });
+    setTimeout(() => {
+      Toast.show({
+        type: 'success', // You can change this to 'error', 'info', etc.
+        text1: 'Payment is successfull!',
+        text2: 'Thank you for the Donation 👋'
+      }) 
+      setLoading(false); // Stop loading before navigating
+      navigation.navigate("DoneScreen", { campaign, value,cards });
+    }, 4000); 
+   // 4-second delay
+
   } catch (error) {
     console.error('Error updating donation amount:', error.response ? error.response.data : error.message);
-    // Handle error as needed (e.g., show an alert or error message)
   } finally {
-    setLoading(false); // Always set loading to false at the end
+    // You can stop loading here if needed
   }
 };
 
@@ -91,111 +102,123 @@ const handleDonate = async () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        <StatusBar style="light" />
-        <LinearGradient colors={['#F9F9F9', '#F9F9F9']} style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#4a90e2" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add Card</Text>
-        </LinearGradient>
+      {loading ? ( // Show loader when loading
+        <View style={styles.loaderContainer}>
+         <LottieView
+      source={require('../../assets/loading.json')} // Lottie animation file path
+      autoPlay
+      loop
+      style={{ width: 200, height: 200 }}
 
-        <LinearGradient colors={['#4a69bd', '#4a69bd']} style={styles.cardPreview}>
-          <View style={styles.cardChip} />
-          <Text style={styles.cardTitle}>CARD/BANK</Text>
-          <Text style={styles.cardNumber}>{formattedCardNumber || '•••• •••• •••• ••••'}</Text>
-          <View style={styles.cardBottom}>
-            <Text style={styles.cardHolder}>{cards[activeCardIndex].accountName || 'CARD HOLDER'}</Text>
-            <Text style={styles.cardExpiry}>{cards[activeCardIndex].expiryDate || 'MM/YY'}</Text>
-          </View>
-        </LinearGradient>
-
-        <View style={styles.form}>
-          <Text style={styles.formTitle}>Card Details</Text>
-
-          <View style={styles.inputCard}>
-            <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Account Name"
-              placeholderTextColor="#999"
-              value={cards[activeCardIndex].accountName}
-              onChangeText={(text) => updateCard(activeCardIndex, 'accountName', text)}
-            />
-          </View>
-
-          <View style={styles.inputCard}>
-            <Ionicons name="card-outline" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Card Number"
-              placeholderTextColor="#999"
-              value={cards[activeCardIndex].cardNumber}
-              onChangeText={(text) => {
-                const filteredText = text.replace(/\D/g, '').slice(0, 12); // Allow only numbers and limit to 12 digits
-                updateCard(activeCardIndex, 'cardNumber', filteredText);
-              }}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.row}>
-            <View style={[styles.inputCard, styles.halfWidth]}>
-              <Ionicons name="calendar-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="MM/YY"
-                placeholderTextColor="#999"
-                value={cards[activeCardIndex].expiryDate}
-                onChangeText={(text) => {
-                  const filteredText = text.replace(/[^0-9\/]/g, '').slice(0, 5); // Allow only numbers and '/' and limit to 5 characters
-                  updateCard(activeCardIndex, 'expiryDate', filteredText);
-                }}
-              />
-            </View>
-
-            <View style={[styles.inputCard, styles.halfWidth]}>
-              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="CVC"
-                placeholderTextColor="#999"
-                value={cards[activeCardIndex].cvc}
-                onChangeText={(text) => {
-                  const filteredText = text.replace(/\D/g, '').slice(0, 3); // Allow only numbers and limit to 3 digits
-                  updateCard(activeCardIndex, 'cvc', filteredText);
-                }}
-                keyboardType="numeric"
-              />
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.checkboxContainer} onPress={() => setIsSaved(!isSaved)}>
-            <View style={[styles.checkbox, isSaved && styles.checkboxChecked]}>
-              {isSaved && (
-                <Svg width="12" height="9" viewBox="0 0 12 9">
-                  <Path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
-              )}
-            </View>
-            <Text style={styles.checkboxLabel}>Save Card for Later</Text>
-          </TouchableOpacity>
+    />
+          <Text style={styles.loadingText}>Payement on process...</Text>
         </View>
-      </ScrollView>
-
-      <TouchableOpacity
-        style={[styles.addButton, !isFormValid && styles.disabledButton]}
-        onPress={handleDonate}
-        disabled={!isFormValid || loading}
-      >
-        <Text style={styles.addButtonText}>Donate Now</Text>
-      </TouchableOpacity>
+      ) : (
+        <>
+          <ScrollView style={styles.container}>
+            <StatusBar style="light" />
+            <LinearGradient colors={['#F9F9F9', '#F9F9F9']} style={styles.header}>
+              <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color="#4a90e2" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Add Card</Text>
+            </LinearGradient>
+  
+            <LinearGradient colors={['#4a69bd', '#4a69bd']} style={styles.cardPreview}>
+              <View style={styles.cardChip} />
+              <Text style={styles.cardTitle}>CARD/BANK</Text>
+              <Text style={styles.cardNumber}>{formattedCardNumber || '•••• •••• •••• ••••'}</Text>
+              <View style={styles.cardBottom}>
+                <Text style={styles.cardHolder}>{cards[activeCardIndex].accountName || 'CARD HOLDER'}</Text>
+                <Text style={styles.cardExpiry}>{cards[activeCardIndex].expiryDate || 'MM/YY'}</Text>
+              </View>
+            </LinearGradient>
+  
+            <View style={styles.form}>
+              <Text style={styles.formTitle}>Card Details</Text>
+  
+              <View style={styles.inputCard}>
+                <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Account Name"
+                  placeholderTextColor="#999"
+                  value={cards[activeCardIndex].accountName}
+                  onChangeText={(text) => updateCard(activeCardIndex, 'accountName', text)}
+                />
+              </View>
+  
+              <View style={styles.inputCard}>
+                <Ionicons name="card-outline" size={20} color="#666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Card Number"
+                  placeholderTextColor="#999"
+                  value={cards[activeCardIndex].cardNumber}
+                  onChangeText={(text) => {
+                    const filteredText = text.replace(/\D/g, '').slice(0, 12); // Allow only numbers and limit to 12 digits
+                    updateCard(activeCardIndex, 'cardNumber', filteredText);
+                  }}
+                  keyboardType="numeric"
+                />
+              </View>
+  
+              <View style={styles.row}>
+                <View style={[styles.inputCard, styles.halfWidth]}>
+                  <Ionicons name="calendar-outline" size={20} color="#666" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="MM/YY"
+                    placeholderTextColor="#999"
+                    value={cards[activeCardIndex].expiryDate}
+                    onChangeText={(text) => {
+                      const filteredText = text.replace(/[^0-9\/]/g, '').slice(0, 5); // Allow only numbers and '/' and limit to 5 characters
+                      updateCard(activeCardIndex, 'expiryDate', filteredText);
+                    }}
+                  />
+                </View>
+  
+                <View style={[styles.inputCard, styles.halfWidth]}>
+                  <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="CVC"
+                    placeholderTextColor="#999"
+                    value={cards[activeCardIndex].cvc}
+                    onChangeText={(text) => {
+                      const filteredText = text.replace(/\D/g, '').slice(0, 3); // Allow only numbers and limit to 3 digits
+                      updateCard(activeCardIndex, 'cvc', filteredText);
+                    }}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+  
+              <TouchableOpacity style={styles.checkboxContainer} onPress={() => setIsSaved(!isSaved)}>
+                <View style={[styles.checkbox, isSaved && styles.checkboxChecked]}>
+                  {isSaved && (
+                    <Svg width="12" height="9" viewBox="0 0 12 9">
+                      <Path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  )}
+                </View>
+                <Text style={styles.checkboxLabel}>Save Card for Later</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+  
+          <TouchableOpacity
+            style={[styles.addButton, !isFormValid && styles.disabledButton]}
+            onPress={handleDonate}
+            disabled={!isFormValid || loading}
+          >
+            <Text style={styles.addButtonText}>Donate Now</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </SafeAreaView>
-  );
-}
-
-
-
+  )}
+  
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -213,8 +236,16 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  
+  loadingText: {
+    marginTop: 20, // Space between the animation and the text
+    fontSize: 18, // Font size of the text
+    color: '#4a90e2', // Color of the text
+  },
   header: {
     paddingVertical: 15,
     flexDirection: 'row',

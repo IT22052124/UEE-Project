@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, Alert,StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient'; // Add gradient support
-
+import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 const PRESET_AMOUNTS = ['200/-', '500/-', '1000/-', '1500/-'];
 
@@ -38,6 +38,16 @@ export default function DonateScreen({ route }) {
 
   const handleDonatePress = (paymentMethod) => {
     const donationAmount = selectedAmount || customAmount;
+    if (!donationAmount || parseInt(donationAmount) <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid Amount',
+        text2: 'Please enter a valid donation amount.',
+      });
+      return;
+    }
+
+
     if (parseInt(donationAmount) > maxDonation) {
       Alert.alert('Invalid Amount', `You can only donate up to Rs ${maxDonation}/-`);
       return;

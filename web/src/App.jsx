@@ -11,6 +11,8 @@ import ProgramTable from "./Program/Table";
 import EditProgram from "./Program/UpdateProgram";
 import Dashboard from "./Donation/Dashboard";
 import Login from "./Login/login";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
 
 function App() {
   const [count, setCount] = useState(0);
@@ -37,6 +39,17 @@ function App() {
           <Route path="/pupdate/:id" element={<EditProgram />} />
           {/* Add additional routes as needed */}
         </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </div>
     </div>
   );

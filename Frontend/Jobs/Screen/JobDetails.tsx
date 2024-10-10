@@ -39,7 +39,8 @@ export default function JobDetailsScreen({ navigation, route }) {
     try {
       setLoading(true);
       const userDetails = await AsyncStorage.getItem("user");
-      const user = JSON.parse(userDetails)?._id;
+      //const user = JSON.parse(userDetails)?._id || '66f3dda2bd01bea47d940c63';
+      const user ='66f3dda2bd01bea47d940c63';
       const response = await axios.get(`http://${IPAddress}:5000/Job/check`, {
         params: { item, user },
       });
@@ -59,7 +60,7 @@ export default function JobDetailsScreen({ navigation, route }) {
   // useEffect to run when component mounts or when applicantID/jobID changes
   useEffect(() => {
     checkApplicationStatus();
-  }, [item, user, applied]);
+  }, [item, applied]);
 
   const handleWebsitePress = () => {
     Linking.openURL(item.postedBy.website);

@@ -186,6 +186,7 @@ export default function ApplyJobScreen({ navigation, route }) {
               placeholder="Telephone"
               placeholderTextColor="#999"
               keyboardType="phone-pad"
+              maxLength={10}
             />
           )}
         />

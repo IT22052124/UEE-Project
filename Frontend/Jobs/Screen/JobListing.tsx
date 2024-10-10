@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,39 +9,12 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 import { IPAddress } from "../../globals";
 import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-
-// Mock data for job listings
-const jobListings = [
-  {
-    id: "1",
-    title: "Senior Software Engineer",
-    address: "San Francisco, CA",
-    recruiter: "TechCorp Inc.",
-    applications: 45,
-    logo: "https://example.com/techcorp-logo.png",
-  },
-  {
-    id: "2",
-    title: "UX Designer",
-    address: "New York, NY",
-    recruiter: "DesignHub",
-    applications: 32,
-    logo: "https://example.com/designhub-logo.png",
-  },
-  {
-    id: "3",
-    title: "Data Scientist",
-    address: "Seattle, WA",
-    recruiter: "DataTech Solutions",
-    applications: 28,
-    logo: "https://example.com/datatech-logo.png",
-  },
-  // Add more job listings as needed
-];
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function JobListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,9 +22,11 @@ export default function JobListScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchJobs();
-  }, [jobs]);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchJobs();
+    }, [])
+  );
 
   const fetchJobs = async () => {
     try {
@@ -112,12 +87,6 @@ export default function JobListScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
         <View style={styles.searchContainer}>
           <Ionicons
             name="search"
@@ -136,7 +105,10 @@ export default function JobListScreen({ navigation }) {
       <Text style={styles.headerTitle}>Recently Added</Text>
 
       {loading ? (
-        <Text>Loading jobs...</Text> // You can add a spinner or loader here
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#4a90e2" />
+          <Text style={styles.loaderText}>Loading jobs...</Text>
+        </View>
       ) : (
         <FlatList
           data={filteredJobs}
@@ -173,7 +145,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
-
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -186,7 +157,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    width: "90%",
+    width: "100%",
   },
   searchIcon: {
     marginRight: 8,
@@ -244,5 +215,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4a90e2",
     paddingLeft: 5,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#4a90e2",
   },
 });

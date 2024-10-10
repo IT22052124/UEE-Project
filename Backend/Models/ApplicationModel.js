@@ -53,6 +53,13 @@ const applicationSchema = mongoose.Schema(
       trim: true,
       default: "", // Default to empty string if no profile pic is provided
     },
+    status: {
+      type: String,
+      required: true, // "true" as status should always be provided
+      enum: ["Pending", "Reviewed"], // Restrict status to "Pending" or "Reviewed"
+      default: "Pending", // Default value to "Pending"
+      trim: true,
+    },
   },
   {
     timestamps: true,

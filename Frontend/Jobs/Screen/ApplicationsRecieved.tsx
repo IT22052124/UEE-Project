@@ -16,47 +16,36 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { IPAddress } from "../../globals";
 import { useFocusEffect } from "@react-navigation/native";
+
+const getFormattedDate = (isoString) => {
+  const date = new Date(isoString); // Parse the ISO string
+  const year = date.getFullYear(); // Get the year
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Get the month (add 1 since it's 0-based)
+  const day = String(date.getDate()).padStart(2, "0"); // Get the day
+  return `${year}-${month}-${day}`; // Return formatted as YYYY-MM-DD
+};
+
 // Define the structure of a job application
 interface JobApplication {
   id: string;
   jobTitle: string;
-  applicantName: string;
-  resumePdfUrl: string;
+  firstname: string;
+  lastName: string;
+  createdAt: String;
+  resume: string;
   date: string;
   status: "Pending" | "Reviewed";
 }
-
-// Sample data (replace this with your actual data source)
-const jobApplications: JobApplication[] = [
-  {
-    id: "1",
-    jobTitle: "Software Engineer",
-    applicantName: "John Doe",
-    resumePdfUrl:
-      "https://firebasestorage.googleapis.com/v0/b/frontend-web-e454c.appspot.com/o/jobDocuments%2F66f3dda2bd01bea47d940c63_1728498780064_document.pdf?alt=media&token=7c8c18c9-6112-4006-af15-6547f00e2ab0",
-    date: "Mon. July 3rd",
-    status: "Reviewed",
-  },
-  {
-    id: "2",
-    jobTitle: "Product Manager",
-    applicantName: "Jane Smith",
-    resumePdfUrl: "https://example.com/janesmith_resume.pdf",
-    date: "Tue. July 4th",
-    status: "Pending",
-  },
-  // Add more job applications as needed
-];
 
 const ApplicationCard: React.FC<{ application: JobApplication }> = ({
   application,
 }) => {
   const handleDownloadPdf = async () => {
-    const fileUri = `${FileSystem.documentDirectory}${application.id}_resume.pdf`;
+    const fileUri = `${FileSystem.documentDirectory}${application._id}_resume.pdf`;
 
     try {
       const response = await FileSystem.downloadAsync(
-        application.resumePdfUrl,
+        application.resume,
         fileUri
       );
 
@@ -67,6 +56,8 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({
           dialogTitle: "Open Resume PDF",
           UTI: ".pdf",
         });
+
+        await updateApplicationStatus(application._id, "Reviewed");
       } else {
         console.error("Download failed with status:", response.status);
       }
@@ -75,13 +66,42 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({
     }
   };
 
+  const updateApplicationStatus = async (applicationId, newStatus) => {
+
+    console.log("here")
+    try {
+      const response = await axios.patch(
+        `http://${IPAddress}:5000/Job/updateStatus/${applicationId}`,
+        { status: newStatus } // Send the new status in the request body
+      );
+
+      if (response.status === 200) {
+        console.log(
+          `Status updated to ${newStatus} for application ID: ${applicationId}`
+        );
+
+      
+      } else {
+        console.error(
+          `Failed to update status. Status code: ${response.status}`
+        );
+      }
+    } catch (error) {
+      console.error("Error updating application status:", error);
+    }
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.cardContent}>
         <View style={styles.leftContent}>
           <Text style={styles.jobTitle}>{application.jobTitle}</Text>
-          <Text style={styles.applicantName}>{application.applicantName}</Text>
-          <Text style={styles.date}>{application.date}</Text>
+          <Text style={styles.applicantName}>
+            {application.firstname} {application.lastName}
+          </Text>
+          <Text style={styles.date}>
+            {getFormattedDate(application.createdAt)}
+          </Text>
         </View>
         <View style={styles.rightContent}>
           <TouchableOpacity
@@ -119,12 +139,12 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({
 
 export default function JobApplicationsScreen() {
   const [loading, setLoading] = useState(false);
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
       fetchApplicationsByCompany();
-    }, [])
+    }, [applications])
   );
 
   const fetchApplicationsByCompany = async () => {
@@ -133,14 +153,12 @@ export default function JobApplicationsScreen() {
       const userDetails = await AsyncStorage.getItem("user");
       const user = JSON.parse(userDetails)?._id; // Get the user's company ID
 
-      console.log(user)
       // Fetch job applications for this company
       const response = await axios.get(
         `http://${IPAddress}:5000/Job/getApplication/${user}` // Assuming this endpoint fetches applications by company ID
       );
 
-      setApplications(response.data); // Set the applications as job details
-      console.log(applications);
+      setApplications(response.data);
     } catch (error) {
       console.error("Error fetching applications by company:", error);
       Alert.alert(
@@ -160,8 +178,8 @@ export default function JobApplicationsScreen() {
       </View>
       <View style={styles.separator} />
       <FlatList
-        data={jobApplications}
-        keyExtractor={(item) => item.id}
+        data={applications} // Use the actual applications data here
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => <ApplicationCard application={item} />}
         contentContainerStyle={styles.listContainer}
       />

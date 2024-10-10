@@ -213,3 +213,48 @@ export const getJobProviderById = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+export const getJobById = async (req, res) => {
+  console.log(req.params.id)
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+    res.json(job);
+  } catch (error) {
+    console.error("Error fetching job:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateJobById = async (req, res) => {
+  const { jobTitle, jobDescription, location, salary, skills } = req.body;
+
+  // Create an object to hold the fields to be updated
+  const updateData = {};
+
+  // Map frontend names to schema fields
+  if (jobTitle) updateData.title = jobTitle; // Map jobTitle to title
+  if (jobDescription) updateData.description = jobDescription; // Map jobDescription to description
+  if (location) updateData.location = location; // Keep location as is
+  if (salary !== undefined) updateData.salary = salary; // Allow salary to be updated to zero if needed
+  if (Array.isArray(skills) && skills.length > 0) updateData.skills = skills; // Ensure skills is an array with at least one skill
+
+  try {
+    const updatedJob = await Job.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true } // Return the updated job and run validators
+    );
+
+    if (!updatedJob) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    res.json({ message: "Job updated successfully", job: updatedJob });
+  } catch (error) {
+    console.error("Error updating job:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

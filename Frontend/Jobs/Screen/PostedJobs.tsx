@@ -65,6 +65,10 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
     ]);
   };
 
+  const handleUpdateJob = (jobId) => {
+    navigation.navigate("UpdateJobScreen", { jobId });
+  };
+
   const renderJobItem = ({ item }) => (
     <View style={styles.jobItem}>
       <View style={styles.jobContent}>
@@ -85,17 +89,24 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
           <Text style={styles.jobSkills}>{item.skills.join(", ")}</Text>
         </View>
       </View>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => confirmDelete(item._id)}
-      >
-        <MaterialIcons name="delete-outline" size={24} color="#e53e3e" />
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.updateButton}
+          onPress={() => handleUpdateJob(item._id)}
+        >
+          <MaterialIcons name="edit" size={24} color="#4299e1" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => confirmDelete(item._id)}
+        >
+          <MaterialIcons name="delete-outline" size={24} color="#e53e3e" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
   const handleAddNewJob = () => {
-    // Navigate to the new job creation screen
     navigation.navigate("JobPostingScreen");
   };
 
@@ -215,10 +226,16 @@ const styles = StyleSheet.create({
     color: "#4a5568",
     marginLeft: 4,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 12,
+  },
+  updateButton: {
+    padding: 8,
+    marginRight: 8,
+  },
   deleteButton: {
-    position: "absolute",
-    right: 12,
-    top: 12,
     padding: 8,
   },
   addButton: {

@@ -94,7 +94,12 @@ function BottomTabNavigator() {
           } else if (route.name === "AppliedJobsScreen") {
             // Icon for Applied Jobs Screen
             iconName = focused ? "document" : "document-outline";
-          }
+          } else if (route.name === "DonationHomepage") {
+            // Icon for Applied Jobs Screen
+            iconName = focused ? "document" : "heart-half-outline";
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -107,11 +112,17 @@ function BottomTabNavigator() {
         component={JobListScreen}
         options={{ headerShown: false, tabBarLabel: "Jobs" }} // Set proper label
       />
+       <Tab.Screen
+        name="DonationHomepage"
+        component={DonationHomepage}
+        options={{ headerShown: false, tabBarLabel: "Donate Now" }} // Set proper label
+      />
       <Tab.Screen
         name="AppliedJobsScreen"
         component={AppliedJobsScreen}
         options={{ headerShown: false, tabBarLabel: "Applied Jobs" }} // Set proper label
       />
+      
     </Tab.Navigator>
   );
 }

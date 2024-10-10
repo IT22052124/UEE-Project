@@ -199,7 +199,7 @@ const DonationForm = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-lg border pl-3 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            className="mt-1 pl-3 block w-full rounded-lg border pl-3 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             rows="3"
             placeholder="Enter the Description here..."
 
@@ -555,7 +555,7 @@ const DonationForm = () => {
             name="emergency"
             value={formData.emergency}
             onChange={handleChange}
-            className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            className="mt-1 pl-3 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             required
           >
             <option value="">Select</option>

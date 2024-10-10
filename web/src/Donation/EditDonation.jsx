@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
 
 const EditDonation = () => {
   const { id } = useParams();
@@ -28,6 +29,10 @@ const EditDonation = () => {
 
       await axios.put(`http://localhost:5000/Donation/update/${id}`, updateData);
       navigate("/table");
+      toast.success("This is a success message!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+     
     } catch (err) {
       setError("Failed to update donation");
     }
@@ -66,7 +71,7 @@ const EditDonation = () => {
   }
 
   return (
-    <div className="max-w-6xl ml-80 mx-auto px-4 py-6 sm:px-6 lg:px-8 bg-white shadow-lg rounded-lg">
+    <div className="max-w-6xl mt-0 ml-80 mx-auto px-4 py-6 sm:px-6 lg:px-8 bg-white shadow-lg rounded-lg">
       {error && <p className="text-red-500 text-center">{error}</p>}
       <form
         onSubmit={handleUpdate}
@@ -90,7 +95,7 @@ const EditDonation = () => {
             name="title"
             value={donation.title}
             onChange={handleChange}
-            className="mt-1 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            className="mt-1 pl-3 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             placeholder="Enter the title here..."
             required
           />
@@ -109,7 +114,7 @@ const EditDonation = () => {
             name="description"
             value={donation.description}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            className="mt-1 block pl-3  w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             rows="4"
             required
           />
@@ -132,7 +137,7 @@ const EditDonation = () => {
                 name="amountRequired"
                 value={donation.amountRequired}
                 onChange={handleChange}
-                className="mt-1 block w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 pl-3 block w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
                 required
               />
             </div>
@@ -154,7 +159,7 @@ const EditDonation = () => {
                 name="location"
                 value={donation.location}
                 onChange={handleChange}
-                className="mt-1 block w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 block pl-3 w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
                 required
               />
             </div>
@@ -176,7 +181,7 @@ const EditDonation = () => {
               name="category"
               value={donation.category}
               onChange={handleChange}
-              className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+              className="mt-1 pl-3 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               required
             >
               <option value="">Select a category</option>
@@ -216,7 +221,7 @@ const EditDonation = () => {
                   name="bankDetails.accountNumber"
                   value={donation.bankDetails?.accountNumber || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                  className="mt-1 pl-3 block w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
                 />
               </div>
             </div>
@@ -235,7 +240,7 @@ const EditDonation = () => {
                   name="bankDetails.accountHolderName"
                   value={donation.bankDetails?.accountHolderName || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                  className="mt-1 block pl-3 w-full pl-10 h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
                 />
               </div>
             </div>
@@ -250,7 +255,7 @@ const EditDonation = () => {
                 name="bankDetails.bankName"
                 value={donation.bankDetails?.bankName || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 block pl-3 w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               >
                 <option value="">Select</option>
                 <option value="Bank Of ceylon">Bank Of ceylon</option>
@@ -272,7 +277,7 @@ const EditDonation = () => {
                 name="bankDetails.bankBranch"
                 value={donation.bankDetails?.bankBranch || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 block pl-3 w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               />
             </div>
           </div>
@@ -301,7 +306,7 @@ const EditDonation = () => {
                 name="directCash.orgName"
                 value={donation.directCash?.orgName}
                 onChange={handleChange}
-                className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 block pl-3 w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               />
             </div>
 
@@ -318,7 +323,7 @@ const EditDonation = () => {
                 name="directCash.phone"
                 value={donation.directCash?.phone}
                 onChange={handleChange}
-                className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 block pl-3  w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               />
             </div>
 
@@ -335,7 +340,7 @@ const EditDonation = () => {
                 name="directCash.address"
                 value={donation.directCash?.address}
                 onChange={handleChange}
-                className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 block pl-3 w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               />
             </div>
 
@@ -352,7 +357,7 @@ const EditDonation = () => {
                 name="directCash.additionalField"
                 value={donation.directCash?.additionalField}
                 onChange={handleChange}
-                className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+                className="mt-1 pl-3 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
               />
             </div>
           </div>
@@ -371,7 +376,7 @@ const EditDonation = () => {
             name="emergency"
             value={donation.emergency}
             onChange={handleChange}
-            className="mt-1 block w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            className="mt-1 block pl-3 w-full h-12 rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             required
           >
             <option value="">Select</option>

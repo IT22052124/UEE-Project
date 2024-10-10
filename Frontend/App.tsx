@@ -37,6 +37,8 @@ import JobProviderSignIn from "./Jobs/Screen/JobProviderSignIn";
 import Toast from "react-native-toast-message";
 import JobApplicationsScreen from "./Jobs/Screen/ApplicationsRecieved";
 import UserScreen from "./Pages/CommunityConnect/Screen/UserScreen";
+import UpdateJobScreen from "./Jobs/Screen/UpdateJob";
+import AppliedJobsScreen from "./Jobs/Screen/AppliedJobs";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -79,10 +81,50 @@ function JPBottomTabNavigator({ route }) {
   );
 }
 
+function BottomTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "JobListScreen") {
+            // Icon for Job List Screen
+            iconName = focused ? "briefcase" : "briefcase-outline";
+          } else if (route.name === "AppliedJobsScreen") {
+            // Icon for Applied Jobs Screen
+            iconName = focused ? "document" : "document-outline";
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: "tomato", // Customize the active icon color
+        tabBarInactiveTintColor: "gray", // Customize the inactive icon color
+      })}
+    >
+      <Tab.Screen
+        name="JobListScreen"
+        component={JobListScreen}
+        options={{ headerShown: false, tabBarLabel: "Jobs" }} // Set proper label
+      />
+      <Tab.Screen
+        name="AppliedJobsScreen"
+        component={AppliedJobsScreen}
+        options={{ headerShown: false, tabBarLabel: "Applied Jobs" }} // Set proper label
+      />
+    </Tab.Navigator>
+  );
+}
+
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="SearchScreen">
+      <Stack.Navigator initialRouteName="MainTabs">
+        <Stack.Screen
+          name="SignUpScreen"
+          component={SignUpScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
@@ -199,15 +241,21 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="MainTabs"
+          component={BottomTabNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="JobPostingScreen"
           component={JobPostingScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="JobListScreen"
-          component={JobListScreen}
+          name="UpdateJobScreen"
+          component={UpdateJobScreen}
           options={{ headerShown: false }}
         />
+
         <Stack.Screen
           name="JobDetailsScreen"
           component={JobDetailsScreen}

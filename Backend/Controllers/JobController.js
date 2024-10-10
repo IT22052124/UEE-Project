@@ -94,21 +94,18 @@ export const checkJob = async (req, res) => {
 export const getJobApplicationsByCompany = async (req, res) => {
   try {
     const { id } = req.params; // Assuming company ID is passed as a URL parameter
-    console.log(id);
-    
+
     // Step 1: Find all jobs posted by the company
     const jobs = await Job.find({ postedBy: id });
-    const jobIds = jobs.map(job => job._id);
+    const jobIds = jobs.map((job) => job._id);
 
     // Step 2: Find applications where JobID is one of the jobIds
     const applications = await Application.find({ JobID: { $in: jobIds } })
       .populate({
-        path: 'JobID', // Populate JobID details
-        populate: { path: 'postedBy' } // Nested populate for company details
+        path: "JobID", // Populate JobID details
+        populate: { path: "postedBy" }, // Nested populate for company details
       })
       .sort({ _id: -1 }); // Sort by latest application first
-
-    console.log(applications);
 
     // Step 3: Respond with the applications
     res.status(200).json(applications);
@@ -118,4 +115,45 @@ export const getJobApplicationsByCompany = async (req, res) => {
   }
 };
 
+export const getJobApplicationsByUser = async (req, res) => {
+  try {
+    const { id } = req.params; // Assuming applicant ID is passed as a URL parameter
+    // Step 1: Find applications for the specified applicant
+    const applications = await Application.find({ applicantID: id }) // Filter by applicant ID
+      .populate({
+        path: "JobID", // Populate JobID details
+        populate: { path: "postedBy" }, // Nested populate for company details
+      })
+      .sort({ _id: -1 }); // Sort by latest application first
 
+    // Step 2: Respond with the applications
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching job applications:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    console.log(status);
+
+    const application = await Application.findByIdAndUpdate(
+      id,
+      { status: status },
+      { new: true }
+    );
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    res.status(200).json(application);
+  } catch (error) {
+    console.error("Error updating application status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

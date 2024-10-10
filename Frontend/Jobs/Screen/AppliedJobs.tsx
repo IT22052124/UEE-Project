@@ -52,7 +52,7 @@ export default function AppliedJobsScreen({ navigation }) {
       <Image
         source={
           item.companyLogo
-            ? { uri: item.postedBy.companyLogo }
+            ? { uri: item.companyLogo }
             : require('./../notAvailabe.jpg')
         }
         style={styles.logo}

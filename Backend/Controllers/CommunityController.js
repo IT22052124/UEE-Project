@@ -64,7 +64,7 @@ export const getAllCommunityByName = async (req, res) => {
         populate: {
           path: "author",
         },
-      }) 
+      })
       .exec();
 
     res.status(200).json({
@@ -134,6 +134,97 @@ export const updateAdmin = async (req, res) => {
     res.status(200).json({
       message: "community admin updated successfully",
       community,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getAllCommunities = async (req, res) => {
+  try {
+    // Fetch all communities from the database and populate necessary fields
+    const communities = await Community.find();
+
+    res.status(200).json({
+      message: "Communities retrieved successfully",
+      communities,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error retrieving communities",
+      error: error.message,
+    });
+  }
+};
+
+// Update community details
+export const updateCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params; // Get community ID from URL parameters
+    const {
+      communityName,
+      communityDescription,
+      communityPic,
+      coverPic,
+      adminId,
+    } = req.body;
+
+    // Find the community by ID
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // Check if the community name already exists (if changing the name)
+    if (communityName && communityName !== community.communityName) {
+      const existingCommunity = await Community.findOne({ communityName });
+      if (existingCommunity) {
+        return res
+          .status(400)
+          .json({ message: "Community name already exists." });
+      }
+      community.communityName = communityName; // Update the name
+    }
+
+    // Update other fields
+    community.communityDescription =
+      communityDescription || community.communityDescription;
+    community.communityPic = communityPic || community.communityPic;
+    community.coverPic = coverPic || community.coverPic;
+    community.admin = adminId || community.admin; // Update the admin field if provided
+
+    // Save the updated community
+    const updatedCommunity = await community.save();
+
+    res.status(200).json({
+      message: "Community updated successfully",
+      community: updatedCommunity,
+    });
+  } catch (error) {
+    // Improved error handling
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ message: error.message, errors: error.errors });
+    }
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete a community
+export const deleteCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params; // Get community ID from URL parameters
+
+    // Find the community by ID and remove it
+    const community = await Community.findByIdAndDelete(communityId);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    res.status(200).json({
+      message: "Community deleted successfully",
+      communityId: communityId,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

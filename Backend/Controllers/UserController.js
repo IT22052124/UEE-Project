@@ -195,3 +195,60 @@ export const toggleCommunityMembership = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Get user details by ID
+export const getUserDetailsById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Find the user by ID
+    const user = await User.findById(userId).select(
+      "_id username fullName email telephone profilePic communities"
+    ); // Exclude password and select relevant fields
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Return user details (excluding sensitive information like password)
+    res.status(200).json({
+      message: "User details retrieved successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const getUserProfilePosts = async (req, res) => {
+  try {
+    const userId = req.params.id; // Get the user ID from the URL params
+
+    // Find the user by ID and populate their profilePosts
+    const user = await User.findById(userId).populate("profilePosts");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Return the populated profilePosts
+    res.status(200).json({
+      message: "Profile posts retrieved successfully",
+      posts: user.profilePosts,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    // Fetch all users from the database
+    const users = await User.find().select("-password"); // Exclude password from the results
+
+    res.status(200).json({
+      message: "Users retrieved successfully",
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

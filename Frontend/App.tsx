@@ -16,6 +16,8 @@ import CampaignDonation from "./Donation/Screen/CampaignDonationScreen";
 import DirectTransfer from "./Donation/Screen/OrganizationScreen";
 import BankDeposits from "./Donation/Screen/BankTransferScreen";
 import JobProviderRegistration from "./Jobs/Screen/RegisterJobProvider";
+import { DetailedPostScreen } from "./Pages/CommunityConnect/Screen/DetailedPostScreen";
+import SearchScreen from "./Pages/CommunityConnect/Screen/SearchScreen";
 import SignUpScreen from "./OtherScreens/SignUpScreen";
 import { S } from "@expo/html-elements";
 import JobProviderRegistration2 from "./Jobs/Screen/RegisterJobProvider2";
@@ -79,16 +81,16 @@ function JPBottomTabNavigator({ route }) {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="JobProviderSignIn">
-        <Stack.Screen
-          name="SignUpScreen"
-          component={SignUpScreen}
-          options={{ headerShown: false }}
-        />
+      <Stack.Navigator initialRouteName="SearchScreen">
         <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
-          options={{ headerShown: true }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SearchScreen"
+          component={SearchScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="CreateCommunityScreen"
@@ -150,6 +152,11 @@ export default function App() {
           component={CommunityScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="DetailedPostScreen"
+          component={DetailedPostScreen}
+          options={{ headerShown: false }}
+          />
         <Stack.Screen
           name="Program"
           component={Program}

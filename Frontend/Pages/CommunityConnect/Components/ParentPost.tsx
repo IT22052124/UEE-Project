@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MediaRenderer } from "./MediaRenderer"; // Import the renderMedia function
 import { isImageOrVideo } from "../../../Storage/firebase";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 
 export const ParentPost = ({ post }) => {
   const [mediaTypes, setMediaTypes] = useState<(string | null)[]>([]);
@@ -14,7 +14,6 @@ export const ParentPost = ({ post }) => {
           post.medias.map((media) => isImageOrVideo(media))
         );
         setMediaTypes(types);
-        console.log("Media types:", types);
       } catch (error) {
         console.error("Error fetching media types:", error);
       } finally {

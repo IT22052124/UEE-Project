@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Platform,
   StatusBar,
   Alert,
+  ActivityIndicator, // Import ActivityIndicator for loader
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,14 +20,36 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../Storage/firebase"; // Firebase configuration
 import uuid from "react-native-uuid"; // Optional: For unique IDs
 import { IPAddress } from "../../../globals";
+import { useRoute } from "@react-navigation/native";
 
-export default function CreateCommunityScreen() {
+export default function CommunityFormScreen({ navigation }) {
+  const route = useRoute();
+  const isEditing = route.params?.isEditing || false;
+  const existingCommunity = route.params?.existingCommunity || null;
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
   const [communityPic, setCommunityPic] = useState(null);
   const [coverPic, setCoverPic] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
-  const pickImage = async (setImage: Function) => {
+  useEffect(() => {
+    console.log("Existing community:", existingCommunity);
+    if (isEditing && existingCommunity) {
+      setCommunityName(existingCommunity.communityName.replace(/^c\//, ""));
+      setDescription(existingCommunity.communityDescription);
+      setCommunityPic(existingCommunity.communityPic);
+      setCoverPic(existingCommunity.coverPic);
+    }
+  }, [isEditing, existingCommunity]);
+
+  // Validate the community name and update state
+  const handleCommunityNameChange = (text) => {
+    const filteredText = text.replace(/[^a-zA-Z0-9_]/g, "");
+    setCommunityName(filteredText);
+  };
+
+  const pickImage = async (setImage) => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
@@ -46,24 +69,14 @@ export default function CreateCommunityScreen() {
     }
   };
 
-  const uploadImageToFirebase = async (imageUri: any, folderName: any) => {
+  const uploadImageToFirebase = async (imageUri, folderName) => {
     try {
-      // Fetch the file from the local file URI
       const response = await fetch(imageUri);
-
-      // Convert it to a blob
       const blob = await response.blob();
-
-      // Create a reference to the Firebase Storage
-      const fileName = `${folderName}/${uuid.v4()}`; // Use react-native-uuid to generate a unique filename
+      const fileName = `${folderName}/${uuid.v4()}`;
       const storageRef = ref(storage, fileName);
-
-      // Upload the file to Firebase Storage
       await uploadBytes(storageRef, blob);
-
-      // Get the download URL for the uploaded image
       const downloadURL = await getDownloadURL(storageRef);
-
       return downloadURL;
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -71,13 +84,26 @@ export default function CreateCommunityScreen() {
     }
   };
 
-  const handleCreateCommunity = async () => {
+  const handleCreateOrUpdateCommunity = async () => {
     if (!communityName || !description) {
       Alert.alert("Error", "Please fill out all fields.");
       return;
     }
 
+    const nameRegex = /^c\/[a-zA-Z0-9_]+$/; // Regex to enforce format
+    const formattedCommunityName = `c/${communityName}`;
+
+    if (!nameRegex.test(formattedCommunityName)) {
+      Alert.alert(
+        "Error",
+        "Community name must start with 'c/' and contain only letters, numbers, and underscores."
+      );
+      return;
+    }
+
     try {
+      setIsLoading(true); // Start loading
+
       let uploadedCommunityPic = null;
       let uploadedCoverPic = null;
 
@@ -92,38 +118,45 @@ export default function CreateCommunityScreen() {
         uploadedCoverPic = await uploadImageToFirebase(coverPic, "cover_pics");
       }
 
-      console.log({
-        communityName,
-        communityDescription: description, // Change to actual admin ID
+      const requestData = {
+        communityName: formattedCommunityName,
+        communityDescription: description,
+        adminId: "66f3dda2bd01bea47d940c63", // Change to actual admin ID
         communityPic: uploadedCommunityPic,
         coverPic: uploadedCoverPic,
+      };
+
+      const apiUrl = `http://${IPAddress}:5000/Community/community${
+        isEditing ? `/${existingCommunity._id}` : ""
+      }`;
+
+      const method = isEditing ? axios.put : axios.post;
+
+      await method(apiUrl, requestData);
+
+      Alert.alert(
+        "Success",
+        `Community ${isEditing ? "updated" : "created"} successfully!`
+      );
+
+      // Navigate to CommunityScreen with the community name
+      navigation.navigate("CommunityScreen", {
+        communityName: formattedCommunityName,
       });
-      axios
-        .post(`http://${IPAddress}:5000/Community/community`, {
-          communityName,
-          communityDescription: description,
-          adminId: "66f3dda2bd01bea47d940c63", // Change to actual admin ID
-          communityPic: uploadedCommunityPic,
-          coverPic: uploadedCoverPic,
-        })
-        .then((response) => {
-          console.log(response);
-          Alert.alert("Success", "Community created successfully!");
-        })
-        .catch((error) => {
-          console.log(error);
-          Alert.alert("Error", "Failed to create community.");
-        });
     } catch (error) {
       Alert.alert("Error", "Something went wrong.");
       console.error(error);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        {/* Cover Image Picker */}
+      <ScrollView
+        style={[styles.container, isDarkMode && styles.darkContainer]}
+      >
+        {/* Cover Image and Back Button Container */}
         <View style={styles.coverContainer}>
           {coverPic ? (
             <Image source={{ uri: coverPic }} style={styles.coverImage} />
@@ -132,6 +165,17 @@ export default function CreateCommunityScreen() {
               <Ionicons name="image-outline" size={48} color="white" />
             </View>
           )}
+          {/* Back Button */}
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={isDarkMode ? "#fff" : "#000"}
+            />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.coverUploadButton}
             onPress={() => pickImage(setCoverPic)}
@@ -152,46 +196,58 @@ export default function CreateCommunityScreen() {
               <View
                 style={[styles.communityPic, styles.communityPicPlaceholder]}
               >
-                <Ionicons name="camera" size={36} color="#666" />
+                <Ionicons name="camera" size={36} color="white" />
               </View>
             )}
             <TouchableOpacity
               style={styles.communityPicUploadButton}
               onPress={() => pickImage(setCommunityPic)}
             >
-              <Ionicons name="camera" size={20} color="#666" />
+              <Ionicons name="camera" size={20} color="white" />
             </TouchableOpacity>
           </View>
 
           {/* Form Inputs */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Community Name</Text>
+            <Text style={[styles.label, isDarkMode && styles.darkLabel]}>
+              Community Name
+            </Text>
+            <Text style={styles.communityNameDisplay}>c/{communityName}</Text>
             <TextInput
-              style={styles.input}
-              value={communityName}
-              onChangeText={setCommunityName}
-              placeholder="Enter community name"
-              placeholderTextColor="#999"
+              style={[styles.input, isDarkMode && styles.darkInput]}
+              value={communityName} // Show only the community name in the input
+              onChangeText={handleCommunityNameChange}
+              placeholder="Enter community name (letters, numbers, underscores)"
+              placeholderTextColor={isDarkMode ? "#bbb" : "#999"}
             />
           </View>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Description</Text>
+            <Text style={[styles.label, isDarkMode && styles.darkLabel]}>
+              Description
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, isDarkMode && styles.darkInput]}
               value={description}
               onChangeText={setDescription}
               placeholder="Enter description"
-              placeholderTextColor="#999"
+              placeholderTextColor={isDarkMode ? "#bbb" : "#999"}
               multiline
             />
           </View>
 
-          {/* Create Button */}
+          {/* Create/Update Button */}
           <TouchableOpacity
             style={styles.createButton}
-            onPress={handleCreateCommunity}
+            onPress={handleCreateOrUpdateCommunity}
+            disabled={isLoading} // Disable button while loading
           >
-            <Text style={styles.createButtonText}>Create Community</Text>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="white" /> // Show loader
+            ) : (
+              <Text style={styles.createButtonText}>
+                {isEditing ? "Update Community" : "Create Community"}
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -203,17 +259,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#fff",
+    backgroundColor: "#1A1A1B",
   },
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#1e1e1e", // Keeping only dark mode
+  },
+  darkContainer: {
+    backgroundColor: "#1A1A1B",
   },
   coverContainer: {
-    height: 150,
-    backgroundColor: "#FF5700",
-    justifyContent: "center",
-    alignItems: "center",
+    position: "relative",
+    height: 200,
   },
   coverImage: {
     width: "100%",
@@ -221,40 +278,44 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   coverPlaceholder: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#666",
     width: "100%",
+    height: "100%",
+  },
+  backButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 20,
+    padding: 5,
   },
   coverUploadButton: {
     position: "absolute",
-    bottom: 100,
+    bottom: 10,
     right: 10,
-    backgroundColor: "white",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 20,
-    padding: 8,
-    zIndex: 10, // Ensure it is on top
+    padding: 5,
   },
   content: {
-    marginTop: -50,
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    padding: 16,
   },
   communityPicContainer: {
-    alignItems: "center",
-    marginBottom: 20,
+    position: "relative",
+    marginBottom: 16,
   },
   communityPic: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 4,
-    borderColor: "white",
+    alignSelf: "center",
+    marginBottom: 8,
   },
   communityPicPlaceholder: {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#666",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -262,37 +323,45 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 6,
-    borderWidth: 2,
-    borderColor: "#e0e0e0",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 20,
+    padding: 5,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   label: {
+    color: "white",
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
+    marginBottom: 4,
+  },
+  darkLabel: {
+    color: "#bbb",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#666",
     borderRadius: 8,
-    padding: 10,
+    padding: 8,
+    color: "white",
+  },
+  darkInput: {
+    borderColor: "#bbb",
+  },
+  communityNameDisplay: {
+    color: "white",
     fontSize: 16,
+    marginBottom: 4,
   },
   createButton: {
-    backgroundColor: "#FF4500",
-    borderRadius: 25,
-    padding: 15,
+    backgroundColor: "#007bff",
+    borderRadius: 8,
+    padding: 12,
     alignItems: "center",
+    marginTop: 16,
   },
   createButtonText: {
     color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
   },
 });

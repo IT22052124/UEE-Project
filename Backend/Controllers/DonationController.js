@@ -177,13 +177,84 @@ export const getDonationById = async (req, res) => {
 // Retrieve all emergency donations
 export const getEmergencyDonations = async (req, res) => {
   try {
-    // Filter donations by emergency field (set as 'yes')
-    const emergencyDonations = await Donation.find({ emergency: "yes" });
+    const emergencyDonations = await Donation.aggregate([
+      {
+        $match: {
+          emergency: "yes",
+          $expr: { $lt: ["$amountRaised", "$amountRequired"] },
+        },
+      },
+    ]);
+
     res.status(200).json({
       message: "Emergency donations retrieved successfully",
       donations: emergencyDonations,
     });
   } catch (error) {
+    console.error(error); // Log the error to the console for debugging
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+// Update the amountRaised for an existing donation by ID
+export const updateDonationAmountRaised = async (req, res) => {
+  const { id } = req.params; // Extract ID from request parameters
+  const { amountRaised } = req.body; // Extract new amountRaised from request body
+
+  try {
+    // Find the donation by ID
+    const donation = await Donation.findOne({ Id: id });
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+
+    // Update the amountRaised
+    const updatedAmountRaised = donation.amountRaised + (amountRaised || 0);
+
+    // Update the donation in the database
+    const updatedDonation = await Donation.findOneAndUpdate(
+      { Id: id },
+      { amountRaised: updatedAmountRaised },
+      { new: true, runValidators: true }
+    );
+
+    // Return the updated donation
+    res.status(200).json({
+      message: "Donation amount raised updated successfully",
+      donation: {
+        _id: updatedDonation._id,
+        Id: updatedDonation.Id,
+        title: updatedDonation.title,
+        description: updatedDonation.description,
+        amountRaised: updatedDonation.amountRaised,
+        amountRequired: updatedDonation.amountRequired,
+        location: updatedDonation.location,
+        category: updatedDonation.category,
+        bankDetails: updatedDonation.bankDetails,
+        directCash: updatedDonation.directCash,
+        organization: updatedDonation.organization,
+        emergency: updatedDonation.emergency,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const getAllDonationsR = async (req, res) => {
+  try {
+    const donations = await Donation.find({
+      $expr: { $lt: ["$amountRaised", "$amountRequired"] }
+    });
+
+    res.status(200).json({
+      message: "Donations retrieved successfully",
+      donations,
+    });
+  } catch (error) {
+    console.error("Error fetching donations:", error); // Log the error for debugging
+    res.status(500).json({ message: error.message });
+  }
+};
+

@@ -2,7 +2,9 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import HomeScreen from "./Pages/CommunityConnect/Screen/HomeScreen";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+
 import CreatePostScreen from "./Pages/CommunityConnect/Screen/CreatePostScreen";
 import CreateCommunityScreen from "./Pages/CommunityConnect/Screen/CreateCommunityScreen";
 import CommunityScreen from "./Pages/CommunityConnect/Screen/CommunityScreen";
@@ -16,8 +18,65 @@ import BankDeposits from "./Donation/Screen/BankTransferScreen";
 import JobProviderRegistration from "./Jobs/Screen/RegisterJobProvider";
 import { DetailedPostScreen } from "./Pages/CommunityConnect/Screen/DetailedPostScreen";
 import SearchScreen from "./Pages/CommunityConnect/Screen/SearchScreen";
+import SignUpScreen from "./OtherScreens/SignUpScreen";
+import { S } from "@expo/html-elements";
+import JobProviderRegistration2 from "./Jobs/Screen/RegisterJobProvider2";
+import JobPostingScreen from "./Jobs/Screen/PostJob";
+import HomeScreen from "./Pages/CommunityConnect/Screen/HomeScreen";
+import PostedJobsScreen from "./Jobs/Screen/PostedJobs";
+import CardPayment from "./Donation/Screen/Card";
+import DoneS from "./Donation/Screen/Done";
+import CompanyProfileScreen from "./Jobs/Screen/JobProviderProfile";
+import JobListScreen from "./Jobs/Screen/JobListing";
+import JobDetailsScreen from "./Jobs/Screen/JobDetails";
+import ApplyJobScreen from "./Jobs/Screen/ApplyJob";
+import Program from "./CommunityProgram/Screen/Program";
+import EnrolledProgram from "./CommunityProgram/Screen/EnrolledProgram";
+import Location from "./CommunityProgram/Screen/Location";
+import JobProviderSignIn from "./Jobs/Screen/JobProviderSignIn";
+import Toast from "react-native-toast-message";
+import JobApplicationsScreen from "./Jobs/Screen/ApplicationsRecieved";
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function JPBottomTabNavigator({ route }) {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "PostedJobs") {
+            iconName = focused ? "briefcase" : "briefcase-outline"; // Icon for posted jobs
+          } else if (route.name === "Applications") {
+            iconName = focused ? "document" : "document-outline"; // Icon for company profile
+          } else if (route.name === "Profile") {
+            iconName = focused ? "business" : "business-outline"; // Icon for company profile
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
+    >
+      <Tab.Screen
+        name="PostedJobs"
+        component={PostedJobsScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Applications"
+        component={JobApplicationsScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={CompanyProfileScreen}
+        options={{ headerShown: false }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 export default function App() {
   return (
@@ -54,6 +113,11 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="DoneScreen"
+          component={DoneS}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="DirectTransfer"
           component={DirectTransfer}
           options={{ headerShown: false }}
@@ -61,6 +125,11 @@ export default function App() {
         <Stack.Screen
           name="AboutScreen"
           component={AboutScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CardPayment"
+          component={CardPayment}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -87,14 +156,65 @@ export default function App() {
           name="DetailedPostScreen"
           component={DetailedPostScreen}
           options={{ headerShown: false }}
+          />
+        <Stack.Screen
+          name="Program"
+          component={Program}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EnrolledProgram"
+          component={EnrolledProgram}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Location"
+          component={Location}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="JobProviderRegistration"
           component={JobProviderRegistration}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="JobProviderRegistration2"
+          component={JobProviderRegistration2}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobProviderSignIn"
+          component={JobProviderSignIn}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JPMainTabs"
+          component={JPBottomTabNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobPostingScreen"
+          component={JobPostingScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobListScreen"
+          component={JobListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobDetailsScreen"
+          component={JobDetailsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ApplyJobScreen"
+          component={ApplyJobScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
       <StatusBar style="auto" />
+      <Toast ref={(ref) => Toast.setRef(ref)} />
     </NavigationContainer>
   );
 }

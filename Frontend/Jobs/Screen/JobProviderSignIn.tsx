@@ -8,37 +8,32 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  Dimensions,
+  Alert,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { IPAddress } from "../../globals";
+
+const { width } = Dimensions.get("window");
 
 const schema = yup.object().shape({
-  companyName: yup.string().required("Please Enter a Company Name"),
-  contactPersonName: yup.string().required("Please Enter a Person Name"),
   email: yup
     .string()
     .email("Please enter a valid email")
     .required("Please Enter an Email"),
-  password: yup
-    .string()
-    .required("Please Enter a Password")
-    .min(6, "Password must be at least 6 characters"),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password"), null], "Passwords must match")
-    .required("Confirm Password is required"),
+  password: yup.string().required("Please Enter a Password"),
 });
 
-
-export default function JobProviderRegistration({ navigation }) {
+export default function JobProviderSignIn({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const signPage = ()=>{
-    navigation.navigate("JobProviderSignIn");
-  }
+  const [loading, setLoading] = useState(false);
 
   const {
     control,
@@ -50,7 +45,49 @@ export default function JobProviderRegistration({ navigation }) {
 
   const onSubmit = async (data) => {
     const formData = { ...data };
-    navigation.navigate("JobProviderRegistration2", { formData: formData });
+    const email = formData.email;
+    const password = formData.password;
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `http://${IPAddress}:5000/JobProvider/login`,
+        { password, email }
+      );
+
+      if (response.data.success) {
+        await AsyncStorage.setItem(
+          "user",
+          JSON.stringify(response.data.user || {})
+        );
+
+        Toast.show({
+          type: "success",
+          position: "top",
+          text1: "Login Successful",
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+        navigation.replace("JPMainTabs");
+      } else {
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: "Login Failed",
+          text2: response.data.message || "Please check your credentials.",
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      Alert.alert(
+        "Error",
+        "An error occurred while logging in. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,64 +103,12 @@ export default function JobProviderRegistration({ navigation }) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={signPage}>
-            <Text style={styles.signInText}>Sign In</Text>
-          </TouchableOpacity>
         </View>
 
-        <Text style={styles.title}>Set up your profile ✏️</Text>
-        <Text style={styles.subtitle}>
-          Create an account so you can share your jobs
-        </Text>
+        <Image source={require("./../SignIn.jpg")} style={styles.image} />
 
         <View style={styles.form}>
           {/* Company Name Field */}
-          <Controller
-            control={control}
-            name="companyName"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <>
-                <TextInput
-                  style={styles.input}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="Company Name"
-                  placeholderTextColor="#999"
-                />
-                {errors.companyName && (
-                  <Text style={styles.errorText}>
-                    {errors.companyName.message}
-                  </Text>
-                )}
-              </>
-            )}
-          />
-
-          {/* Contact Person Name Field */}
-          <Controller
-            control={control}
-            name="contactPersonName"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <>
-                <TextInput
-                  style={styles.input}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  placeholder="Contact Person Name"
-                  placeholderTextColor="#999"
-                />
-                {errors.contactPersonName && (
-                  <Text style={styles.errorText}>
-                    {errors.contactPersonName.message}
-                  </Text>
-                )}
-              </>
-            )}
-          />
-
-          {/* Email Field */}
           <Controller
             control={control}
             name="email"
@@ -136,7 +121,6 @@ export default function JobProviderRegistration({ navigation }) {
                   value={value}
                   placeholder="Email"
                   placeholderTextColor="#999"
-                  keyboardType="email-address"
                 />
                 {errors.email && (
                   <Text style={styles.errorText}>{errors.email.message}</Text>
@@ -176,47 +160,23 @@ export default function JobProviderRegistration({ navigation }) {
             <Text style={styles.errorText}>{errors.password.message}</Text>
           )}
 
-          {/* Confirm Password Field */}
-          <View style={styles.passwordContainer}>
-            <Controller
-              control={control}
-              name="confirmPassword"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <>
-                  <TextInput
-                    style={styles.passwordInput}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    placeholder="Confirm Password"
-                    placeholderTextColor="#999"
-                    secureTextEntry={!showConfirmPassword}
-                  />
-                </>
-              )}
-            />
-
-            <TouchableOpacity
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              <Ionicons
-                name={showConfirmPassword ? "eye-off" : "eye"}
-                size={24}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
-          {errors.confirmPassword && (
-            <Text style={styles.errorText}>
-              {errors.confirmPassword.message}
-            </Text>
-          )}
-
           <TouchableOpacity
-            style={styles.continueButton}
+            style={styles.signInButton}
             onPress={handleSubmit(onSubmit)}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
+            <Text style={styles.signInButtonText}>Sign In</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("JobProviderRegistration");
+            }}
+            style={styles.link}
+          >
+            <Text style={styles.linkText}>
+              Don't have an account?{" "}
+              <Text style={styles.registerText}>Register</Text>
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -250,6 +210,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#000",
   },
+  image: {
+    width: width * 0.9,
+    height: width * 0.8,
+    resizeMode: "contain",
+    marginBottom: 10,
+  },
   subtitle: {
     fontSize: 16,
     color: "#666",
@@ -279,15 +245,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
-  continueButton: {
-    backgroundColor: "#F0F0F0",
+  signInButton: {
+    backgroundColor: "#007AFF",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
   },
-  continueButtonText: {
-    color: "#999",
-    fontSize: 18,
+  signInButtonText: {
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "600",
   },
   errorText: {
@@ -295,5 +261,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: -15,
     marginBottom: 15,
+  },
+  link: {
+    marginTop: 10,
+    alignItems: "center",
+  },
+  linkText: {
+    color: "#333333",
+    fontSize: 16,
+  },
+  registerText: {
+    color: "#007AFF",
+    fontWeight: "bold",
   },
 });

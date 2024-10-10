@@ -6,14 +6,13 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function BankTransferScreen({ route, navigation }) {
-  const { campaign, selectedAmount } = route.params;
+  const { campaign, value } = route.params;
   const [depositImage, setDepositImage] = useState('');
 
   const handleTransfer = () => {
@@ -54,7 +53,7 @@ export default function BankTransferScreen({ route, navigation }) {
         <View style={styles.content}>
           <View style={styles.causeContainer}>
             <Text style={styles.causeTitle}>{campaign.title}</Text>
-            <Text style={styles.donationAmount}>Amount: ${selectedAmount}</Text>
+            <Text style={styles.donationAmount}>Amount(Rs): {value}</Text>
           </View>
 
           <View style={styles.section}>
@@ -63,48 +62,79 @@ export default function BankTransferScreen({ route, navigation }) {
               <DetailCard
                 icon="person-outline"
                 label="Account Holder"
-                value={campaign.bankDetails.accountHolder}
+                value={campaign.bankDetails.accountHolderName}
+                color="green"
               />
               <DetailCard
                 icon="card-outline"
                 label="Account Number"
                 value={campaign.bankDetails.accountNumber}
+                color="blue"
               />
               <DetailCard
                 icon="business-outline"
                 label="Bank Name"
                 value={campaign.bankDetails.bankName}
+                color="red"
               />
               <DetailCard
                 icon="location-outline"
                 label="Branch"
-                value={campaign.bankDetails.branch}
+                value={campaign.bankDetails.bankBranch}
+                color="green"
               />
             </View>
           </View>
 
+          
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Instructions</Text>
             <View style={styles.instructionContainer}>
-              <Text style={styles.instructionText}>
-                1. Transfer the selected amount to the account details provided above.
-                {'\n'}2. Include your name in the transfer details.
-                {'\n'}3. Upload an image of your bank deposit receipt below.
-              </Text>
+              <View style={styles.instructionItem}>
+               
+                <View style={styles.instructionTextContainer1}>
+                  
+                  <Text style={styles.instructionText}>
+                    - Transfer the selected amount to the account details provided above.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    -  Include your name in the transfer details.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Once after funds are received, it will be given to the specific cause.
+                  </Text>
+                  
+                </View>
+              </View>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.uploadButton} onPress={handleImageUpload}>
-            <Ionicons name="cloud-upload-outline" size={24} color="#FFFFFF" />
-            <Text style={styles.uploadButtonText}>Upload Deposit Image</Text>
-          </TouchableOpacity>
-
-          {depositImage && (
-            <Image source={{ uri: depositImage }} style={styles.imagePreview} />
-          )}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle1}>Thank You!</Text>
+            <View style={styles.instructionContainer}>
+              <View style={styles.instructionItem}>
+                <Ionicons name="heart-outline" size={24} color="green" style={styles.instructionIcon} />
+                <View style={styles.instructionTextContainer}>
+                  <Text style={styles.instructionTextBold}>Your Support Makes a Difference:</Text>
+                  <Text style={styles.instructionText}>
+                    - Your donation helps provide essential resources to those in need.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - It contributes to community development and better living conditions.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Every contribution counts and plays a vital role in supporting various initiatives.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Your kindness inspires others to join the cause and create a positive impact.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
 
           <TouchableOpacity style={styles.transferButton} onPress={handleTransfer}>
-            <Text style={styles.transferButtonText}>Confirm Transfer</Text>
+            <Text style={styles.transferButtonText}>Done</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -112,10 +142,10 @@ export default function BankTransferScreen({ route, navigation }) {
   );
 }
 
-const DetailCard = ({ icon, label, value }) => (
+const DetailCard = ({ icon, label, value, color }) => (
   <View style={styles.detailCard}>
     <View style={styles.iconContainer}>
-      <Ionicons name={icon} size={24} color="#007AFF" />
+      <Ionicons name={icon} size={24} color={color} />
     </View>
     <View style={styles.detailContent}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -176,8 +206,8 @@ const styles = StyleSheet.create({
   },
   causeTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontWeight: '600',
+    color: 'black',
     marginBottom: 8,
   },
   donationAmount: {
@@ -191,7 +221,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#007AFF',
+    color: '#2980B9',
+    textAlign: 'center',
+  },
+  sectionTitle1: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: 'green',
+    textAlign: 'center',
   },
   formContainer: {
     gap: 12,
@@ -221,55 +259,60 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    fontWeight: '500',
     marginBottom: 4,
   },
   detailValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
     color: '#333',
   },
   instructionContainer: {
-    backgroundColor: '#F0F8FF',
+    backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: 10,
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  instructionItem: {
+    flexDirection: 'row',
+    marginBottom: 14,
+  },
+  instructionIcon: {
+    marginRight: 16,
+  },
+  instructionTextContainer: {
+    flex: 1,
+  },
+  instructionTextContainer1: {
+    flex: 1,
+    marginLeft: 40,
+  },
+  instructionTextBold: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
   },
   instructionText: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-  },
-  uploadButton: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  uploadButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  imagePreview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
+    fontSize: 14,
+    color: '#666',
+    marginLeft: -40,
+    marginBottom: 10,
   },
   transferButton: {
-    backgroundColor: '#28A745',
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   transferButtonText: {
-    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#ffffff',
   },
 });

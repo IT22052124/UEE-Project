@@ -1,24 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const DonationTable = () => {
   const [donations, setDonations] = useState([]);
-  const [filteredDonations, setFilteredDonations] = useState([]); 
-  const [searchQuery, setSearchQuery] = useState(''); 
+  const [filteredDonations, setFilteredDonations] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [editDonation, setEditDonation] = useState(null); // State to handle the donation being edited
-  const [showEditForm, setShowEditForm] = useState(false); // Toggle form visibility
+  const [error, setError] = useState("");
+  const [editDonation, setEditDonation] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [expandedDescription, setExpandedDescription] = useState({});
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/Donation');
+        const response = await axios.get("http://localhost:5000/Donation");
         setDonations(response.data.donations);
-        setFilteredDonations(response.data.donations); 
+        setFilteredDonations(response.data.donations);
       } catch (err) {
-        setError('Failed to fetch donations');
+        setError("Failed to fetch donations");
       } finally {
         setLoading(false);
       }
@@ -27,12 +29,10 @@ const DonationTable = () => {
     fetchDonations();
   }, []);
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    // Filter donations based on title, description, or organization
     const filtered = donations.filter(
       (donation) =>
         donation.title.toLowerCase().includes(query) ||
@@ -41,30 +41,35 @@ const DonationTable = () => {
     );
     setFilteredDonations(filtered);
   };
-  
 
-  // Handle delete donation
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/Donation/${id}`);
-       
       setDonations(donations.filter((donation) => donation.Id !== id));
-      setFilteredDonations(filteredDonations.filter((donation) => donation.Id !== id));
+      setFilteredDonations(
+        filteredDonations.filter((donation) => donation.Id !== id)
+      );
     } catch (err) {
-      setError('Failed to delete donation');
+      setError("Failed to delete donation");
     }
   };
-
-  // Handle edit donation (pre-fill the edit form)
-  const handleEdit = (id) => {
-    navigate(`/update/${id}`);
-    
+  const toggleDescription = (id) => {
+    setExpandedDescription((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
-  // Handle update donation
+  const handleEdit = (id) => {
+    navigate(`/update/${id}`);
+  };
+
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:5000/Donation/${editDonation.Id}`, editDonation);
+      await axios.put(
+        `http://localhost:5000/Donation/${editDonation.Id}`,
+        editDonation
+      );
       const updatedDonations = donations.map((donation) =>
         donation.Id === editDonation.Id ? editDonation : donation
       );
@@ -73,7 +78,7 @@ const DonationTable = () => {
       setShowEditForm(false);
       setEditDonation(null);
     } catch (err) {
-      setError('Failed to update donation');
+      setError("Failed to update donation");
     }
   };
 
@@ -87,7 +92,10 @@ const DonationTable = () => {
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+      <div
+        className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+        role="alert"
+      >
         <strong className="font-bold">Error!</strong>
         <span className="block sm:inline"> {error}</span>
       </div>
@@ -95,10 +103,12 @@ const DonationTable = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-8">
+    <div className="container ml-60 p-6 mx-auto px-4 sm:px-8">
       <div className="py-8">
         <div className="flex flex-col md:flex-row justify-between w-full mb-1 sm:mb-0">
-          <h2 className="text-3xl leading-tight text-gray-800 font-bold">Donations</h2>
+          <h2 className="text-3xl leading-tight text-gray-800 font-bold">
+            Donations
+          </h2>
           <div className="text-end">
             <form className="flex w-full max-w-sm space-x-3">
               <div className="relative flex items-center w-full">
@@ -110,17 +120,16 @@ const DonationTable = () => {
                   onChange={handleSearchChange}
                 />
               </div>
-              <button
-                className="flex-shrink-0 bg-purple-600 text-white text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
-                type="button"
-              >
-                Search
+              <button className="group/button relative inline-flex items-center justify-center overflow-hidden rounded-md bg-gradient-to-r from-blue-900 to-blue-400 backdrop-blur-lg px-6 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-xl hover:shadow-gray-600/50 border border-white/20">
+                <span className="text-lg">Search</span>
+                <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
+                  <div className="relative h-full w-10 bg-white/20"></div>
+                </div>
               </button>
             </form>
           </div>
         </div>
 
-        {/* Edit Form */}
         {showEditForm && (
           <div className="mb-8 bg-white shadow-md rounded-lg p-4">
             <h3 className="text-lg font-bold mb-4">Edit Donation</h3>
@@ -131,7 +140,9 @@ const DonationTable = () => {
                   type="text"
                   className="w-full p-2 border rounded-md"
                   value={editDonation?.title}
-                  onChange={(e) => setEditDonation({ ...editDonation, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditDonation({ ...editDonation, title: e.target.value })
+                  }
                 />
               </div>
               <div className="mb-4">
@@ -139,7 +150,12 @@ const DonationTable = () => {
                 <textarea
                   className="w-full p-2 border rounded-md"
                   value={editDonation?.description}
-                  onChange={(e) => setEditDonation({ ...editDonation, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditDonation({
+                      ...editDonation,
+                      description: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="mb-4">
@@ -148,7 +164,12 @@ const DonationTable = () => {
                   type="number"
                   className="w-full p-2 border rounded-md"
                   value={editDonation?.amountRequired}
-                  onChange={(e) => setEditDonation({ ...editDonation, amountRequired: e.target.value })}
+                  onChange={(e) =>
+                    setEditDonation({
+                      ...editDonation,
+                      amountRequired: e.target.value,
+                    })
+                  }
                 />
               </div>
               <button
@@ -173,115 +194,162 @@ const DonationTable = () => {
             <table className="min-w-full leading-normal">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     ID
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Title
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Description
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Amount Required
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Amount Raised
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Category
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Location
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Organization
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                    Emergency
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Payment Details
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredDonations.length > 0 ? (
-                  filteredDonations.map((donation) => (
-                    <tr key={donation.Id}>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">{donation.Id}</p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">{donation.title}</p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">{donation.description}</p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">{donation.amountRequired}</p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">{donation.amountRaised}</p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <span className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
-                          <span aria-hidden className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
-                          <span className="relative">{donation.category}</span>
-                        </span>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">{donation.location}</p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">{donation.organization}</p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p className="text-gray-900 whitespace-no-wrap">
-                          {donation.bankDetails?.bankName}<br />
-                          {donation.directCash?.orgName}
-                        </p>
-                      </td>
-                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <div className="flex space-x-2">
+                {filteredDonations.map((donation, index) => (
+                  <tr
+                    key={donation.Id}
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                    } transition duration-200 hover:bg-gray-300`}
+                  >
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {donation.Id}
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {donation.title}
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {expandedDescription[donation.Id] ? (
+                        <>
+                          {donation.description}
                           <button
-                            className="text-blue-600 hover:text-blue-900"
-                            onClick={() => handleEdit(donation.Id)}
+                            onClick={() => toggleDescription(donation.Id)}
+                            className="ml-2 text-blue-500"
                           >
+                            Show less
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {donation.description.slice(0, 100)}...
+                          <button
+                            onClick={() => toggleDescription(donation.Id)}
+                            className="ml-2 text-blue-500"
+                          >
+                            Show more
+                          </button>
+                        </>
+                      )}
+                    </td>
+
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {donation.amountRequired}
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {donation.amountRaised}
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      <span
+                        className={`px-2 py-1 rounded-full text-white ${
+                          donation.category === "Health"
+                            ? "bg-green-500"
+                            : donation.category === "Education"
+                            ? "bg-blue-500"
+                            : donation.category === "Environment"
+                            ? "bg-teal-500"
+                            : donation.category === "Disaster"
+                            ? "bg-yellow-500"
+                            : donation.category === "Hunger"
+                            ? "bg-green-500"
+                            : "bg-gray-500"
+                        }`}
+                      >
+                        {donation.category}
+                      </span>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {donation.location}
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm text-center">
+                      <span
+                        className={`px-2 py-1 rounded-full text-white ${
+                          donation.emergency === "yes"
+                            ? "bg-red-500"
+                            : "bg-blue-500"
+                        }`}
+                      >
+                        {donation.emergency}
+                      </span>
+                    </td>
+
+                    <td className="px-5 py-5 border-b border-gray-200  text-sm">
+                      <div className="flex space-x-4">
+                        {/* Edit Button */}
+                        <div className="group relative">
+                          <button onClick={() => handleEdit(donation.Id)}>
+                            <svg
+                              stroke-linejoin="round"
+                              stroke-linecap="round"
+                              strokeWidth="2"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              className="w-6 h-6 hover:scale-125 duration-200 hover:stroke-blue-500" // Decreased size
+                            >
+                              <path d="M4 21h16M15 2l5 5-10 10H4v-5L15 2z" />
+                            </svg>
+                          </button>
+                          <span className="absolute -top-14 left-[50%] -translate-x-[50%] z-20 origin-left scale-0 px-3 rounded-lg border border-gray-300 bg-white py-2 text-sm font-bold shadow-md transition-all duration-300 ease-in-out group-hover:scale-100">
                             Edit
-                          </button>
-                          <button
-                            className="text-red-600 hover:text-red-900"
-                            onClick={() => handleDelete(donation.Id)}
-                          >
-                            Delete
-                          </button>
+                            <span></span>
+                          </span>
                         </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="10" className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                      No donations available
+
+                        {/* Delete Button */}
+                        <div className="group relative">
+                          <button onClick={() => handleDelete(donation.Id)}>
+                            <svg
+                              stroke-linejoin="round"
+                              stroke-linecap="round"
+                              strokeWidth="2"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              className="w-6 h-6 hover:scale-125 duration-200 hover:stroke-red-500" // Decreased size
+                            >
+                              <path d="M3 6h18M3 6h1.5a1 1 0 011-1h12a1 1 0 011 1H21m-3 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6M9 10v4M15 10v4" />
+                            </svg>
+                          </button>
+                          <span className="absolute -top-14 left-[50%] -translate-x-[50%] z-20 origin-left scale-0 px-3 rounded-lg border border-gray-300 bg-white py-2 text-sm font-bold shadow-md transition-all duration-300 ease-in-out group-hover:scale-100">
+                            Delete
+                            <span></span>
+                          </span>
+                        </div>
+                      </div>
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
-            <div className="px-5 py-5 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
-              <span className="text-xs xs:text-sm text-gray-900">
-                Showing 1 to 4 of 50 Entries
-              </span>
-              <div className="inline-flex mt-2 xs:mt-0">
-                <button className="text-sm bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l">
-                  Prev
-                </button>
-                <button className="text-sm bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r">
-                  Next
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

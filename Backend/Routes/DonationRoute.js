@@ -4,8 +4,10 @@ import {
   updateDonation,
   deleteDonation,
   getAllDonations,
+  getAllDonationsR,
   getDonationById,
   getEmergencyDonations,
+  updateDonationAmountRaised
 } from "../Controllers/DonationController.js";
 
 // Adjust the path as necessary
@@ -18,6 +20,7 @@ router.post("/", createDonation);
 
 //get donations
 router.get("/", getAllDonations);
+router.get("/all", getAllDonationsR);
 
 router.get("/emergency", getEmergencyDonations);
 
@@ -30,5 +33,8 @@ router.delete("/:id", deleteDonation);
 
 // Update the admin of a community
 router.put("/update/:id", updateDonation);
+
+router.put("/update/amount/:id", updateDonationAmountRaised);
+
 
 export default router;

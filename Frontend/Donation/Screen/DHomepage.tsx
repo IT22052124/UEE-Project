@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { IPAddress } from "../../globals";
 
 export default function DonationScreen() {
   const navigation = useNavigation();
@@ -12,16 +13,29 @@ export default function DonationScreen() {
   const [scrollY] = useState(new Animated.Value(0));
 
   // Fetch data from backend
+  const fetchEmergencyHelpData = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.4:5000/Donation/emergency');
+      console.log(response.data.donations);
+      setEmergencyHelpData(response.data.donations);
+    } catch (error) {
+      console.error('Error fetching emergency help data:', error);
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get('http://192.168.1.4:5000/Donation/emergency')
-      .then((response) => {
-        setEmergencyHelpData(response.data.donations);
-      })
-      .catch((error) => {
-        console.error('Error fetching emergency help data:', error);
-      });
-  }, []);
+    // Initial fetch
+    fetchEmergencyHelpData();
+
+    // Set up the interval to fetch data every 10 seconds
+    const interval = setInterval(() => {
+      fetchEmergencyHelpData();
+    }, 10000); // Fetch every 10 seconds
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array means this runs once on mount
+
 
   const handleCategorySelect = (category) => {
     navigation.navigate('CatergoryScreen', { category });
@@ -51,7 +65,7 @@ export default function DonationScreen() {
               <Text style={styles.greeting}>Hello, Faizal</Text>
               <Text style={styles.subGreeting}>What do you want to donate today?</Text>
             </View>
-            <Image source={{ uri: '{https://example.com/profile-pic.jpg}' }} style={styles.profilePic} />
+            <Image source={{ uri: 'https://example.com/profile-pic.jpg' }} style={styles.profilePic} />
           </View>
         </LinearGradient>
       </Animated.View>
@@ -71,24 +85,22 @@ export default function DonationScreen() {
 
         <Text style={styles.sectionTitle}>Categories</Text>
         
-          <View style={styles.categories}>
-            {['All', 'Hunger', 'Medical'].map((category, index) => (
-              <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
-                <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
-                  <Ionicons name={getCategoryIcon(category)} size={24} color="#fff" />
-                </LinearGradient>
-                <Text style={styles.categoryText}>{category}</Text>
-              </TouchableOpacity>
-            ))}
-          
-            {/* See all category */}
-            <TouchableOpacity style={styles.categoryItem} onPress={toggleMoreCategories}>
-            <View style={styles.categoryIcon}>
-            <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
-
-              <Ionicons name={getCategoryIcon('See all')} size={24} color="#fff" />
+        <View style={styles.categories}>
+          {['All', 'Hunger', 'Medical'].map((category, index) => (
+            <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
+              <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
+                <Ionicons name={getCategoryIcon(category)} size={24} color="#fff" />
               </LinearGradient>
-
+              <Text style={styles.categoryText}>{category}</Text>
+            </TouchableOpacity>
+          ))}
+          
+          {/* See all category */}
+          <TouchableOpacity style={styles.categoryItem} onPress={toggleMoreCategories}>
+            <View style={styles.categoryIcon}>
+              <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
+                <Ionicons name={getCategoryIcon('See all')} size={24} color="#fff" />
+              </LinearGradient>
             </View>
             <Text style={styles.categoryText}>See all</Text>
           </TouchableOpacity>
@@ -97,22 +109,18 @@ export default function DonationScreen() {
         {/* Additional categories */}
         {showMoreCategories && (
           <View style={styles.moreCategories}>
-            {['Education', 'Poverty', 'Disaster','Others'].map((category, index) => (
+            {['Education', 'Poverty', 'Disaster', 'Others'].map((category, index) => (
               <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
                 <View style={styles.categoryIcon}>
-                <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
-
-                  <Ionicons name={getCategoryIcon(category)} size={24} color="#fff" />
+                  <LinearGradient colors={['#63b3ed', '#4299e1']} style={styles.categoryIcon}>
+                    <Ionicons name={getCategoryIcon(category)} size={24} color="#fff" />
                   </LinearGradient>
-
                 </View>
                 <Text style={styles.categoryText}>{category}</Text>
               </TouchableOpacity>
             ))}
           </View>
         )}
-
-        
 
         <Text style={styles.sectionTitle}>Emergency help</Text>
         <View style={styles.emergencyHelp}>
@@ -122,7 +130,7 @@ export default function DonationScreen() {
               <View style={styles.emergencyInfo}>
                 <Text style={styles.emergencyTitle}>{item.title}</Text>
                 <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: `${item.progress}%` }]} />
+                  <View style={[styles.progressFill, { width: `${((item.amountRaised / item.amountRequired) * 100).toFixed(0)}%` }]} />
                 </View>
                 <Text style={styles.fundRaised}>Fund Raised: Rs.{item.amountRaised}/-</Text>
               </View>
@@ -134,7 +142,7 @@ export default function DonationScreen() {
   );
 }
 
-const getCategoryIcon = (category: string) => {
+const getCategoryIcon = (category) => {
   switch (category) {
     case 'All':
       return 'grid-outline';
@@ -148,8 +156,8 @@ const getCategoryIcon = (category: string) => {
       return 'medkit-outline';
     case 'Disaster':
       return 'leaf-outline';
-      case 'Others':
-      return 'leaf-outline';
+    case 'Others':
+      return 'nuclear-outline';
     case 'See all':
       return 'chevron-forward-outline';
     default:
@@ -227,7 +235,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-
   },
   moreCategories: {
     flexDirection: 'row',
@@ -236,7 +243,6 @@ const styles = StyleSheet.create({
   },
   categoryItem: {
     alignItems: 'center',
-    
   },
   categoryIcon: {
     width: 70,
@@ -251,46 +257,50 @@ const styles = StyleSheet.create({
     color: '#4a5568',
   },
   emergencyHelp: {
-    gap: 20,
+    marginTop: 5,
   },
   emergencyItem: {
     flexDirection: 'row',
+    marginBottom: 20,
+    borderRadius: 15,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    overflow: 'hidden',
+    paddingTop:2
   },
   emergencyImage: {
-    width: 120,
-    height: 120,
+    width: 110,
+    height: 110,
+    borderRadius: 15,
+
   },
   emergencyInfo: {
     flex: 1,
-    padding: 16,
+    padding: 10,
   },
   emergencyTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
-    marginBottom: 8,
     color: '#2d3748',
+    marginBottom: 10,
   },
   progressBar: {
-    height: 6,
+    height: 10,
     backgroundColor: '#e2e8f0',
-    borderRadius: 3,
-    marginBottom: 8,
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginVertical: 5,
   },
   progressFill: {
     height: '100%',
     backgroundColor: '#4299e1',
-    borderRadius: 3,
+    borderRadius: 5,
   },
   fundRaised: {
-    fontSize: 14,
-    color: '#718096',
+    color: '#4a5568',
   },
 });

@@ -5,7 +5,9 @@ import {
   getProgramById,
   updateProgram,
   deleteProgram,
-  getNotEnrolledPrograms
+  getUnenrolledPrograms,
+  getEnrolledPrograms,
+  enrollUserInProgram
 } from "../Controllers/ProgramController.js"; // Import your user controller
 
 const router = express.Router();
@@ -25,6 +27,7 @@ router.put('/programs/:id', updateProgram);
 // Route to delete a program by ID
 router.delete('/programs/:id', deleteProgram);
 
-router.get('/programs/:id', getNotEnrolledPrograms);
-
+router.get('/unenrolled-programs', getUnenrolledPrograms);
+router.put('/enroll', enrollUserInProgram);
+router.get('/enrolled-programs', getEnrolledPrograms);
 export default router;

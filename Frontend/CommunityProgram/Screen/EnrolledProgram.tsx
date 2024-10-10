@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';  // Import Axios for API calls
+import { IPAddress } from '../../globals';
+import { useNavigation } from '@react-navigation/native';
 
-const ProgramItem = ({ name, type, description, location, isExpanded, onToggle }) => (
+const ProgramItem = ({ name, type, description, location, isExpanded, onToggle, onLocationPress }) => (
   <View style={styles.programItem}>
     <TouchableOpacity onPress={onToggle} style={styles.programHeader}>
       <Text style={styles.programName}>{name}</Text>
@@ -15,7 +18,7 @@ const ProgramItem = ({ name, type, description, location, isExpanded, onToggle }
       <View style={styles.programDetails}>
         <Text style={styles.programDescription}>{description}</Text>
         <Text style={styles.programLocation}>{location}</Text>
-        <TouchableOpacity style={styles.locationButton}>
+        <TouchableOpacity style={styles.locationButton} onPress={onLocationPress}>
           <Text style={styles.buttonText}>Location</Text>
         </TouchableOpacity>
       </View>
@@ -25,14 +28,28 @@ const ProgramItem = ({ name, type, description, location, isExpanded, onToggle }
 
 export default function EnrolledProgramsScreen() {
   const [expandedProgram, setExpandedProgram] = useState(null);
+  const [enrolledPrograms, setEnrolledPrograms] = useState([]);  // State to hold enrolled programs
+  const navigation = useNavigation(); // Initialize navigation
+  const email = 'afhamuzumaki34@gmail.com'; // Replace with actual user's email
 
-  const programs = [
-    { name: 'Medical Checkup', type: 'Medical', description: 'Have a free Medical checkup' },
-    { name: 'Food Banks and Pantries', type: 'Food', description: 'Provide free groceries and meals', location: 'No. 45, Temple Road, Kandy, 20000, Sri Lanka' },
-    { name: 'Educational Support Programs', type: 'Education', description: 'Offer educational support' },
-    { name: 'Job Training', type: 'Job', description: 'Provide job training' },
-    { name: 'Community Development Programs', type: 'Community', description: 'Help improve Community' },
-  ];
+  useEffect(() => {
+    const fetchEnrolledPrograms = async () => {
+      try {
+        // Replace with your actual backend URL
+        const response = await axios.get(`http://${IPAddress}:5000/Program/enrolled-programs?userEmail=${email}`);
+        setEnrolledPrograms(response.data.data); // Adjust based on your API response structure
+      } catch (error) {
+        console.error('Error fetching enrolled programs:', error);
+      }
+    };
+
+    fetchEnrolledPrograms();
+  }, []);
+
+  const handleLocationPress = (location) => {
+    // Navigate to the MapScreen with location as a parameter
+    navigation.navigate('Location', { location });
+  };
 
   return (
     <View style={styles.container}>
@@ -40,12 +57,16 @@ export default function EnrolledProgramsScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Enrolled Programs</Text>
         </View>
-        {programs.map((program, index) => (
+        {enrolledPrograms.map((program, index) => (
           <ProgramItem
             key={index}
-            {...program}
+            name={program.title} // Ensure you're mapping correct field names
+            type={program.label}
+            description={program.description}
+            location={program.address}
             isExpanded={expandedProgram === index}
             onToggle={() => setExpandedProgram(expandedProgram === index ? null : index)}
+            onLocationPress={() => handleLocationPress(program.address)}  // Pass location to handler
           />
         ))}
       </ScrollView>

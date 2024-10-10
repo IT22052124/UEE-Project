@@ -1,23 +1,71 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
+import axios from 'axios';
 
 export default function MapScreen() {
+  const route = useRoute();
+  const { location } = route.params; // Extract the location from the route parameters
+  const [coordinates, setCoordinates] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const geocodeLocation = async () => {
+      try {
+        const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+          params: {
+            q: location,
+            format: 'json',
+            limit: 1, // Get only one result
+          },
+        });
+
+        if (response.data.length > 0) {
+          const { lat, lon } = response.data[0]; // Get the latitude and longitude
+          setCoordinates({ latitude: parseFloat(lat), longitude: parseFloat(lon) });
+        } else {
+          console.warn('Location not found');
+        }
+      } catch (error) {
+        console.error('Error fetching location:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    geocodeLocation();
+  }, [location]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
+
+  if (!coordinates) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Could not find location</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 7.2906,
-          longitude: 80.6337,
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
       >
-        <Marker
-          coordinate={{ latitude: 7.2906, longitude: 80.6337 }}
-        >
+        <Marker coordinate={coordinates}>
           <View style={styles.markerContainer}>
             <Ionicons name="location" size={24} color="#fff" />
           </View>
@@ -25,7 +73,7 @@ export default function MapScreen() {
       </MapView>
       <View style={styles.locationInfo}>
         <Text style={styles.locationTitle}>LOCATION</Text>
-        <Text style={styles.locationAddress}>No. 45, Temple Road, Kandy, 20000, Sri Lanka</Text>
+        <Text style={styles.locationAddress}>{location}</Text>
       </View>
       <View style={styles.bottomNav}>
         {['cash-outline', 'sync-outline', 'people-outline', 'briefcase-outline', 'settings-outline'].map((icon, index) => (
@@ -75,5 +123,10 @@ const styles = StyleSheet.create({
   },
   navItem: {
     alignItems: 'center',
+  },
+  errorText: {
+    textAlign: 'center',
+    margin: 20,
+    color: 'red',
   },
 });

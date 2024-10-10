@@ -142,7 +142,7 @@ const DonationForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-6xl mx-auto p-8 bg-gradient-to-br from-blue-50 to-blue-200 shadow-xl rounded-lg mt-10 border border-indigo-100"
+      className="max-w-6xl ml-80 mr-15 mx-auto p-8 bg-gradient-to-br from-blue-50 to-blue-200 shadow-xl rounded-lg mt-5 border border-indigo-100"
     >
       <h2 className="text-4xl font-extrabold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
         Create a Donation

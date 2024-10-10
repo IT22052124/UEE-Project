@@ -66,7 +66,7 @@ const EditDonation = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8 bg-white shadow-lg rounded-lg">
+    <div className="max-w-6xl ml-80 mx-auto px-4 py-6 sm:px-6 lg:px-8 bg-white shadow-lg rounded-lg">
       {error && <p className="text-red-500 text-center">{error}</p>}
       <form
         onSubmit={handleUpdate}

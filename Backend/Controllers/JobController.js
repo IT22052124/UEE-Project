@@ -26,7 +26,7 @@ export const applyJob = async (req, res) => {
     let id;
 
     if (latestApplication.length !== 0) {
-      const latestId = parseInt(latestJob[0].ID.slice(1));
+      const latestId = parseInt(latestApplication[0].ID.slice(1));
       id = "A" + String(latestId + 1).padStart(4, "0");
     } else {
       id = "A0001";
@@ -90,3 +90,32 @@ export const checkJob = async (req, res) => {
     });
   }
 };
+
+export const getJobApplicationsByCompany = async (req, res) => {
+  try {
+    const { id } = req.params; // Assuming company ID is passed as a URL parameter
+    console.log(id);
+    
+    // Step 1: Find all jobs posted by the company
+    const jobs = await Job.find({ postedBy: id });
+    const jobIds = jobs.map(job => job._id);
+
+    // Step 2: Find applications where JobID is one of the jobIds
+    const applications = await Application.find({ JobID: { $in: jobIds } })
+      .populate({
+        path: 'JobID', // Populate JobID details
+        populate: { path: 'postedBy' } // Nested populate for company details
+      })
+      .sort({ _id: -1 }); // Sort by latest application first
+
+    console.log(applications);
+
+    // Step 3: Respond with the applications
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching job applications:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+

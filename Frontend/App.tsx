@@ -66,13 +66,10 @@ function CommunityTabNavigator() {
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarStyle: {
-          backgroundColor: "#1E1E1E", // Set the background color
-        },
       })}
       tabBarOptions={{
-        activeTintColor: "#FF4500",
-        inactiveTintColor: "white",
+        tabBarActiveTintColor: "#4a90e2", // Customize the active icon color
+        tabBarInactiveTintColor: "gray",
       }}
     >
       <CommunityTab.Screen
@@ -143,6 +140,11 @@ function CommunityConnectStackNavigator() {
         component={UserScreen}
         options={{ headerShown: false }}
       />
+      <CommunityConnectStack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
     </CommunityConnectStack.Navigator>
   );
 }
@@ -197,12 +199,14 @@ function BottomTabNavigator() {
           } else if (route.name === "AppliedJobsScreen") {
             // Icon for Applied Jobs Screen
             iconName = focused ? "document" : "document-outline";
-            } else if (route.name === "DonationHomepage") {
-              // Icon for Applied Jobs Screen
-              iconName = focused ? "document" : "heart-half-outline";
+          } else if (route.name === "DonationHomepage") {
+            // Icon for Applied Jobs Screen
+            iconName = focused ? "document" : "heart-half-outline";
           } else if (route.name === "DonationHomepage") {
             // Icon for Applied Jobs Screen
             iconName = focused ? "heart-half" : "heart-half-outline";
+          } else if (route.name === "Community") {
+            iconName = focused ? "people" : "people-outline";
 
             return <Ionicons name={iconName} size={size} color={color} />;
           }
@@ -229,7 +233,7 @@ function BottomTabNavigator() {
         options={{ headerShown: false, tabBarLabel: "Applied Jobs" }} // Set proper label
       />
       <Tab.Screen
-        name="CommunityConnect"
+        name="Community"
         component={CommunityConnectStackNavigator}
         options={{ tabBarLabel: "Community", headerShown: false }}
       />
@@ -240,7 +244,7 @@ function BottomTabNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignInScreen">
+      <Stack.Navigator initialRouteName="MainTabs">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}

@@ -317,7 +317,7 @@ export const DetailedPostScreen = () => {
         <>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+              <Ionicons name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -339,7 +339,7 @@ export const DetailedPostScreen = () => {
                 <Ionicons
                   name="search"
                   size={24}
-                  color="#777"
+                  color="#000"
                   style={styles.searchIcon}
                 />
               </View>
@@ -379,7 +379,7 @@ export const DetailedPostScreen = () => {
                 <Entypo
                   name="arrow-bold-up"
                   size={32}
-                  color={UserVote === "upvoted" ? "#FF4500" : "#FFFFFF"} // Shows orange if upvoted, white otherwise
+                  color={UserVote === "upvoted" ? "#FF4500" : "#808080"} // Shows orange if upvoted, white otherwise
                 />
               </TouchableOpacity>
 
@@ -393,7 +393,7 @@ export const DetailedPostScreen = () => {
                 <Entypo
                   name="arrow-down"
                   size={32}
-                  color={UserVote === "downvoted" ? "#FF4500" : "#FFFFFF"} // Shows orange if downvoted, white otherwise
+                  color={UserVote === "downvoted" ? "#FF4500" : "#808080"} // Shows orange if downvoted, white otherwise
                 />
               </TouchableOpacity>
             </View>
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#121212",
+    backgroundColor: "#FFFFFF",
   },
   touch: {
     width: "100%",
@@ -464,12 +464,12 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFFFFF",
   },
   noCommentsText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#000",
     textAlign: "center",
     marginTop: 20,
   },
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFFFFF",
   },
   errorText: {
     fontSize: 18,
@@ -486,7 +486,6 @@ const styles = StyleSheet.create({
   },
   header2: {
     padding: 16,
-    backgroundColor: "#1E1E1E",
     marginBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
@@ -512,7 +511,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginRight: 8,
-    color: "#FFFFFF", // Space between username and timestamp
+    color: "#808080", // Space between username and timestamp
   },
 
   timestamp: {
@@ -520,15 +519,15 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
+    color: "#2d3748",
     marginTop: 8,
-    color: "#FFFFFF",
   },
   description: {
+    color: "#808080", // Red flair for highlighting
     fontSize: 16,
     marginVertical: 8,
-    color: "#FF4500",
   },
   votesContainer: {
     flexDirection: "row",
@@ -545,7 +544,8 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   postStatText: {
-    color: "#FFFFFF",
+    color: "#000",
+    fontWeight: "bold",
     fontSize: 12,
     marginHorizontal: 5,
   },
@@ -562,11 +562,13 @@ const styles = StyleSheet.create({
   commentInput: {
     flex: 1,
     borderWidth: 1,
-    backgroundColor: "#2C2C2E",
+    backgroundColor: "#F0F0F0",
     borderRadius: 20,
     padding: 8,
     marginRight: 8,
-    color: "#FFFFFF",
+    color: "#000",
+    height: 40,
+    paddingHorizontal: 15,
   },
   addCommentButton: {
     backgroundColor: "#007AFF",
@@ -582,16 +584,16 @@ const styles = StyleSheet.create({
   commentsHeader: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#000",
     padding: 16,
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFF",
   },
   commentContainer: {
     flexDirection: "row",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: "#eee",
-    backgroundColor: "#1A1A1B",
+    borderTopColor: "#808080",
+    backgroundColor: "#FFF",
   },
   commentProfilePic: {
     width: 40,
@@ -605,12 +607,12 @@ const styles = StyleSheet.create({
   commentUsername: {
     fontWeight: "bold",
     fontSize: 14,
-    color: "white",
+    color: "#000",
   },
   commentText: {
     fontSize: 14,
     marginVertical: 4,
-    color: "#FF4500",
+    color: "#808080",
   },
   commentTimestamp: {
     fontSize: 12,
@@ -633,7 +635,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    color: "white",
+    color: "#000",
   },
   replyButtonText: {
     marginLeft: 10,
@@ -653,14 +655,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#1A1A1B",
     justifyContent: "flex-start", // Aligns icons to the left
   },
+
   searchBar: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#272729",
+    borderBlockColor: "#000",
+    borderBottomColor: "#E0E0E0",
     borderRadius: 20,
     marginHorizontal: 10,
     paddingHorizontal: 10,
@@ -675,10 +678,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 40,
-    backgroundColor: "#222",
+    backgroundColor: "#F0F0F0", // Light background for search
     borderRadius: 20,
     paddingHorizontal: 15,
-    color: "#fff",
+    color: "#000", // Black text
   },
   CommunityName: {
     fontSize: 16,

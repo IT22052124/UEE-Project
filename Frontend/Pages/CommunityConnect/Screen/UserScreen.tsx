@@ -21,7 +21,7 @@ import { ParentPost } from "../Components/ParentPost";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function UserScreen({ route }) {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,9 +82,9 @@ export default function UserScreen({ route }) {
   };
 
   const theme = {
-    backgroundColor: isDarkMode ? "#121212" : "#F0F2F5",
+    backgroundColor: isDarkMode ? "#121212" : "#FFF",
     textColor: isDarkMode ? "#E0E0E0" : "#333",
-    cardBackground: isDarkMode ? "#1E1E1E" : "#FFF",
+    cardBackground: isDarkMode ? "#1E1E1E" : "#F0F2F5",
     inputBackground: isDarkMode ? "#2C2C2C" : "#F0F2F5",
     buttonBackground: isDarkMode ? "#BB86FC" : "#4ECDC4",
     buttonText: isDarkMode ? "#121212" : "#FFF",
@@ -175,9 +175,7 @@ export default function UserScreen({ route }) {
           <View style={styles.headerLeft}>
             <Text style={styles.postTitle}>{item.postTitle}</Text>
           </View>
-          <TouchableOpacity>
-            <Ionicons name="ellipsis-vertical" size={16} color="black" />
-          </TouchableOpacity>
+          
         </View>
         <Text style={styles.postTime}>{timeAgo(item.createdAt)}</Text>
         <Text style={styles.postFlair}>{item.descriptions}</Text>
@@ -187,9 +185,9 @@ export default function UserScreen({ route }) {
         <View style={styles.postStats}>
           <TouchableOpacity onPress={() => handleUpvote(item._id)}>
             {userVote === "upvoted" ? (
-              <Entypo name="arrow-bold-up" size={32} color="#FF4500" />
+              <Entypo name="arrow-bold-up" size={32} color="#4ECDC4" />
             ) : (
-              <Entypo name="arrow-bold-up" size={32} color="#FFFFFF" />
+              <Entypo name="arrow-bold-up" size={32} color="#808080" />
             )}
           </TouchableOpacity>
           <Text style={styles.postStatText}>
@@ -197,9 +195,9 @@ export default function UserScreen({ route }) {
           </Text>
           <TouchableOpacity onPress={() => handleDownvote(item._id)}>
             {userVote === "downvoted" ? (
-              <Entypo name="arrow-down" size={32} color="#FF4500" />
+              <Entypo name="arrow-down" size={32} color="#4ECDC4" />
             ) : (
-              <Entypo name="arrow-down" size={32} color="#FFFFFF" />
+              <Entypo name="arrow-down" size={32} color="#808080" />
             )}
           </TouchableOpacity>
           <TouchableOpacity
@@ -210,13 +208,10 @@ export default function UserScreen({ route }) {
             }
           >
             <View style={styles.commentContainer}>
-              <Ionicons name="chatbubble-outline" size={32} color="#FFFFFF" />
+              <Ionicons name="chatbubble-outline" size={32} color="#808080" />
               <Text style={styles.postStatText}>{item.comments.length}</Text>
             </View>
           </TouchableOpacity>
-          {/* <TouchableOpacity style={styles.shareButton}>
-          <Text style={styles.shareButtonText}>Share</Text>
-        </TouchableOpacity> */}
         </View>
       </View>
     );
@@ -228,7 +223,7 @@ export default function UserScreen({ route }) {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.touch}
@@ -387,7 +382,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#FFF",
   },
   touch: {
     width: "100%",
@@ -396,14 +391,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#1A1A1B",
     justifyContent: "flex-start", // Aligns icons to the left
   },
   searchBar: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#272729",
+    borderBlockColor: "#000",
+    borderBottomColor: "#E0E0E0",
     borderRadius: 20,
     marginHorizontal: 10,
     paddingHorizontal: 10,
@@ -418,10 +413,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 40,
-    backgroundColor: "#222",
+    backgroundColor: "#F0F0F0", // Light background for search
     borderRadius: 20,
     paddingHorizontal: 15,
-    color: "#fff",
+    color: "#000", // Black text
   },
   content: {
     padding: 15,
@@ -511,9 +506,13 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   post: {
-    padding: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: "#FF4500",
+    backgroundColor: "#F9F9F9", // Light grey post background
+    padding: 16,
+    marginVertical: 8,
+    marginHorizontal: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E0E0E0", // Soft border for post
   },
   postHeader: {
     flexDirection: "row",
@@ -540,19 +539,19 @@ const styles = StyleSheet.create({
     alignItems: "flex-start", // Align items to the start (top)
   },
   postTitle: {
-    color: "white",
-    fontSize: 18, // Increased font size for the title
+    fontSize: 16,
     fontWeight: "bold",
-    marginRight: 10, // Space between title and time
+    color: "#2d3748",
+    marginTop: 8,
+  },
+  postFlair: {
+    color: "#808080", // Red flair for highlighting
+    fontSize: 15,
+    marginVertical: 4,
   },
   postTime: {
     color: "#888", // Lighter color for the timestamp
     fontSize: 12, // Slightly lower than the title
-  },
-  postFlair: {
-    color: "#FF4500",
-    fontSize: 12,
-    marginTop: 5,
   },
   postStats: {
     flexDirection: "row",

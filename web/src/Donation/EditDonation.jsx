@@ -29,9 +29,8 @@ const EditDonation = () => {
 
       await axios.put(`http://localhost:5000/Donation/update/${id}`, updateData);
       navigate("/table");
-      toast.success("This is a success message!", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
+      toast.success("Donation added successfully!"); // Show success toast
+
      
     } catch (err) {
       setError("Failed to update donation");

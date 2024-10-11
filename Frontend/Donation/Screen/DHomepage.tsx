@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   emergencyItem: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 15,
     borderRadius: 15,
     backgroundColor: '#fff',
     shadowColor: '#000',

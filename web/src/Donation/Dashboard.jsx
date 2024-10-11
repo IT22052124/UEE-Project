@@ -156,7 +156,7 @@ const EnhancedDonationDashboard = () => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="amount" fill="#8884d8" />
+                <Bar dataKey="amount" fill="#0088FE" />
               </BarChart>
             </ResponsiveContainer>
           </div>

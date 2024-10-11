@@ -99,7 +99,7 @@ function BottomTabNavigator() {
             iconName = focused ? "document" : "document-outline";
           } else if (route.name === "DonationHomepage") {
              // Icon for Applied Jobs Screen
-            iconName = focused ? "document" : "heart-half-outline";
+            iconName = focused ? "heart-half" : "heart-half-outline";
 
           return <Ionicons name={iconName} size={size} color={color} />;
         }

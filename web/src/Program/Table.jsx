@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+
 const ProgramTable = () => {
   const [programs, setPrograms] = useState([]);
   const [filteredPrograms, setFilteredPrograms] = useState([]);
@@ -101,7 +102,7 @@ const ProgramTable = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-8">
+    <div className="container ml-60 p-6 mt-0 mx-auto px-4 sm:px-8">
       <div className="py-8">
         <div className="flex flex-col md:flex-row justify-between w-full mb-1 sm:mb-0">
           <h2 className="text-3xl leading-tight text-gray-800 font-bold">Programs</h2>

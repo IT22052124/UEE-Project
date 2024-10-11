@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';  // Axios for API calls
+import { IPAddress } from "../../globals";
+import { useNavigation } from '@react-navigation/native';
 
-const ProgramItem = ({ name, type, description, location, isExpanded, onToggle }) => (
+const ProgramItem = ({ name, type, description, location, isExpanded, onToggle, onEnroll, onLocationPress  }) => (
   <View style={styles.programItem}>
     <TouchableOpacity onPress={onToggle} style={styles.programHeader}>
       <Text style={styles.programName}>{name}</Text>
@@ -17,10 +19,10 @@ const ProgramItem = ({ name, type, description, location, isExpanded, onToggle }
         <Text style={styles.programDescription}>{description}</Text>
         <Text style={styles.programLocation}>{location}</Text>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.locationButton}>
+        <TouchableOpacity style={styles.locationButton} onPress={onLocationPress}>
             <Text style={styles.buttonText}>Location</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.enrollButton}>
+          <TouchableOpacity style={styles.enrollButton} onPress={onEnroll}>
             <Text style={styles.buttonText}>Enroll</Text>
           </TouchableOpacity>
         </View>
@@ -29,16 +31,18 @@ const ProgramItem = ({ name, type, description, location, isExpanded, onToggle }
   </View>
 );
 
+const email = 'afhamuzumaki34@gmail.com'; // You can replace this with dynamic user email
+
 export default function CommunityProgramsScreen() {
   const [expandedProgram, setExpandedProgram] = useState(null);
   const [notEnrolledPrograms, setNotEnrolledPrograms] = useState([]);
-
+  const navigation = useNavigation(); // Initialize navigation
   useEffect(() => {
     const fetchNotEnrolledPrograms = async () => {
       try {
-        // Replace with your actual backend URL and logged-in user's email
-        const response = await axios.get('http://localhost:5000/Program/not-enrolled-programs/user@example.com');
-        setNotEnrolledPrograms(response.data);
+        const response = await axios.get(`http://${IPAddress}:5000/Program/unenrolled-programs?userEmail=${email}`);
+        console.log(response.data);
+        setNotEnrolledPrograms(response.data.data || []); // Ensure it's an array
       } catch (error) {
         console.error('Error fetching not enrolled programs:', error);
       }
@@ -47,21 +51,47 @@ export default function CommunityProgramsScreen() {
     fetchNotEnrolledPrograms();
   }, []);
 
+  const handleEnroll = async (programId) => {
+    try {
+      // Call your API to enroll the user in the program
+      const response=await axios.put(`http://${IPAddress}:5000/Program/enroll`, {
+        programId,
+        userEmail: email, // Assuming email is defined
+      });
+      console.log(response.data);
+      // Redirect to the enrolled community programs screen
+      navigation.navigate('EnrolledProgram'); // Change this to your actual route name
+    } catch (error) {
+      console.error('Error enrolling in program:', error);
+      // Optionally handle errors here, e.g., show an alert
+    }
+  };
+  const handleLocationPress = (location) => {
+    // Navigate to the MapScreen with location as a parameter
+    navigation.navigate('Location', { location });
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Unenrolled Community Programs</Text>
-          <TouchableOpacity style={styles.enrolledButton}>
-            <Text style={styles.enrolledButtonText}>Enrolled</Text>
-          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Community Programs</Text>
+          <TouchableOpacity style={styles.enrolledButton} onPress={() => navigation.navigate('EnrolledProgram')}>
+  <Text style={styles.enrolledButtonText}>Enrolled</Text>
+</TouchableOpacity>
+
         </View>
         {notEnrolledPrograms.map((program, index) => (
           <ProgramItem
             key={index}
-            {...program}
+            name={program.title} // Ensure you're mapping correct field names
+            type={program.label}
+            description={program.description}
+            location={program.address}
             isExpanded={expandedProgram === index}
             onToggle={() => setExpandedProgram(expandedProgram === index ? null : index)}
+            onEnroll={() => handleEnroll(program._id)} // Pass the program ID
+            onLocationPress={() => handleLocationPress(program.address)}  // Pass location to handler
           />
         ))}
       </ScrollView>
@@ -76,6 +106,7 @@ export default function CommunityProgramsScreen() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -86,6 +117,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
+    borderTopWidth:50,
     borderBottomWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -93,6 +125,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#374151',
+    textAlign: 'center',
+    left: 60,
   },
   enrolledButton: {
     backgroundColor: '#3b82f6',

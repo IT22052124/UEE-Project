@@ -36,12 +36,12 @@ import Location from "./CommunityProgram/Screen/Location";
 import JobProviderSignIn from "./Jobs/Screen/JobProviderSignIn";
 import Toast from "react-native-toast-message";
 import JobApplicationsScreen from "./Jobs/Screen/ApplicationsRecieved";
-import UserScreen from "./Pages/CommunityConnect/Screen/UserScreen";
 import UpdateJobScreen from "./Jobs/Screen/UpdateJob";
 import AppliedJobsScreen from "./Jobs/Screen/AppliedJobs";
 import SignInScreen from "./OtherScreens/SignInScreen";
 import ChatScreen from "./Pages/CommunityConnect/Screen/ChatScreen";
 import ChatListScreen from "./Pages/CommunityConnect/Screen/ChatListScreen";
+import JobNotificationsScreen from "./Jobs/Screen/Notifications";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -97,11 +97,16 @@ function BottomTabNavigator() {
           } else if (route.name === "AppliedJobsScreen") {
             // Icon for Applied Jobs Screen
             iconName = focused ? "document" : "document-outline";
-          }
+          // } else if (route.name === "DonationHomepage") {
+          //   // Icon for Applied Jobs Screen
+          //   iconName = focused ? "document" : "heart-half-outline";
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "tomato", // Customize the active icon color
+        tabBarActiveTintColor: "#4a90e2", // Customize the active icon color
         tabBarInactiveTintColor: "gray", // Customize the inactive icon color
       })}
     >
@@ -110,11 +115,17 @@ function BottomTabNavigator() {
         component={JobListScreen}
         options={{ headerShown: false, tabBarLabel: "Jobs" }} // Set proper label
       />
+       {/* <Tab.Screen
+        name="DonationHomepage"
+        component={DonationHomepage}
+        options={{ headerShown: false, tabBarLabel: "Donate Now" }} // Set proper label
+      /> */}
       <Tab.Screen
         name="AppliedJobsScreen"
         component={AppliedJobsScreen}
         options={{ headerShown: false, tabBarLabel: "Applied Jobs" }} // Set proper label
       />
+      
     </Tab.Navigator>
   );
 }
@@ -153,11 +164,7 @@ export default function App() {
           component={SearchScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="UserScreen"
-          component={UserScreen}
-          options={{ headerShown: false }}
-        />
+        
         <Stack.Screen
           name="CreateCommunityScreen"
           component={CreateCommunityScreen}
@@ -282,6 +289,11 @@ export default function App() {
         <Stack.Screen
           name="ApplyJobScreen"
           component={ApplyJobScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobNotificationsScreen"
+          component={JobNotificationsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

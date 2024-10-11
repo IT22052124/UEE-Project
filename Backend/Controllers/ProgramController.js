@@ -81,59 +81,88 @@ export const deleteProgram = async (req, res) => {
   }
 };
 
-export const getEnrolledPrograms = async (req, res) => {
-  const userEmail = req.params.email;
+// Controller to get all unenrolled programs for a specific user
+export const getUnenrolledPrograms = async (req, res) => {
+  const { userEmail } = req.query; // Get the user's email from the query parameters
+  console.log(userEmail);
+  if (!userEmail) {
+    return res.status(400).json({ message: 'User email is required' });
+  }
 
   try {
-    // Fetch programs where the user is enrolled
-    const enrolledPrograms = await CommunityProgram.find({
-      'user_enrollments.email': userEmail,
-      'user_enrollments.status': 'Enrolled',
+    // Fetch all programs from the database
+    const allPrograms = await Program.find();
+    console.log(allPrograms);
+
+    // Filter programs that the user is not enrolled in
+    const unenrolledPrograms = allPrograms.filter(program => {
+      // Check if user_enrollments is an array and contains the userEmail
+      const isEnrolled = Array.isArray(program.user_enrollments) && 
+                         program.user_enrollments.some(enrollment => enrollment.email === userEmail && enrollment.status === 'Enrolled');
+      return !isEnrolled; // Include programs that the user is not enrolled in
     });
 
-    res.status(200).json(enrolledPrograms);
+    res.status(200).json({ data: unenrolledPrograms });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching enrolled programs', error });
+    res.status(500).json({ message: 'Error retrieving programs', error });
   }
 };
 
-// Get not enrolled programs for a user
-export const getNotEnrolledPrograms = async (req, res) => {
-  const userEmail = req.params.email;
+
+
+
+
+// Controller function to enroll a user in a program
+export const enrollUserInProgram = async (req, res) => {
+  const { programId, userEmail } = req.body;
+  console.log(userEmail, programId);
 
   try {
-    // Fetch programs where the user is not enrolled
-    const notEnrolledPrograms = await CommunityProgram.find({
-      'user_enrollments.email': { $ne: userEmail },
-    });
+    // Find the program by ID in the database
+    const program = await Program.findById(programId);
 
-    res.status(200).json(notEnrolledPrograms);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching not enrolled programs', error });
-  }
-};
-
-// Enroll user in a program
-export const enrollInProgram = async (req, res) => {
-  const { program_id, user_email } = req.body;
-
-  try {
-    // Find the program by its ID
-    const program = await CommunityProgram.findById(program_id);
-
-    // Check if the user is already enrolled
-    const existingEnrollment = program.user_enrollments.find(enrollment => enrollment.email === user_email);
-
-    if (existingEnrollment) {
-      return res.status(400).json({ message: 'User is already enrolled in this program.' });
+    if (!program) {
+      return res.status(404).json({ message: 'Program not found' });
     }
 
-    // Add the enrollment
-    program.user_enrollments.push({ email: user_email, status: 'Enrolled' });
+    // Check if the user is already enrolled
+    const existingEnrollment = program.user_enrollments.find(enrollment => enrollment.email === userEmail);
+
+    if (existingEnrollment) {
+      return res.status(400).json({ message: 'User is already enrolled in this program' });
+    }
+
+    // Add the user's email to the user_enrollments array
+    program.user_enrollments.push({ email: userEmail, status: 'Enrolled' });
+    
+    // Save the updated program
     await program.save();
 
-    res.status(200).json({ message: 'Enrollment successful.' });
+    return res.status(200).json({ message: 'Successfully enrolled in the program', program });
   } catch (error) {
-    res.status(500).json({ message: 'Error enrolling user.', error });
+    return res.status(500).json({ message: 'Error enrolling in the program', error });
+  }
+};
+
+// Controller function to get programs a user is enrolled in
+export const getEnrolledPrograms = async (req, res) => {
+  const { userEmail } = req.query; // Get the user's email from the query parameters
+  console.log(userEmail);
+  if (!userEmail) {
+    return res.status(400).json({ message: 'User email is required' });
+  }
+
+  try {
+    // Fetch all programs from the database
+    const allPrograms = await Program.find();
+    
+    // Filter programs that the user is enrolled in
+    const enrolledPrograms = allPrograms.filter(program => 
+      program.user_enrollments.some(enrollment => enrollment.email === userEmail && enrollment.status === 'Enrolled')
+    );
+
+    res.status(200).json({ data: enrolledPrograms });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving enrolled programs', error });
   }
 };

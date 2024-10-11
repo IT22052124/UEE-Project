@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import ImageUpload from "../shared/ImageUpload";
+import { ToastContainer, toast } from 'react-toastify';
 
 const DonationForm = () => {
   const [progress, setProgress] = useState(0);
@@ -111,6 +112,7 @@ const DonationForm = () => {
         emergency: formData.emergency,
         image: downloadURLs.map((fileData) => fileData.url),
       });
+      toast.success("Donation created successfully!");
       setSuccess("Donation created successfully!");
       setError("");
       setFormData({

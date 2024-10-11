@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
 
 const DonationTable = () => {
   const [donations, setDonations] = useState([]);
@@ -49,6 +50,7 @@ const DonationTable = () => {
       setFilteredDonations(
         filteredDonations.filter((donation) => donation.Id !== id)
       );
+      toast.su("Donation deleted successfully!");
     } catch (err) {
       setError("Failed to delete donation");
     }
@@ -106,7 +108,7 @@ const DonationTable = () => {
     <div className="container ml-60 p-6 mt-0 mx-auto px-4 sm:px-8">
       <div className="py-8">
         <div className="flex flex-col md:flex-row justify-between w-full mb-1 sm:mb-0">
-          <h2 className="text-3xl leading-tight text-gray-800 font-bold">
+          <h2 className="text-4xl leading-tight text-gray-800 font-bold">
             Donations
           </h2>
           <div className="text-end">
@@ -191,7 +193,7 @@ const DonationTable = () => {
 
         <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
           <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
-            <table className="min-w-full leading-normal">
+            <table className="min-w-full  leading-normal">
               <thead>
                 <tr>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-blue-500 text-left text-xs font-semibold text-white uppercase tracking-wider">

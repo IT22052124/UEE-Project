@@ -4,8 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';  // Axios for API calls
 import { IPAddress } from "../../globals";
 import { useNavigation } from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
 
-const ProgramItem = ({ name, type, description, location, isExpanded, onToggle, onEnroll, onLocationPress  }) => (
+const ProgramItem = ({ name, type, description, location, startDate, endDate, organizer, isExpanded, onToggle, onEnroll, onLocationPress  }) => (
   <View style={styles.programItem}>
     <TouchableOpacity onPress={onToggle} style={styles.programHeader}>
       <Text style={styles.programName}>{name}</Text>
@@ -16,10 +17,15 @@ const ProgramItem = ({ name, type, description, location, isExpanded, onToggle, 
     </TouchableOpacity>
     {isExpanded && (
       <View style={styles.programDetails}>
-        <Text style={styles.programDescription}>{description}</Text>
-        <Text style={styles.programLocation}>{location}</Text>
+        <Text style={styles.programDescription}>
+          {description} This is a {type.toLowerCase()} program organized by {organizer}. 
+        </Text>
+        <Text style={styles.programDate}>
+          Start Date: {startDate} | End Date: {endDate}
+        </Text>
+        <Text style={styles.programLocation}>Location: {location}</Text>
         <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.locationButton} onPress={onLocationPress}>
+          <TouchableOpacity style={styles.locationButton} onPress={onLocationPress}>
             <Text style={styles.buttonText}>Location</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.enrollButton} onPress={onEnroll}>
@@ -37,12 +43,27 @@ export default function CommunityProgramsScreen() {
   const [expandedProgram, setExpandedProgram] = useState(null);
   const [notEnrolledPrograms, setNotEnrolledPrograms] = useState([]);
   const navigation = useNavigation(); // Initialize navigation
+  
+  
+
   useEffect(() => {
     const fetchNotEnrolledPrograms = async () => {
       try {
         const response = await axios.get(`http://${IPAddress}:5000/Program/unenrolled-programs?userEmail=${email}`);
         console.log(response.data);
-        setNotEnrolledPrograms(response.data.data || []); // Ensure it's an array
+        const programs = response.data.data || [];
+        setNotEnrolledPrograms(programs);
+
+        // Check for new programs
+        programs.forEach(program => {
+          const startDate = new Date(program.startDate);
+          const currentDate = new Date();
+
+          // If the program starts today or in the future, schedule a notification
+          if (startDate.toDateString() === currentDate.toDateString()) {
+            scheduleNotification(program.title, startDate);
+          }
+        });
       } catch (error) {
         console.error('Error fetching not enrolled programs:', error);
       }
@@ -54,7 +75,7 @@ export default function CommunityProgramsScreen() {
   const handleEnroll = async (programId) => {
     try {
       // Call your API to enroll the user in the program
-      const response=await axios.put(`http://${IPAddress}:5000/Program/enroll`, {
+      const response = await axios.put(`http://${IPAddress}:5000/Program/enroll`, {
         programId,
         userEmail: email, // Assuming email is defined
       });
@@ -66,6 +87,17 @@ export default function CommunityProgramsScreen() {
       // Optionally handle errors here, e.g., show an alert
     }
   };
+
+  const scheduleNotification = async (title, date) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `New Program Starting: ${title}`,
+        body: `A new program "${title}" is starting today! Check it out.`,
+      },
+      trigger: date,
+    });
+  };
+
   const handleLocationPress = (location) => {
     // Navigate to the MapScreen with location as a parameter
     navigation.navigate('Location', { location });
@@ -77,9 +109,8 @@ export default function CommunityProgramsScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Community Programs</Text>
           <TouchableOpacity style={styles.enrolledButton} onPress={() => navigation.navigate('EnrolledProgram')}>
-  <Text style={styles.enrolledButtonText}>Enrolled</Text>
-</TouchableOpacity>
-
+            <Text style={styles.enrolledButtonText}>Enrolled</Text>
+          </TouchableOpacity>
         </View>
         {notEnrolledPrograms.map((program, index) => (
           <ProgramItem
@@ -88,6 +119,9 @@ export default function CommunityProgramsScreen() {
             type={program.label}
             description={program.description}
             location={program.address}
+            startDate={new Date(program.startDate).toLocaleDateString()}
+            endDate={new Date(program.endDate).toLocaleDateString()}
+            organizer={program.organizer}
             isExpanded={expandedProgram === index}
             onToggle={() => setExpandedProgram(expandedProgram === index ? null : index)}
             onEnroll={() => handleEnroll(program._id)} // Pass the program ID

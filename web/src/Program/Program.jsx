@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
-import ImageUpload from "../shared/ImageUpload";
+
 
 const ProgramForm = () => {
   const [progress, setProgress] = useState(0);
-  const [imageUploading, setImageUploading] = useState(false);
-  const [downloadURLs, setDownloadURLs] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     label: "", // Now will hold the selected option
     address: "",
     locationRedirectUrl: "",
-    mapImage: [""],
+    startDate: "", // New start date field
+    endDate: "",   // New end date field
+    organizer: "",
   });
 
   const [error, setError] = useState("");
@@ -36,16 +36,24 @@ const ProgramForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Date validation: Ensure endDate is not earlier than startDate
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+
+    if (end < start) {
+      setError("End date cannot be earlier than the start date.");
+      return;
+    }
+
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("label", formData.label);
     formDataToSend.append("address", formData.address);
     formDataToSend.append("locationRedirectUrl", formData.locationRedirectUrl);
-
-    if (formData.mapImage) {
-      formDataToSend.append("mapImage", downloadURLs);
-    }
+    formDataToSend.append("startDate", formData.startDate);
+    formDataToSend.append("endDate", formData.endDate);
+    formDataToSend.append("organizer", formData.organizer);
 
     try {
       const response = await axios.post("http://localhost:5000/Program", {
@@ -54,7 +62,10 @@ const ProgramForm = () => {
         label: formData.label,
         address: formData.address,
         locationRedirectUrl: formData.locationRedirectUrl,
-        mapImage: downloadURLs.map((fileData) => fileData.url),
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        organizer: formData.organizer
+        
       });
       setSuccess("Community program created successfully!");
       setError("");
@@ -64,7 +75,9 @@ const ProgramForm = () => {
         label: "",
         address: "",
         locationRedirectUrl: "",
-        mapImage: [""],
+        startDate: "",
+        endDate: "",
+        organizer: "",
       });
     } catch (err) {
       setError("Failed to create program. Please try again.");
@@ -139,6 +152,26 @@ const ProgramForm = () => {
           />
         </div>
 
+        {/* Organizer */}
+        <div>
+          <label
+            className="block text-sm font-medium text-gray-700 mb-2"
+            htmlFor="organizer"
+          >
+            Organizer
+          </label>
+          <input
+            type="text"
+            id="organizer"
+            name="organizer"
+            placeholder="Enter the Organizer here"
+            value={formData.organizer}
+            onChange={handleChange}
+            className="mt-1 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            required
+          />
+        </div>
+
         {/* Label */}
         <div>
           <label
@@ -206,57 +239,45 @@ const ProgramForm = () => {
           />
         </div>
 
-        {/* Map Image Upload */}
-        <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg">
-          <div className="flex space-x-4 overflow-x-auto w-full">
-            {imageUploading && (
-              <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
-                <p className="text-center text-lg text-black">{progress}%</p>
-              </div>
-            )}
-            {!imageUploading &&
-              downloadURLs.map((fileData, index) => (
-                <div key={index} className="relative w-36 h-36 flex-shrink-0">
-                  <img
-                    src={fileData.url}
-                    alt={`Map ${index + 1}`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <button
-                    onClick={() => handleDelete(fileData.ref, index)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-700 focus:outline-none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            {downloadURLs.length === 0 && !imageUploading && (
-              <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
-                <p className="text-center text-lg text-black">Add map image</p>
-              </div>
-            )}
-          </div>
-          <div className="mt-4">
-            <ImageUpload
-              setDownloadURLs={setDownloadURLs}
-              setProgress={setProgress}
-              setLoading={setImageUploading}
-            />
-          </div>
+        {/* Start Date */}
+        <div>
+          <label
+            className="block text-sm font-medium text-gray-700 mb-2"
+            htmlFor="startDate"
+          >
+            Start Date
+          </label>
+          <input
+            type="date"
+            id="startDate"
+            name="startDate"
+            value={formData.startDate}
+            onChange={handleChange}
+            className="mt-1 block w-full pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            required
+          />
         </div>
+
+        {/* End Date */}
+        <div>
+          <label
+            className="block text-sm font-medium text-gray-700 mb-2"
+            htmlFor="endDate"
+          >
+            End Date
+          </label>
+          <input
+            type="date"
+            id="endDate"
+            name="endDate"
+            value={formData.endDate}
+            onChange={handleChange}
+            className="mt-1 block w-full pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            required
+          />
+        </div>
+
+          
 
         {/* Submit Button */}
         <div className="mt-8">
@@ -273,4 +294,3 @@ const ProgramForm = () => {
 };
 
 export default ProgramForm;
-

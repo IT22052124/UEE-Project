@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import ImageUpload from "../shared/ImageUpload"; // Assuming this component is used for image uploading
+
 
 const ProgramUpdateForm = () => {
   const { id } = useParams(); // Get the program ID from the URL parameters
@@ -11,10 +11,11 @@ const ProgramUpdateForm = () => {
     label: '',
     address: '',
     locationRedirectUrl: '',
-    mapImage: '', // Store the image URL
+    startDate: "", // New start date field
+    endDate: "",   // New end date field
+    organizer: "",
   });
-  const [downloadURLs, setDownloadURLs] = useState([]); // Store the uploaded image URLs
-  const [imageUploading, setImageUploading] = useState(false);
+
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,7 +34,9 @@ const ProgramUpdateForm = () => {
           label: programData.label,
           address: programData.address,
           locationRedirectUrl: programData.locationRedirectUrl,
-          mapImage: programData.mapImage[0], // Assuming it's a single image URL
+          startDate: programData.startDate,
+        endDate: programData.endDate,
+        organizer: programData.organizer
         });
         setDownloadURLs([{ url: programData.mapImage[0] }]); // Set the current image URL
       } catch (err) {
@@ -57,7 +60,7 @@ const ProgramUpdateForm = () => {
 
     const updatedData = {
       ...program,
-      mapImage: downloadURLs.map((fileData) => fileData.url), // Updated images
+     
     };
 
     try {
@@ -117,6 +120,26 @@ const ProgramUpdateForm = () => {
           />
         </div>
 
+           {/* Organizer */}
+           <div>
+          <label
+            className="block text-sm font-medium text-gray-700 mb-2"
+            htmlFor="organizer"
+          >
+            Organizer
+          </label>
+          <input
+            type="text"
+            id="organizer"
+            name="organizer"
+            placeholder="Enter the Organizer here"
+            value={program.organizer}
+            onChange={handleChange}
+            className="mt-1 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            required
+          />
+        </div>
+
         {/* Label Selection */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">Label</label>
@@ -166,37 +189,42 @@ const ProgramUpdateForm = () => {
           <small className="text-gray-500">Please enter a valid URL (starting with http:// or https://).</small>
         </div>
 
-        {/* Map Image Upload & Preview */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Map Image</label>
-          <div className="flex space-x-4">
-            {imageUploading && (
-              <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
-                <p className="text-center text-lg text-black">{progress}%</p>
-              </div>
-            )}
-            {!imageUploading &&
-              downloadURLs.map((fileData, index) => (
-                <div key={index} className="relative w-36 h-36">
-                  <img
-                    src={fileData.url}
-                    alt={`Map ${index + 1}`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <button
-                    onClick={() => setDownloadURLs(downloadURLs.filter((_, i) => i !== index))}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-700"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            {downloadURLs.length === 0 && (
-              <div className="text-gray-500">No images uploaded.</div>
-            )}
-          </div>
+        {/* Start Date */}
+        <div>
+          <label
+            className="block text-sm font-medium text-gray-700 mb-2"
+            htmlFor="startDate"
+          >
+            Start Date
+          </label>
+          <input
+            type="date"
+            id="startDate"
+            name="startDate"
+            value={program.startDate}
+            onChange={handleChange}
+            className="mt-1 block w-full pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            required
+          />
+        </div>
+
+        {/* End Date */}
+        <div>
+          <label
+            className="block text-sm font-medium text-gray-700 mb-2"
+            htmlFor="endDate"
+          >
+            End Date
+          </label>
+          <input
+            type="date"
+            id="endDate"
+            name="endDate"
+            value={program.endDate}
+            onChange={handleChange}
+            className="mt-1 block w-full pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
+            required
+          />
         </div>
 
         {/* Submit and Cancel Buttons */}

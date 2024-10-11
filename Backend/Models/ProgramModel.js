@@ -12,6 +12,11 @@ const programSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  organizer: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   label: {
     type: String,
     required: true,
@@ -35,10 +40,6 @@ const programSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  mapImage: {
-    type: [String], // Array of strings to store multiple image URLs
-    required: true,
-  },
   user_enrollments: [
     {
       email: String,
@@ -49,10 +50,24 @@ const programSchema = new mongoose.Schema({
       },
     },
   ],
+  status: {
+    type: String,
+    required: true,
+    enum: ["active", "completed", "cancelled"],
+    default: "active",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
-});
+  startDate: {
+    type: Date,  // Date type for start date
+    required: true
+  },
+  endDate: {
+    type: Date,  // Date type for end date
+    required: true
+}}
+);
 
 export const Program = mongoose.model("Program", programSchema);

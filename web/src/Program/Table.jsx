@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import Modal from 'react-modal';
 
 const ProgramTable = () => {
   const [programs, setPrograms] = useState([]);
@@ -11,7 +11,8 @@ const ProgramTable = () => {
   const [error, setError] = useState('');
   const [editProgram, setEditProgram] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
-  const [zoomedImage, setZoomedImage] = useState(null); // State for zoomed image
+  const [enrolledUsers, setEnrolledUsers] = useState([]);
+  const [showEnrollmentsModal, setShowEnrollmentsModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,7 +21,6 @@ const ProgramTable = () => {
         const response = await axios.get('http://localhost:5000/Program/programs');
         setPrograms(response.data.data);
         setFilteredPrograms(response.data.data);
-        console.log(response.data.data);
       } catch (err) {
         console.error(err);
         setError('Failed to fetch programs');
@@ -57,11 +57,13 @@ const ProgramTable = () => {
     }
   };
 
-  const handleEdit = (id) => {
-    navigate(`/pupdate/${id}`);
+  const handleEdit = (program) => {
+    setEditProgram(program);
+    setShowEditForm(true);
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e) => {
+    e.preventDefault();
     try {
       await axios.put(`http://localhost:5000/Program/programs/${editProgram._id}`, editProgram);
       const updatedPrograms = programs.map((program) =>
@@ -76,12 +78,16 @@ const ProgramTable = () => {
     }
   };
 
-  const handleImageClick = (image) => {
-    setZoomedImage(image);
+  const handleViewEnrollments = (program) => {
+    const enrolled = program.user_enrollments.filter((enrollment) => enrollment.status === 'Enrolled');
+    const enrolledEmails = enrolled.map((enrollment) => enrollment.email);
+    setEnrolledUsers(enrolledEmails);
+    setShowEnrollmentsModal(true);
   };
 
-  const handleCloseZoom = () => {
-    setZoomedImage(null);
+  const handleCloseModal = () => {
+    setShowEnrollmentsModal(false);
+    setEnrolledUsers([]);
   };
 
   if (loading) {
@@ -157,6 +163,24 @@ const ProgramTable = () => {
                   onChange={(e) => setEditProgram({ ...editProgram, address: e.target.value })}
                 />
               </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Start Date</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border rounded-md"
+                  value={editProgram?.startDate?.split('T')[0] || ''}
+                  onChange={(e) => setEditProgram({ ...editProgram, startDate: e.target.value })}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">End Date</label>
+                <input
+                  type="date"
+                  className="w-full p-2 border rounded-md"
+                  value={editProgram?.endDate?.split('T')[0] || ''}
+                  onChange={(e) => setEditProgram({ ...editProgram, endDate: e.target.value })}
+                />
+              </div>
               <button
                 type="submit"
                 className="bg-blue-500 text-white px-4 py-2 rounded-md"
@@ -186,16 +210,16 @@ const ProgramTable = () => {
                     Description
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600 text-left text-xs font-semibold uppercase tracking-wider">
+                    Organizer
+                  </th>
+                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600 text-left text-xs font-semibold uppercase tracking-wider">
                     Address
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600 text-left text-xs font-semibold uppercase tracking-wider">
-                    Label
+                    Start Date
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600 text-left text-xs font-semibold uppercase tracking-wider">
-                    Image
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600 text-left text-xs font-semibold uppercase tracking-wider">
-                    Location URL
+                    End Date
                   </th>
                   <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-gray-600 text-left text-xs font-semibold uppercase tracking-wider">
                     Actions
@@ -205,55 +229,73 @@ const ProgramTable = () => {
               <tbody>
                 {filteredPrograms.map((program) => (
                   <tr key={program._id}>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{program.title}</td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{program.description}</td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{program.address}</td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{program.label}</td>
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <img
-                        src={program.mapImage}
-                        alt={program.title}
-                        className="w-16 h-16 cursor-pointer"
-                        onClick={() => handleImageClick(program.mapImage)}
-                      />
+                      <p className="text-gray-900 whitespace-no-wrap">{program.title}</p>
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <a href={program.locationRedirectUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        {program.locationRedirectUrl}
-                      </a>
+                      <p className="text-gray-900 whitespace-no-wrap">{program.description}</p>
                     </td>
                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <button onClick={() => handleEdit(program._id)} className="text-blue-600 hover:text-blue-900">
+                      <p className="text-gray-900 whitespace-no-wrap">{program.organizer}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <p className="text-gray-900 whitespace-no-wrap">{program.address}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <p className="text-gray-900 whitespace-no-wrap">{new Date(program.startDate).toLocaleDateString()}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <p className="text-gray-900 whitespace-no-wrap">{new Date(program.endDate).toLocaleDateString()}</p>
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                      <button
+                        className="text-blue-500 hover:underline"
+                        onClick={() => handleEdit(program)}
+                      >
                         Edit
                       </button>
-                      <button onClick={() => handleDelete(program._id)} className="text-red-600 hover:text-red-900 ml-4">
+                      <button
+                        className="text-red-500 hover:underline ml-4"
+                        onClick={() => handleDelete(program._id)}
+                      >
                         Delete
+                      </button>
+                      <button
+                        className="text-green-500 hover:underline ml-4"
+                        onClick={() => handleViewEnrollments(program)}
+                      >
+                        View Enrollments
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {showEnrollmentsModal && (
+              <Modal isOpen={showEnrollmentsModal} onRequestClose={handleCloseModal}>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-lg p-6 shadow-lg" style={{ minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
+                <h2 className="text-lg font-bold">Enrolled Users</h2>
+                <ul>
+                  {enrolledUsers.map((email, index) => (
+                    <li key={index}>{email}</li>
+                  ))}
+                </ul>
+                
+                <button className="mt-auto bg-gray-500 text-white px-4 py-2 rounded-md self-end" onClick={handleCloseModal}>Close</button>
+                </div>
+                </div>
+              </Modal>
+            )}
+            
           </div>
         </div>
-
-        {zoomedImage && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75">
-            <div className="relative">
-              <img src={zoomedImage} alt="Zoomed" className="max-w-full max-h-full" />
-              <button
-                onClick={handleCloseZoom}
-                className="absolute top-2 right-2 text-white text-2xl"
-              >
-                &times;
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
 export default ProgramTable;
+
+
 

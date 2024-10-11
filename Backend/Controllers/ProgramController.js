@@ -9,7 +9,10 @@ export const createProgram = async (req, res) => {
       label: req.body.label,
       address: req.body.address,
       locationRedirectUrl: req.body.locationRedirectUrl,
-      mapImage: req.body.mapImage, // Array of image URLs
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+      organizer: req.body.organizer,
+      status: 'active', // Automatically set the status to active
     });
 
     const savedProgram = await newProgram.save();
@@ -53,7 +56,8 @@ export const updateProgram = async (req, res) => {
         label: req.body.label,
         address: req.body.address,
         locationRedirectUrl: req.body.locationRedirectUrl,
-        mapImage: req.body.mapImage,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
       },
       { new: true } // Return the updated document
     );
@@ -84,41 +88,36 @@ export const deleteProgram = async (req, res) => {
 // Controller to get all unenrolled programs for a specific user
 export const getUnenrolledPrograms = async (req, res) => {
   const { userEmail } = req.query; // Get the user's email from the query parameters
-  console.log(userEmail);
+
   if (!userEmail) {
     return res.status(400).json({ message: 'User email is required' });
   }
 
   try {
-    // Fetch all programs from the database
-    const allPrograms = await Program.find();
-    console.log(allPrograms);
-
-    // Filter programs that the user is not enrolled in
+    // Fetch all programs with status 'active'
+    const allPrograms = await Program.find({ status: 'active' }).exec();
+    
+    // Filter programs where the user is not enrolled
     const unenrolledPrograms = allPrograms.filter(program => {
-      // Check if user_enrollments is an array and contains the userEmail
-      const isEnrolled = Array.isArray(program.user_enrollments) && 
-                         program.user_enrollments.some(enrollment => enrollment.email === userEmail && enrollment.status === 'Enrolled');
+      const isEnrolled = Array.isArray(program.user_enrollments) &&
+                         program.user_enrollments.some(enrollment => 
+                            enrollment.email === userEmail && enrollment.status === 'Enrolled'
+                         );
       return !isEnrolled; // Include programs that the user is not enrolled in
     });
 
     res.status(200).json({ data: unenrolledPrograms });
   } catch (error) {
+    console.error('Error retrieving programs:', error); // Log the error for debugging
     res.status(500).json({ message: 'Error retrieving programs', error });
   }
 };
 
-
-
-
-
 // Controller function to enroll a user in a program
 export const enrollUserInProgram = async (req, res) => {
   const { programId, userEmail } = req.body;
-  console.log(userEmail, programId);
 
   try {
-    // Find the program by ID in the database
     const program = await Program.findById(programId);
 
     if (!program) {
@@ -135,7 +134,6 @@ export const enrollUserInProgram = async (req, res) => {
     // Add the user's email to the user_enrollments array
     program.user_enrollments.push({ email: userEmail, status: 'Enrolled' });
     
-    // Save the updated program
     await program.save();
 
     return res.status(200).json({ message: 'Successfully enrolled in the program', program });
@@ -146,15 +144,15 @@ export const enrollUserInProgram = async (req, res) => {
 
 // Controller function to get programs a user is enrolled in
 export const getEnrolledPrograms = async (req, res) => {
-  const { userEmail } = req.query; // Get the user's email from the query parameters
-  console.log(userEmail);
+  const { userEmail, status = 'active' } = req.query; // Get the user's email and status from the query parameters
+
   if (!userEmail) {
     return res.status(400).json({ message: 'User email is required' });
   }
 
   try {
-    // Fetch all programs from the database
-    const allPrograms = await Program.find();
+    // Fetch all programs with the specified status
+    const allPrograms = await Program.find({ status });
     
     // Filter programs that the user is enrolled in
     const enrolledPrograms = allPrograms.filter(program => 
@@ -166,3 +164,4 @@ export const getEnrolledPrograms = async (req, res) => {
     res.status(500).json({ message: 'Error retrieving enrolled programs', error });
   }
 };
+

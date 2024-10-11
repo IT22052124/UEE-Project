@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';  // Import Axios for API calls
+import axios from 'axios'; // Import Axios for API calls
 import { IPAddress } from '../../globals';
 import { useNavigation } from '@react-navigation/native';
+//import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ProgramItem = ({ name, type, description, location, isExpanded, onToggle, onLocationPress }) => (
+const ProgramItem = ({ name, type, description, location, startDate, endDate, organizer, isExpanded, onToggle, onLocationPress }) => (
   <View style={styles.programItem}>
     <TouchableOpacity onPress={onToggle} style={styles.programHeader}>
       <Text style={styles.programName}>{name}</Text>
@@ -18,6 +19,9 @@ const ProgramItem = ({ name, type, description, location, isExpanded, onToggle, 
       <View style={styles.programDetails}>
         <Text style={styles.programDescription}>{description}</Text>
         <Text style={styles.programLocation}>{location}</Text>
+        <Text style={styles.programDates}>Start Date: {startDate}</Text>
+        <Text style={styles.programDates}>End Date: {endDate}</Text>
+        <Text style={styles.programOrganizer}>Organizer: {organizer}</Text>
         <TouchableOpacity style={styles.locationButton} onPress={onLocationPress}>
           <Text style={styles.buttonText}>Location</Text>
         </TouchableOpacity>
@@ -28,9 +32,11 @@ const ProgramItem = ({ name, type, description, location, isExpanded, onToggle, 
 
 export default function EnrolledProgramsScreen() {
   const [expandedProgram, setExpandedProgram] = useState(null);
-  const [enrolledPrograms, setEnrolledPrograms] = useState([]);  // State to hold enrolled programs
+  const [enrolledPrograms, setEnrolledPrograms] = useState([]); // State to hold enrolled programs
   const navigation = useNavigation(); // Initialize navigation
-  const email = 'afhamuzumaki34@gmail.com'; // Replace with actual user's email
+  //const userDetails = await AsyncStorage.getItem("user");
+     // const email = JSON.parse(userDetails)?.email;
+     const email = 'afhamuzumaki34@gmail.com'; // Replace with actual user's email
 
   useEffect(() => {
     const fetchEnrolledPrograms = async () => {
@@ -64,9 +70,12 @@ export default function EnrolledProgramsScreen() {
             type={program.label}
             description={program.description}
             location={program.address}
+            startDate={new Date(program.startDate).toLocaleDateString()} // Format date as needed
+            endDate={new Date(program.endDate).toLocaleDateString()} // Format date as needed
+            organizer={program.organizer}
             isExpanded={expandedProgram === index}
             onToggle={() => setExpandedProgram(expandedProgram === index ? null : index)}
-            onLocationPress={() => handleLocationPress(program.address)}  // Pass location to handler
+            onLocationPress={() => handleLocationPress(program.address)} // Pass location to handler
           />
         ))}
       </ScrollView>
@@ -134,6 +143,15 @@ const styles = StyleSheet.create({
   programLocation: {
     marginBottom: 8,
     color: '#6b7280',
+  },
+  programDates: {
+    marginBottom: 8,
+    color: '#6b7280',
+  },
+  programOrganizer: {
+    marginBottom: 8,
+    fontWeight: 'bold',
+    color: '#374151',
   },
   locationButton: {
     backgroundColor: '#ef4444',

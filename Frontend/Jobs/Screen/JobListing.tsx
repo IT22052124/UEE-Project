@@ -79,7 +79,9 @@ export default function JobListScreen({ navigation }) {
     <TouchableOpacity
       style={styles.jobItem}
       onPress={() => {
+        console.log(item)
         navigation.navigate("JobDetailsScreen", { item: item });
+
       }}
     >
       <Image

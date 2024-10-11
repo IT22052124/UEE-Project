@@ -35,6 +35,8 @@ export default function JobDetailsScreen({ navigation, route }) {
   const [applied, setApplied] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  console.log(item)
+
   const checkApplicationStatus = async () => {
     try {
       setLoading(true);
@@ -81,7 +83,7 @@ export default function JobDetailsScreen({ navigation, route }) {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this job opportunity: ${item.title} at ${item.postedBy.companyName}`,
+        message: `Check out this job opportunity: ${item.title} at ${item?.postedBy?.companyName}`,
       });
     } catch (error) {
       console.error(error);
@@ -96,11 +98,11 @@ export default function JobDetailsScreen({ navigation, route }) {
             onPress={() => navigation.goBack()}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color="#4a90e2" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{item.title}</Text>
           <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-            <Ionicons name="share-outline" size={24} color="#333" />
+            <Ionicons name="share-outline" size={24} color="#4a90e2" />
           </TouchableOpacity>
         </View>
 
@@ -114,14 +116,14 @@ export default function JobDetailsScreen({ navigation, route }) {
             style={styles.logo}
           />
           <View style={styles.companyText}>
-            <Text style={styles.companyName}>{item.postedBy.companyName}</Text>
+            <Text style={styles.companyName}>{item.postedBy?.companyName}</Text>
             <View style={styles.statItem}>
               <MaterialIcons name="location-on" size={20} color="#666" />
               <Text style={styles.statText}>{item.location}</Text>
             </View>
             <View style={styles.statItem}>
               <MaterialIcons name="email" size={20} color="#666" />
-              <Text style={styles.statText}>{item.postedBy.email}</Text>
+              <Text style={styles.statText}>{item.postedBy?.email}</Text>
             </View>
             {item.postedBy.website ? (
               <TouchableOpacity onPress={handleWebsitePress}>

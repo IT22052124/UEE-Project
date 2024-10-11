@@ -103,7 +103,7 @@ function BottomTabNavigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "blue", // Customize the active icon color
+        tabBarActiveTintColor: "#4a90e2", // Customize the active icon color
         tabBarInactiveTintColor: "gray", // Customize the inactive icon color
       })}
     >

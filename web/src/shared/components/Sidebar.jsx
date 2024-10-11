@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaRegHeart, FaTable, FaChartBar, FaHome, FaSignOutAlt } from 'react-icons/fa';
+import { FaRegHeart, FaTable, FaChartBar, FaHome, FaSignOutAlt ,FaPlus } from 'react-icons/fa';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const Sidebar = () => {
                 to="/donation"
                 className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
               >
-                <FaRegHeart className="mr-3 text-blue-300 group-hover:text-white transition-colors duration-200" />
+                <FaPlus className="mr-3 text-pink-300 group-hover:text-white transition-colors duration-200" />
                 <span className="group-hover:translate-x-1 transition-transform duration-200">Create donation</span>
               </Link>
             </li>
@@ -62,7 +62,7 @@ const Sidebar = () => {
                 to="/program"
                 className="flex items-center py-3 px-4 text-lg font-medium rounded-lg transition duration-200 hover:bg-white/10 group"
               >
-                <FaRegHeart className="mr-3 text-blue-300 group-hover:text-white transition-colors duration-200" />
+                <FaRegHeart className="mr-3 text-pink-300 group-hover:text-white transition-colors duration-200" />
                 <span className="group-hover:translate-x-1 transition-transform duration-200">Program</span>
               </Link>
             </li>

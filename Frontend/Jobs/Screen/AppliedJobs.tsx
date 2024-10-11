@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function AppliedJobsScreen({ navigation }) {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const user ='66f55789b9c3be6113e48bae';
+  const user = '66f55789b9c3be6113e48bae';
 
   useFocusEffect(
     React.useCallback(() => {
@@ -61,14 +61,24 @@ export default function AppliedJobsScreen({ navigation }) {
         <Text style={styles.jobTitle}>{item.jobTitle}</Text>
         <Text style={styles.jobRecruiter}>{item.companyName}</Text>
         <View style={styles.statItem}>
-          <MaterialIcons name="location-on" size={20} color="#666" />
+          <MaterialIcons name="location-on" size={16} color="#666" />
           <Text style={styles.jobAddress}>{item.JobID.location}</Text>
         </View>
-        <View style={styles.statItem}>
-          <FontAwesome5 name="calendar-alt" size={18} color="#4a90e2" />
-          <Text style={styles.jobApplicationDate}>
-            Applied on: {new Date(item.createdAt).toLocaleDateString()}
-          </Text>
+        <View style={styles.bottomRow}>
+          <View style={styles.statItem}>
+            <FontAwesome5 name="calendar-alt" size={14} color="#4a90e2" />
+            <Text style={styles.jobApplicationDate}>
+              {new Date(item.createdAt).toLocaleDateString()}
+            </Text>
+          </View>
+          <View style={[
+            styles.statusIndicator,
+            item.status === 'Reviewed' ? styles.statusReviewed : styles.statusPending
+          ]}>
+            <Text style={styles.statusText}>
+              {item.status === 'Reviewed' ? 'Reviewed' : 'Pending'}
+            </Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -132,7 +142,7 @@ const styles = StyleSheet.create({
   jobItem: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     elevation: 2,
@@ -142,9 +152,9 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   logo: {
-    width: 70,
-    height: 70,
-    borderRadius: 5,
+    width: 60,
+    height: 60,
+    borderRadius: 8,
     marginRight: 16,
   },
   jobInfo: {
@@ -156,25 +166,47 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 4,
   },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
   jobRecruiter: {
     fontSize: 16,
     color: '#666',
     marginBottom: 4,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
   },
   jobAddress: {
     fontSize: 14,
     color: '#999',
     marginLeft: 4,
   },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
   jobApplicationDate: {
     fontSize: 14,
     color: '#4a90e2',
     marginLeft: 4,
+  },
+  statusIndicator: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusPending: {
+    backgroundColor: '#ffd700',
+  },
+  statusReviewed: {
+    backgroundColor: '#4caf50',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   loaderContainer: {
     flex: 1,

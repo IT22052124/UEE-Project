@@ -81,8 +81,8 @@ const ProgramUpdateForm = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-8 py-8">
-      <h2 className="text-2xl font-bold mb-6">Update Program</h2>
+    <div className="max-w-6xl ml-80 mr-15 mx-auto p-8 bg-gradient-to-br from-blue-50 to-blue-200 shadow-xl rounded-lg mt-5 border border-indigo-100">
+      <h2 className="text-4xl font-extrabold mb-6 text-center text-indigo-700">Update Program</h2>
 
       {successMessage && (
         <div className="bg-green-100 border-t-4 border-green-500 rounded-b text-green-900 px-4 py-3 shadow-md mb-4">
@@ -90,28 +90,28 @@ const ProgramUpdateForm = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-blue-50 to-blue-200 shadow-md rounded-lg p-4">
         {/* Title */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Title</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
           <input
             type="text"
             name="title"
             value={program.title}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md"
             required
           />
         </div>
 
         {/* Description */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Description</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
           <textarea
             name="description"
             value={program.description}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md"
             rows="4"
             required
           />
@@ -119,12 +119,12 @@ const ProgramUpdateForm = () => {
 
         {/* Label Selection */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Label</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Label</label>
           <select
             name="label"
             value={program.label}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md"
             required
           >
             <option value="">Select a program label</option>
@@ -140,26 +140,26 @@ const ProgramUpdateForm = () => {
 
         {/* Address */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
           <input
             type="text"
             name="address"
             value={program.address}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md"
             required
           />
         </div>
 
         {/* Location Redirect URL */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Location Redirect URL</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Location Redirect URL</label>
           <input
             type="url"
             name="locationRedirectUrl"
             value={program.locationRedirectUrl}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md"
             pattern="https?://.+" // Ensures the URL starts with http/https
             required
           />
@@ -168,7 +168,7 @@ const ProgramUpdateForm = () => {
 
         {/* Map Image Upload & Preview */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Map Image</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Map Image</label>
           <div className="flex space-x-4">
             {imageUploading && (
               <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
@@ -193,28 +193,26 @@ const ProgramUpdateForm = () => {
                   </button>
                 </div>
               ))}
-            {downloadURLs.length === 0 && !imageUploading && (
-              <div className="w-36 h-36 flex items-center justify-center bg-gray-200 rounded-lg">
-                <p className="text-center text-lg text-black">Add map image</p>
-              </div>
+            {downloadURLs.length === 0 && (
+              <div className="text-gray-500">No images uploaded.</div>
             )}
-          </div>
-          <div className="mt-4">
-            <ImageUpload
-              setDownloadURLs={setDownloadURLs}
-              setProgress={setProgress}
-              setLoading={setImageUploading}
-            />
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="mt-8">
+        {/* Submit and Cancel Buttons */}
+        <div className="flex justify-end">
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-blue-200"
           >
-            Update Program
+            Update
+          </button>
+          <button
+            type="button"
+            className="ml-4 bg-gray-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-200"
+            onClick={() => navigate('/programtable')}
+          >
+            Cancel
           </button>
         </div>
       </form>

@@ -75,7 +75,7 @@ const ProgramForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-10 border border-gray-200"
+      className="max-w-6xl ml-80 mr-15 mx-auto p-8 bg-gradient-to-br from-blue-50 to-blue-200 shadow-xl rounded-lg mt-5 border border-indigo-100"
     >
       <h2 className="text-4xl font-extrabold mb-6 text-center text-indigo-700">
         Create a Community Program
@@ -111,9 +111,10 @@ const ProgramForm = () => {
             type="text"
             id="title"
             name="title"
+            placeholder="Enter the title here"
             value={formData.title}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             required
           />
         </div>
@@ -130,8 +131,9 @@ const ProgramForm = () => {
             id="description"
             name="description"
             value={formData.description}
+            placeholder="Enter the Description here"
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 pl-3 block w-full rounded-lg border pl-3 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             rows="4"
             required
           />
@@ -150,7 +152,7 @@ const ProgramForm = () => {
             name="label"
             value={formData.label}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             required
           >
             <option value="">Select a program label</option>
@@ -176,9 +178,10 @@ const ProgramForm = () => {
             type="text"
             id="address"
             name="address"
+            placeholder="Enter the address here"
             value={formData.address}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             required
           />
         </div>
@@ -195,9 +198,10 @@ const ProgramForm = () => {
             type="url"
             id="locationRedirectUrl"
             name="locationRedirectUrl"
+            placeholder="Enter the URL here"
             value={formData.locationRedirectUrl}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full  pl-3 rounded-lg h-12 border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-300 focus:ring-opacity-50 transition duration-200 ease-in-out"
             required
           />
         </div>

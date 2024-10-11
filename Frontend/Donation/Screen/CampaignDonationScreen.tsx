@@ -252,6 +252,7 @@ const styles = StyleSheet.create({
   customAmountContainer: {
     paddingHorizontal: 16,
     marginBottom: 24,
+    justifyContent: 'center',
   },
   customAmountInput: {
     borderWidth: 1,
@@ -261,18 +262,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#FFF',
     elevation: 2,
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
   },
   paymentMethodsContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 15,
     marginBottom: 24,
   },
   paymentButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,

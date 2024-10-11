@@ -4,19 +4,22 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {IPAddress} from "../../globals"
+import { IPAddress } from "../../globals";
+
 export default function DonationScreen() {
   const navigation = useNavigation();
   const [emergencyHelpData, setEmergencyHelpData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]); // Add filteredData state
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [scrollY] = useState(new Animated.Value(0));
+  const [searchQuery, setSearchQuery] = useState(''); // Add searchQuery state
 
   // Fetch data from backend
   const fetchEmergencyHelpData = async () => {
     try {
       const response = await axios.get(`http://${IPAddress}:5000/Donation/emergency`);
-      console.log(response.data.donations);
       setEmergencyHelpData(response.data.donations);
+      setFilteredData(response.data.donations); // Initially, filteredData is the same as emergencyHelpData
     } catch (error) {
       console.error('Error fetching emergency help data:', error);
     }
@@ -35,6 +38,17 @@ export default function DonationScreen() {
     return () => clearInterval(interval);
   }, []); // Empty dependency array means this runs once on mount
 
+  // Handle search query change
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+
+    // Filter the emergencyHelpData based on the search query
+    const filtered = emergencyHelpData.filter((item) =>
+      item.title.toLowerCase().includes(text.toLowerCase())
+    );
+
+    setFilteredData(filtered); // Update the filteredData state
+  };
 
   const handleCategorySelect = (category) => {
     navigation.navigate('CatergoryScreen', { category });
@@ -79,11 +93,17 @@ export default function DonationScreen() {
       >
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#888" />
-          <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor="#888" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search"
+            placeholderTextColor="#888"
+            value={searchQuery} // Bind the searchQuery state to the input
+            onChangeText={handleSearch} // Call handleSearch on text change
+          />
         </View>
 
         <Text style={styles.sectionTitle}>Categories</Text>
-        
+
         <View style={styles.categories}>
           {['All', 'Hunger', 'Medical'].map((category, index) => (
             <TouchableOpacity key={index} style={styles.categoryItem} onPress={() => handleCategorySelect(category)}>
@@ -93,7 +113,7 @@ export default function DonationScreen() {
               <Text style={styles.categoryText}>{category}</Text>
             </TouchableOpacity>
           ))}
-          
+
           {/* See all category */}
           <TouchableOpacity style={styles.categoryItem} onPress={toggleMoreCategories}>
             <View style={styles.categoryIcon}>
@@ -123,12 +143,12 @@ export default function DonationScreen() {
 
         <Text style={styles.sectionTitle}>Emergency help</Text>
         <View style={styles.emergencyHelp}>
-          {emergencyHelpData.map((item, index) => (
+          {filteredData.map((item, index) => (
             <TouchableOpacity key={index} style={styles.emergencyItem} onPress={() => handleCampaignSelect(item)}>
               <Image source={{ uri: item.image[0] }} style={styles.emergencyImage} />
               <View style={styles.emergencyInfo}>
                 <Text style={styles.emergencyTitle}>{item.title}</Text>
-                
+
                 {/* Progress bar and percentage */}
                 <View style={styles.progressBarContainer}>
                   <View style={styles.progressBar}>
@@ -291,7 +311,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   emergencyImage: {
-    marginTop:2,
+    marginTop: 2,
     width: 100,
     height: 100,
     borderRadius: 10,
@@ -316,7 +336,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#4a90e2',
+    backgroundColor: '#3CB371',
   },
   fundRaised: {
     fontSize: 13,

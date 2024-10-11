@@ -91,7 +91,7 @@ export default function CategoryScreen() {
           const progressPercentage = ((campaign.amountRaised / campaign.amountRequired) * 100).toFixed(0);
           return (
             <TouchableOpacity
-              key={campaign.id}
+              key={campaign.Id}
               style={styles.campaignCard}
               onPress={() => navigation.navigate('AboutScreen', { campaign })}
             >
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#4299E1',
+    backgroundColor: '#3CB371',
     borderRadius: 3,
   },
   percentageText: {

@@ -17,7 +17,6 @@ export default function DirectTransferScreen({ route, navigation }) {
   const [depositImage, setDepositImage] = useState('');
 
   const handleTransfer = () => {
-    alert('Transfer Successful!');
     navigation.goBack();
   };
 
@@ -76,63 +75,62 @@ export default function DirectTransferScreen({ route, navigation }) {
                 icon="location-outline"
                 label="Address"
                 value={campaign.directCash.address}
-                 color="green"
+                color="green"
               />
             </View>
           </View>
 
+          {/* Updated Instructions Section */}
           <View style={styles.section}>
-  <Text style={styles.sectionTitle}>Instructions</Text>
-  <View style={styles.instructionContainer}>
-    <View style={styles.instructionItem}>
-      <Ionicons name="cash-outline" size={24} color="#4a90e2" style={styles.instructionIcon} />
-      <View style={styles.instructionTextContainer}>
-        <Text style={styles.instructionTextBold}>Instructions for Donation:</Text>
-        
-        <Text style={styles.instructionText}>
-          - If you prefer, you can visit the above government organization to make a direct donation.
-        </Text>
-        <Text style={styles.instructionText}>
-          - Ensure you carry proper identification and reference the donation campaign:{" "}
-          <Text style={styles.highlight}>{campaign.title}</Text>.
-        </Text>
-        <Text style={styles.instructionText}>
-          - Request a receipt or proof of donation from the organization upon completion.
-        </Text>
-        <Text style={styles.instructionText}>
-          - For assistance, feel free to contact the organization's representative.
-        </Text>
-      </View>
-    </View>
-  </View>
-</View>
+            <Text style={styles.sectionTitle}>Instructions</Text>
+            <View style={styles.instructionContainer}>
+              <View style={styles.instructionItem}>
+                <Ionicons name="cash-outline" size={24} color="#4a90e2" style={styles.instructionIcon} />
+                <View style={styles.instructionTextContainer}>
+                  <Text style={styles.instructionTextBold}>Instructions for Donation:</Text>
+                  <Text style={styles.instructionText}>
+                    - You can visit the government organization to make a direct donation.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Carry proper identification and reference the donation campaign:{" "}
+                    <Text style={styles.highlight}>{campaign.title}</Text>.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Request a receipt or proof of donation from the organization.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - For assistance, contact the organization's representative.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
 
-<View style={styles.section}>
-  <Text style={styles.sectionTitle1}>Thank You!</Text>
-  <View style={styles.instructionContainer}>
-    <View style={styles.instructionItem}>
-      <Ionicons name="heart-outline" size={24} color="green" style={styles.instructionIcon} />
-      <View style={styles.instructionTextContainer}>
-        <Text style={styles.instructionTextBold}>Your Support Makes a Difference:</Text>
-        <Text style={styles.instructionText}>
-          - Your donation helps provide essential resources to those in need.
-        </Text>
-        <Text style={styles.instructionText}>
-          - It contributes to community development and better living conditions.
-        </Text>
-        <Text style={styles.instructionText}>
-          - Every contribution counts and plays a vital role in supporting various initiatives.
-        </Text>
-        <Text style={styles.instructionText}>
-          - Your kindness inspires others to join the cause and create a positive impact.
-        </Text>
-      </View>
-    </View>
-  </View>
-</View>
+          {/* Updated Thank You Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle1}>Thank You!</Text>
+            <View style={styles.instructionContainer}>
+              <View style={styles.instructionItem}>
+                <Ionicons name="heart-outline" size={24} color="green" style={styles.instructionIcon} />
+                <View style={styles.instructionTextContainer}>
+                  <Text style={styles.instructionTextBold}>Your Support Makes a Difference:</Text>
+                  <Text style={styles.instructionText}>
+                    - Your donation helps provide essential resources to those in need.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - It contributes to community development and better living conditions.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Every contribution counts and plays a vital role in supporting various initiatives.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    - Your kindness inspires others to join the cause and create a positive impact.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
 
-
-         
           <TouchableOpacity style={styles.transferButton} onPress={handleTransfer}>
             <Text style={styles.transferButtonText}>Done</Text>
           </TouchableOpacity>
@@ -142,7 +140,7 @@ export default function DirectTransferScreen({ route, navigation }) {
   );
 }
 
-const DetailCard = ({ icon, label, value,color }) => (
+const DetailCard = ({ icon, label, value, color }) => (
   <View style={styles.detailCard}>
     <View style={styles.iconContainer}>
       <Ionicons name={icon} size={24} color={color} />
@@ -219,7 +217,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     textAlign: 'center',
-    
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
@@ -246,7 +243,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    
   },
   iconContainer: {
     width: 40,
@@ -285,59 +281,33 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   instructionIcon: {
-    marginRight: 16,
+    marginRight: 12,
   },
   instructionTextContainer: {
     flex: 1,
   },
   instructionTextBold: {
-    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    marginBottom: 4,
   },
   instructionText: {
     fontSize: 14,
-    color: '#666',
-    marginLeft:-40,
-    marginBottom:10,
+    color: '#444',
   },
   highlight: {
-    color: '#007AFF',
     fontWeight: 'bold',
-    
-  },
-  uploadButton: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  uploadButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  imagePreview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
+    color: '#2980B9',
   },
   transferButton: {
     backgroundColor: '#007AFF',
-    padding: 16,
+    paddingVertical: 15,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   transferButtonText: {
-    color: '#FFFFFF',
     fontSize: 18,
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
- 
 });

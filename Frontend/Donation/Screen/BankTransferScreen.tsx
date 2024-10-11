@@ -16,7 +16,6 @@ export default function BankTransferScreen({ route, navigation }) {
   const [depositImage, setDepositImage] = useState('');
 
   const handleTransfer = () => {
-    alert('Transfer Successful!');
     navigation.goBack();
   };
 
@@ -53,7 +52,7 @@ export default function BankTransferScreen({ route, navigation }) {
         <View style={styles.content}>
           <View style={styles.causeContainer}>
             <Text style={styles.causeTitle}>{campaign.title}</Text>
-            <Text style={styles.donationAmount}>Amount(Rs): {value}</Text>
+            <Text style={styles.donationAmount}>Amount (Rs): {value}</Text>
           </View>
 
           <View style={styles.section}>
@@ -86,47 +85,44 @@ export default function BankTransferScreen({ route, navigation }) {
             </View>
           </View>
 
-          
+          {/* Instructions Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Instructions</Text>
+            <Text style={styles.sectionTitle}>How to Complete the Transfer</Text>
             <View style={styles.instructionContainer}>
               <View style={styles.instructionItem}>
-               
-                <View style={styles.instructionTextContainer1}>
-                  
+                <Ionicons name="cash-outline" size={24} color="green" style={styles.instructionIcon} />
+                <View style={styles.instructionTextContainer}>
+                  <Text style={styles.instructionTextBold}>Step-by-Step Instructions:</Text>
                   <Text style={styles.instructionText}>
-                    - Transfer the selected amount to the account details provided above.
+                    1. Transfer the selected amount to the provided account details.
                   </Text>
                   <Text style={styles.instructionText}>
-                    -  Include your name in the transfer details.
+                    2. Include your name in the transfer details for identification.
                   </Text>
                   <Text style={styles.instructionText}>
-                    - Once after funds are received, it will be given to the specific cause.
+                    3. Once the funds are received, they will be allocated to the specified cause.
                   </Text>
-                  
                 </View>
               </View>
             </View>
           </View>
 
+          {/* Thank You Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle1}>Thank You!</Text>
+            <Text style={styles.sectionTitle}>Thank You for Your Support!</Text>
             <View style={styles.instructionContainer}>
               <View style={styles.instructionItem}>
                 <Ionicons name="heart-outline" size={24} color="green" style={styles.instructionIcon} />
                 <View style={styles.instructionTextContainer}>
-                  <Text style={styles.instructionTextBold}>Your Support Makes a Difference:</Text>
+                  <Text style={styles.instructionTextBold}>Your Donation Makes an Impact:</Text>
                   <Text style={styles.instructionText}>
-                    - Your donation helps provide essential resources to those in need.
+                    - Your contribution provides essential resources to those in need.
                   </Text>
                   <Text style={styles.instructionText}>
-                    - It contributes to community development and better living conditions.
+                    - You are helping to improve living conditions and uplift communities.
                   </Text>
                   <Text style={styles.instructionText}>
-                    - Every contribution counts and plays a vital role in supporting various initiatives.
-                  </Text>
-                  <Text style={styles.instructionText}>
-                    - Your kindness inspires others to join the cause and create a positive impact.
+                    - Every bit counts! Your generosity will inspire others to give.
                   </Text>
                 </View>
               </View>
@@ -224,13 +220,6 @@ const styles = StyleSheet.create({
     color: '#2980B9',
     textAlign: 'center',
   },
-  sectionTitle1: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: 'green',
-    textAlign: 'center',
-  },
   formContainer: {
     gap: 12,
   },
@@ -280,29 +269,23 @@ const styles = StyleSheet.create({
   },
   instructionItem: {
     flexDirection: 'row',
-    marginBottom: 14,
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
   instructionIcon: {
-    marginRight: 16,
+    marginRight: 8,
   },
   instructionTextContainer: {
     flex: 1,
   },
-  instructionTextContainer1: {
-    flex: 1,
-    marginLeft: 40,
-  },
-  instructionTextBold: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-  },
   instructionText: {
     fontSize: 14,
-    color: '#666',
-    marginLeft: -40,
-    marginBottom: 10,
+    color: '#333',
+    marginBottom: 6,
+  },
+  instructionTextBold: {
+    fontWeight: '600',
+    marginBottom: 8,
   },
   transferButton: {
     backgroundColor: '#007AFF',
@@ -311,8 +294,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   transferButtonText: {
+    color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
+    fontWeight: '600',
   },
 });

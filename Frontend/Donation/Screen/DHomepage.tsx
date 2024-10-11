@@ -4,8 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { IPAddress } from "../../globals";
-
+import {IPAddress} from "../../globals"
 export default function DonationScreen() {
   const navigation = useNavigation();
   const [emergencyHelpData, setEmergencyHelpData] = useState([]);
@@ -15,7 +14,7 @@ export default function DonationScreen() {
   // Fetch data from backend
   const fetchEmergencyHelpData = async () => {
     try {
-      const response = await axios.get('http://192.168.1.4:5000/Donation/emergency');
+      const response = await axios.get(`http://${IPAddress}:5000/Donation/emergency`);
       console.log(response.data.donations);
       setEmergencyHelpData(response.data.donations);
     } catch (error) {
@@ -45,8 +44,8 @@ export default function DonationScreen() {
     navigation.navigate('AboutScreen', { campaign });
   };
 
-   // Function to toggle more categories
-   const toggleMoreCategories = () => {
+  // Function to toggle more categories
+  const toggleMoreCategories = () => {
     setShowMoreCategories((prev) => !prev);
   };
 
@@ -129,10 +128,18 @@ export default function DonationScreen() {
               <Image source={{ uri: item.image[0] }} style={styles.emergencyImage} />
               <View style={styles.emergencyInfo}>
                 <Text style={styles.emergencyTitle}>{item.title}</Text>
-                <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: `${((item.amountRaised / item.amountRequired) * 100).toFixed(0)}%` }]} />
+                
+                {/* Progress bar and percentage */}
+                <View style={styles.progressBarContainer}>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.progressFill, { width: `${((item.amountRaised / item.amountRequired) * 100).toFixed(0)}%` }]} />
+                  </View>
+                  <Text style={styles.progressPercentage}>
+                    {((item.amountRaised / item.amountRequired) * 100).toFixed(0)}%
+                  </Text>
                 </View>
-                <Text style={styles.fundRaised}>Fund Raised: Rs.{item.amountRaised}/-</Text>
+
+                <Text style={styles.fundRaised}>Fund Required: Rs.{item.amountRequired}/-</Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -186,6 +193,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  progressPercentage: {
+    position: 'absolute',
+    right: 0,
+    bottom: -15, // Adjust this to position percentage below the progress bar
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  progressBarContainer: {
+    position: 'relative',
+    marginBottom: 10, // Adjust as needed for spacing
   },
   greeting: {
     fontSize: 28,
@@ -245,62 +264,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   categoryIcon: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
   },
   categoryText: {
     fontSize: 14,
-    color: '#4a5568',
+    color: '#2d3748',
   },
   emergencyHelp: {
-    marginTop: 5,
+    marginBottom: 20,
   },
   emergencyItem: {
     flexDirection: 'row',
     marginBottom: 15,
-    borderRadius: 15,
     backgroundColor: '#fff',
+    borderRadius: 10,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    overflow: 'hidden',
-    paddingTop:2
   },
   emergencyImage: {
-    width: 110,
-    height: 110,
-    borderRadius: 15,
-
+    marginTop:2,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
   },
   emergencyInfo: {
     flex: 1,
-    padding: 10,
+    padding: 12,
   },
   emergencyTitle: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: 10,
+    marginBottom: 8,
+    marginTop: -5,
   },
   progressBar: {
-    height: 10,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#e2e8f0',
-    borderRadius: 5,
+    marginBottom: 5,
     overflow: 'hidden',
-    marginVertical: 5,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#4299e1',
-    borderRadius: 5,
+    backgroundColor: '#4a90e2',
   },
   fundRaised: {
+    fontSize: 13,
     color: '#4a5568',
   },
 });

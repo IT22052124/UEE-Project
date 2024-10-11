@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import Toast from 'react-native-toast-message'; // Import Toast
 import LottieView from 'lottie-react-native';
-
+import {IPAddress} from "../../globals"
 const { width } = Dimensions.get('window');
 
 export default function AddCardScreen({ route }) {
@@ -56,7 +56,7 @@ const handleDonate = async () => {
  // Use the selected amount from your props
 
     // Update the donation amount using Axios PUT request
-    const response = await axios.put(`http://192.168.1.4:5000/Donation/update/amount/${id}`, {
+    const response = await axios.put(`http://${IPAddress}:5000/Donation/update/amount/${id}`, {
       amountRaised: sanitizedAmount, // Assuming the field to update is named 'amountRaised'
     });
 

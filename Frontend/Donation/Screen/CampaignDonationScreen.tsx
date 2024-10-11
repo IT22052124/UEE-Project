@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, Image, Alert,StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, Image, Alert, StyleSheet, SafeAreaView, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient'; // Add gradient support
+import { LinearGradient } from 'expo-linear-gradient';
 import Toast from 'react-native-toast-message';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useNavigation } from '@react-navigation/native';
+
 const PRESET_AMOUNTS = ['200/-', '500/-', '1000/-', '1500/-'];
 
 export default function DonateScreen({ route }) {
-  const navigation = useNavigation(); // Initialize navigation
-
-  const { campaign } = route.params; // Get campaign details from route params
+  const navigation = useNavigation();
+  const { campaign } = route.params;
   const [selectedAmount, setSelectedAmount] = useState('');
-  const { amountRaised, amountRequired } = campaign; // Destructure amountRaised and amountRequired
+  const { amountRaised, amountRequired } = campaign;
 
   const [customAmount, setCustomAmount] = useState('');
-  const [value,setValue]=useState('');
-  
-  // Calculate the maximum donation amount
+  const [value, setValue] = useState('');
+
   const maxDonation = amountRequired - amountRaised;
 
   const handleAmountSelect = (amount) => {
@@ -33,29 +32,30 @@ export default function DonateScreen({ route }) {
     setCustomAmount(text);
     setSelectedAmount('');
     setValue(text);
-
   };
 
   const handleDonatePress = (paymentMethod) => {
     const donationAmount = selectedAmount || customAmount;
-    if (!donationAmount || parseInt(donationAmount) <= 0) {
-      Toast.show({
-        type: 'error',
-        text1: 'Invalid Amount',
-        text2: 'Please enter a valid donation amount.',
-      });
-      return;
+
+    if (paymentMethod === 'CardPayment') {
+      if (!donationAmount || parseInt(donationAmount) <= 0) {
+        Toast.show({
+          type: 'error',
+          text1: 'Invalid Amount',
+          text2: 'Please enter a valid donation amount to proceed with card payment.',
+        });
+        return;
+      }
+
+      if (parseInt(donationAmount) > maxDonation) {
+        Alert.alert('Invalid Amount', `You can only donate up to Rs ${maxDonation}/-`);
+        return;
+      }
     }
 
-
-    if (parseInt(donationAmount) > maxDonation) {
-      Alert.alert('Invalid Amount', `You can only donate up to Rs ${maxDonation}/-`);
-      return;
-    }
-    navigation.navigate(paymentMethod, { campaign, value: donationAmount });
+    // Proceed with the navigation even if the amount is null for other payment methods
+    navigation.navigate(paymentMethod, { campaign, value: donationAmount || '0' });
   };
-
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -69,9 +69,9 @@ export default function DonateScreen({ route }) {
 
         <View style={styles.causeContainer}>
           <Image
-            source={{ uri: campaign.image[0] }} // Use campaign's image
+            source={{ uri: campaign.image[0] }}
             style={styles.causeImage}
-            accessibilityLabel={campaign.title} // Set accessibility label based on campaign title
+            accessibilityLabel={campaign.title}
           />
           <Text style={styles.causeTitle}>{campaign.title}</Text>
         </View>
@@ -87,10 +87,12 @@ export default function DonateScreen({ route }) {
               ]}
               onPress={() => handleAmountSelect(amount)}
             >
-              <Text style={[
-                styles.amountButtonText,
-                selectedAmount === amount && styles.selectedAmountButtonText,
-              ]}>
+              <Text
+                style={[
+                  styles.amountButtonText,
+                  selectedAmount === amount && styles.selectedAmountButtonText,
+                ]}
+              >
                 {amount}
               </Text>
             </TouchableOpacity>
@@ -112,20 +114,30 @@ export default function DonateScreen({ route }) {
 
         <Text style={styles.sectionTitle}>Choose Payment</Text>
         <View style={styles.paymentMethodsContainer}>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#4CD964' }]}  onPress={() =>handleDonatePress('CardPayment')}>
+          <TouchableOpacity
+            style={[styles.paymentButton, { backgroundColor: '#4CD964' }]}
+            onPress={() => handleDonatePress('CardPayment')}
+          >
             <Ionicons name="card-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Card Payment</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#FF9500' }]} onPress={() =>  handleDonatePress('BankDeposits')}>
+
+          <TouchableOpacity
+            style={[styles.paymentButton, { backgroundColor: '#FF9500' }]}
+            onPress={() => handleDonatePress('BankDeposits')}
+          >
             <Ionicons name="business-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Bank Transfer</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.paymentButton, { backgroundColor: '#007AFF' }]} onPress={() => handleDonatePress('DirectTransfer')}>
+
+          <TouchableOpacity
+            style={[styles.paymentButton, { backgroundColor: '#007AFF' }]}
+            onPress={() => handleDonatePress('DirectTransfer')}
+          >
             <Ionicons name="cash-outline" size={24} color="white" style={styles.paymentIcon} />
             <Text style={styles.paymentButtonText}>Organization</Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -140,16 +152,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingVertical: 15, // Reduced padding vertically to decrease header height
-
+    paddingVertical: 15,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    elevation: 5, // Adds shadow for Android
+    elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 }, // Adds shadow for iOS
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
   },
   backButton: {
@@ -179,7 +190,6 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    marginBottom:0
   },
   causeImage: {
     width: 110,
@@ -236,8 +246,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     color: '#8E8E93',
-    marginVertical: 4,
-    marginBottom:15,
+    marginVertical: 2,
+    marginBottom:15
   },
   customAmountContainer: {
     paddingHorizontal: 16,
@@ -257,40 +267,22 @@ const styles = StyleSheet.create({
   },
   paymentMethodsContainer: {
     paddingHorizontal: 16,
+    marginBottom: 24,
   },
   paymentButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 8,
+    justifyContent: 'center',
     padding: 16,
+    borderRadius: 8,
     marginBottom: 16,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
   },
   paymentIcon: {
-    marginRight: 16,
+    marginRight: 10,
   },
   paymentButtonText: {
+    fontSize: 16,
     color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  donateButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    margin: 16,
-    elevation: 5,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-  },
-  donateButtonText: {
-    color: '#FFF',
-    fontSize: 20,
     fontWeight: 'bold',
   },
 });

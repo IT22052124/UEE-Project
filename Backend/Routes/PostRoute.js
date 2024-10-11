@@ -10,6 +10,8 @@ import {
   downvoteComment,
   getPostDetailsById,
   getPostsFromUserCommunities,
+  getPostComments,
+  getPostsWithoutComments,
 } from "../Controllers/PostController.js"; // Adjust the path as necessary
 
 const router = express.Router();
@@ -41,5 +43,10 @@ router.put("/posts/:postId/comments/:commentId/upvote", upvoteComment);
 router.put("/posts/:postId/comments/:commentId/downvote", downvoteComment);
 
 router.get("/user/:userId/communities/posts", getPostsFromUserCommunities);
+
+router.get("/posts/:id/comments", getPostComments);
+
+// Route for getting posts without comments
+router.get("/posts/:postId/nocomments", getPostsWithoutComments);
 
 export default router;

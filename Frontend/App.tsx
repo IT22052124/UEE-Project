@@ -39,6 +39,9 @@ import JobApplicationsScreen from "./Jobs/Screen/ApplicationsRecieved";
 import UserScreen from "./Pages/CommunityConnect/Screen/UserScreen";
 import UpdateJobScreen from "./Jobs/Screen/UpdateJob";
 import AppliedJobsScreen from "./Jobs/Screen/AppliedJobs";
+import SignInScreen from "./OtherScreens/SignInScreen";
+import ChatScreen from "./Pages/CommunityConnect/Screen/ChatScreen";
+import ChatListScreen from "./Pages/CommunityConnect/Screen/ChatListScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -119,15 +122,30 @@ function BottomTabNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="MainTabs">
+      <Stack.Navigator initialRouteName="HomeScreen">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="SignInScreen"
+          component={SignInScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChatScreen"
+          component={ChatScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChatListScreen"
+          component={ChatListScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

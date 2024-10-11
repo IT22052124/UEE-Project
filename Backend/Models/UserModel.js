@@ -28,7 +28,7 @@ const userSchema = mongoose.Schema(
     },
     telephone: {
       type: String,
-      required: [true, "Please Enter a Telephone Number"],
+      required: false, // Change to false if optional
       trim: true,
     },
     profilePic: {
@@ -55,6 +55,18 @@ const userSchema = mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Post",
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
       },
     ],
   },

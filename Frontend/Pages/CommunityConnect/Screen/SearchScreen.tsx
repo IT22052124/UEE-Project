@@ -14,7 +14,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { IPAddress } from "../../../globals";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useNavigation, useRoute } from "@react-navigation/native"; // Import useNavigation
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const defaultPic =
   "https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg"; // Replace with actual default profile pic URL
@@ -39,8 +40,11 @@ const Tab = ({ title, isActive, onPress }) => (
 );
 
 export default function SearchScreen() {
+  const route = useRoute(); // Initialize useRoute
+  const Name = route.params?.Name || "";
+  const [user, setUser] = useState("");
   const [activeTab, setActiveTab] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(Name);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,8 +53,20 @@ export default function SearchScreen() {
 
   const tabs = ["All", "Communities", "Users"];
 
+  const getUserFromAsyncStorage = async () => {
+    try {
+      const admin = await AsyncStorage.getItem("user");
+      return admin ? JSON.parse(admin)._id || null : null;
+    } catch (error) {
+      console.error("Failed to retrieve user:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchResults = async () => {
+      const id = await getUserFromAsyncStorage(); // Get the user ID from async storage
+      setUser(id);
       try {
         const [usersResponse, communitiesResponse] = await Promise.all([
           axios.get(`http://${IPAddress}:5000/User/users`),
@@ -100,22 +116,23 @@ export default function SearchScreen() {
     if (activeTab === "All") {
       results = searchResults.filter(
         (item) =>
-          item.name.toLowerCase().includes(lowercasedQuery) ||
-          item.details.toLowerCase().includes(lowercasedQuery)
+          (item.name && item.name.toLowerCase().includes(lowercasedQuery)) ||
+          (item.details && item.details.toLowerCase().includes(lowercasedQuery))
       );
     } else if (activeTab === "Users") {
       results = searchResults.filter(
         (item) =>
           item.type === "user" &&
-          (item.name.toLowerCase().includes(lowercasedQuery) ||
-            item.details.toLowerCase().includes(lowercasedQuery))
+          ((item.name && item.name.toLowerCase().includes(lowercasedQuery)) ||
+            (item.details &&
+              item.details.toLowerCase().includes(lowercasedQuery)))
       );
     } else {
       results = searchResults.filter(
         (item) =>
           item.type === "community" &&
-          (item.name.toLowerCase().includes(lowercasedQuery) ||
-            item.details.toLowerCase().includes(lowercasedQuery))
+          item.name &&
+          item.name.toLowerCase().includes(lowercasedQuery)
       );
     }
 
@@ -126,9 +143,14 @@ export default function SearchScreen() {
     <TouchableOpacity
       style={styles.resultItem}
       onPress={() => {
-        if (item.type === "user") {
-          navigation.navigate("ProfileScreen", { userId: item.id }); // Navigate to ProfileScreen with userId
+        if (item.type === "user" && item.id === user) {
+          setSearchQuery(item.name); // Navigate to ProfileScreen with userId
+          navigation.navigate("ProfileScreen");
+        } else if (item.type === "user") {
+          setSearchQuery(item.name); // Navigate to ProfileScreen with userId
+          navigation.navigate("UserScreen", { userId: item.id });
         } else {
+          setSearchQuery(item.name);
           navigation.navigate("CommunityScreen", { communityName: item.name }); // Navigate to CommunityScreen with communityName
         }
       }}
@@ -142,14 +164,7 @@ export default function SearchScreen() {
       <View style={styles.resultInfo}>
         <Text style={styles.resultName}>{item.name}</Text>
         {item.details && (
-          <Text style={styles.resultDetails}>
-            <Ionicons
-              name={item.type === "community" ? "people" : "at"}
-              size={14}
-              color="#777"
-            />
-            {item.details}
-          </Text>
+          <Text style={styles.resultDetails}>@{item.details}</Text>
         )}
       </View>
     </TouchableOpacity>
@@ -159,6 +174,12 @@ export default function SearchScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.searchContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
           <TextInput
             style={styles.searchInput}
             placeholder="Search..."
@@ -185,9 +206,11 @@ export default function SearchScreen() {
         </View>
         {loading ? (
           <Text style={styles.loadingText}>Loading...</Text>
+        ) : filteredResults.length === 0 ? (
+          <Text style={styles.noResultsText}>No results found</Text>
         ) : (
           <FlatList
-            data={filteredResults} // Use filteredResults here
+            data={filteredResults}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             style={styles.resultList}
@@ -208,6 +231,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
+  backButton: {
+    marginRight: 10,
+  },
+  noResultsText: {
+    color: "#fff",
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+  },
+
   profilePic: { width: 40, height: 40, borderRadius: 20, marginRight: 8 },
   searchContainer: {
     flexDirection: "row",

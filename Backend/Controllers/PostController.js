@@ -225,7 +225,6 @@ export const upvotePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    console.log(post);
     // Check if user has already upvoted
     if (post.upvotedBy.includes(userId)) {
       post.upVotes -= 1;
@@ -253,7 +252,7 @@ export const upvotePost = async (req, res) => {
     post.upvotedBy.push(userId);
 
     await post.save();
-
+    console.log(post);
     res.status(200).json({
       message: "Post upvoted successfully",
       post,
@@ -479,6 +478,70 @@ export const getPostsFromUserCommunities = async (req, res) => {
     }, []);
 
     res.status(200).json({ posts });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getPostComments = async (req, res) => {
+  try {
+    const postId = req.params.id; // Get post ID from URL parameters
+
+    // Find the post by ID and populate the author details, comments, and replies
+    const post = await Post.findById(postId)
+      .populate("author") // Populate author details
+      .populate({
+        path: "comments.userId", // Populate user details for comments
+        select: "username profilePic", // Select the fields to populate
+      })
+      .populate({
+        path: "comments.replies.userId", // Populate user details for replies
+        select: "username profilePic", // Select the fields to populate
+      });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Function to recursively populate replies (if needed)
+    const populateNestedReplies = async (comments) => {
+      for (const comment of comments) {
+        if (comment.replies && comment.replies.length > 0) {
+          // Populate the replies' userId
+          await Post.populate(comment.replies, {
+            path: "userId", // Populate user details for replies
+            select: "username profilePic", // Select the fields to populate
+          });
+
+          // Recursively call to populate nested replies
+          await populateNestedReplies(comment.replies);
+        }
+      }
+    };
+
+    // Start populating replies for the comments
+    await populateNestedReplies(post.comments);
+
+    res.status(200).json({
+      message: "Post details retrieved successfully",
+      Comments: post.comments,
+    });
+  } catch (error) {
+    console.error("Error retrieving post details:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getPostsWithoutComments = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId)
+      .select("-comments") // Exclude the 'comments' field
+      .populate("author", "username profilePic"); // You can populate other fields if necessary
+
+    res.status(200).json({
+      message: "Posts retrieved successfully without comments",
+      post,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

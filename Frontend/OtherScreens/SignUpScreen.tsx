@@ -7,20 +7,42 @@ import {
   StyleSheet,
   ImageBackground,
   Alert,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { IPAddress } from "../globals";
+import axios from "axios";
+import { storage } from "../Storage/firebase";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import Toast from "react-native-toast-message";
 
 export default function SignUpScreen({ navigation }) {
   const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profilePic, setProfilePic] = useState(null);
   const [fullNameError, setFullNameError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [usernames, setUsernames] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const usersResponse = await axios.get(
+        `http://${IPAddress}:5000/User/users/username`
+      );
+      setUsernames(usersResponse.data.users);
+      console.log(usersResponse.data.users);
+    };
+    fetchUsers();
+  }, []);
 
   const validateFullName = (name) => {
     if (!name) {
@@ -29,6 +51,20 @@ export default function SignUpScreen({ navigation }) {
       setFullNameError("Full name must be at least 2 characters");
     } else {
       setFullNameError("");
+    }
+  };
+
+  const validateUsername = (username) => {
+    const isUsernameTaken = usernames.some(
+      (user) => user.username === username
+    );
+
+    if (!username) {
+      setUsernameError("Username is required");
+    } else if (isUsernameTaken) {
+      setUsernameError("Username is already taken");
+    } else {
+      setUsernameError("");
     }
   };
 
@@ -66,29 +102,97 @@ export default function SignUpScreen({ navigation }) {
   useEffect(() => {
     setIsFormValid(
       fullName &&
+        username &&
         email &&
         password &&
         confirmPassword &&
         !fullNameError &&
+        !usernameError &&
         !emailError &&
         !passwordError &&
         !confirmPasswordError
     );
   }, [
     fullName,
+    username,
     email,
     password,
     confirmPassword,
     fullNameError,
+    usernameError,
     emailError,
     passwordError,
     confirmPasswordError,
   ]);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (isFormValid) {
-      // Implement your sign-up logic here
-      Alert.alert("Success", "Sign up successful!");
+      try {
+        let profileImageUrl = "";
+
+        // Upload the profile picture if one is selected
+        if (profilePic) {
+          // Convert the image URI to a blob for Firebase upload
+          const response = await fetch(profilePic);
+          const blob = await response.blob();
+
+          // Create a reference to Firebase storage
+          const storageRef = ref(
+            storage,
+            `profile_pics/${username}_${Date.now()}.jpg`
+          );
+
+          // Upload the file to Firebase
+          const uploadTask = await uploadBytesResumable(storageRef, blob);
+
+          // Get the download URL after the image is uploaded
+          profileImageUrl = await getDownloadURL(uploadTask.ref);
+          console.log("Image uploaded. Download URL:", profileImageUrl);
+        }
+
+        // Prepare user data for backend API
+        const userData = {
+          fullName,
+          username: "u/" + username,
+          email,
+          password,
+          profilePic: profileImageUrl,
+        };
+
+        // Make the signup API request
+        const response = await axios.post(
+          `http://${IPAddress}:5000/User/signup`,
+          userData
+        );
+
+        if (response.status === 200) {
+          Toast.show({
+            type: "success",
+            position: "top",
+            text1: "Account created successfully! You can now log in.",
+            visibilityTime: 2000,
+            autoHide: true,
+          });
+          navigation.navigate("SignInScreen");
+        } else {
+          Alert.alert("Error", "An error occurred during signup.");
+        }
+      } catch (error) {
+        Alert.alert("Sign Up Error", error.message);
+      }
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfilePic(result.assets[0].uri);
     }
   };
 
@@ -102,8 +206,18 @@ export default function SignUpScreen({ navigation }) {
         style={styles.container}
       >
         <View style={styles.headerContainer}>
-          <Ionicons name="person-add" size={50} color="white" />
+          <TouchableOpacity
+            onPress={pickImage}
+            style={styles.profilePicContainer}
+          >
+            {profilePic ? (
+              <Image source={{ uri: profilePic }} style={styles.profilePic} />
+            ) : (
+              <Ionicons name="person-add" size={50} color="white" />
+            )}
+          </TouchableOpacity>
           <Text style={styles.headerText}>Create Account</Text>
+          {username && <Text style={styles.usernameDisplay}>u/{username}</Text>}
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -118,6 +232,19 @@ export default function SignUpScreen({ navigation }) {
           />
           {fullNameError ? (
             <Text style={styles.errorText}>{fullNameError}</Text>
+          ) : null}
+          <TextInput
+            style={[styles.input, usernameError && styles.inputError]}
+            placeholder="Username"
+            placeholderTextColor="#aaa"
+            value={username}
+            onChangeText={(text) => {
+              setUsername(text);
+              validateUsername(text);
+            }}
+          />
+          {usernameError ? (
+            <Text style={styles.errorText}>{usernameError}</Text>
           ) : null}
           <TextInput
             style={[styles.input, emailError && styles.inputError]}
@@ -171,7 +298,7 @@ export default function SignUpScreen({ navigation }) {
         </TouchableOpacity>
         <View style={styles.signinContainer}>
           <Text style={styles.signinText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+          <TouchableOpacity onPress={() => navigation.navigate("SignInScreen")}>
             <Text style={styles.signinLink}>Sign In</Text>
           </TouchableOpacity>
         </View>
@@ -195,11 +322,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   },
+  profilePicContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
   headerText: {
     fontSize: 28,
     fontWeight: "bold",
     color: "white",
     marginTop: 10,
+  },
+  usernameDisplay: {
+    fontSize: 18,
+    color: "#4CAF50",
+    marginTop: 5,
   },
   inputContainer: {
     marginBottom: 20,

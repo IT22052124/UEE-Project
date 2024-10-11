@@ -1,5 +1,6 @@
 import { Application } from "../Models/ApplicationModel.js";
 import { Job } from "../Models/JobModel.js";
+import { Notification } from "../Models/NotificationModel.js";
 
 export const getAllJobs = async (req, res) => {
   try {
@@ -139,7 +140,6 @@ export const updateStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    console.log(status);
 
     const application = await Application.findByIdAndUpdate(
       id,
@@ -157,3 +157,35 @@ export const updateStatus = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getNotificationsForUser = async (req, res) => {
+  try {
+    const userId = req.user;
+
+    // Find notifications that the user hasn't seen yet
+    const notifications = await Notification.find({
+      usersSeen: { $ne: userId },
+    });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const markNotificationAsSeen = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const userId = req.user;
+
+    // Add the user's ID to the usersSeen array
+    await Notification.findByIdAndUpdate(notificationId, {
+      $addToSet: { usersSeen: userId },
+    });
+
+    res.status(200).json({ message: 'Notification marked as seen' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

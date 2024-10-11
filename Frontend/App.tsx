@@ -42,10 +42,110 @@ import SignInScreen from "./OtherScreens/SignInScreen";
 import ChatScreen from "./Pages/CommunityConnect/Screen/ChatScreen";
 import ChatListScreen from "./Pages/CommunityConnect/Screen/ChatListScreen";
 import JobNotificationsScreen from "./Jobs/Screen/Notifications";
+import UserScreen from "./Pages/CommunityConnect/Screen/UserScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+const CommunityTab = createBottomTabNavigator();
+const CommunityConnectStack = createStackNavigator();
 
+function CommunityTabNavigator() {
+  return (
+    <CommunityTab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          if (route.name === "Community") {
+            iconName = focused ? "people" : "people-outline";
+          } else if (route.name === "CreateCommunity") {
+            iconName = focused ? "add-circle" : "add-circle-outline"; // Plus icon for Create Community
+          } else if (route.name === "Profile") {
+            iconName = focused ? "person" : "person-outline";
+          } else if (route.name === "Chat") {
+            iconName = focused ? "chatbubble" : "chatbubble-outline";
+          }
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarStyle: {
+          backgroundColor: "#1E1E1E", // Set the background color
+        },
+      })}
+      tabBarOptions={{
+        activeTintColor: "#FF4500",
+        inactiveTintColor: "white",
+      }}
+    >
+      <CommunityTab.Screen
+        name="Community"
+        component={HomeScreen}
+        options={{ tabBarLabel: "Community", headerShown: false }}
+      />
+      <CommunityTab.Screen
+        name="CreateCommunity"
+        component={CreateCommunityScreen}
+        options={{ tabBarLabel: "Create Community", headerShown: false }}
+      />
+      <CommunityTab.Screen
+        name="Chat"
+        component={ChatListScreen} // List of all previous chats
+        options={{ tabBarLabel: "Chat", headerShown: false }}
+      />
+      <CommunityTab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ tabBarLabel: "Profile", headerShown: false }}
+      />
+    </CommunityTab.Navigator>
+  );
+}
+
+function CommunityConnectStackNavigator() {
+  return (
+    <CommunityConnectStack.Navigator initialRouteName="CommunityTabs">
+      <CommunityConnectStack.Screen
+        name="CommunityTabs"
+        component={CommunityTabNavigator}
+        options={{ headerShown: false }}
+      />
+      <CommunityConnectStack.Screen
+        name="DetailedPostScreen"
+        component={DetailedPostScreen}
+        options={{ headerShown: false }}
+      />
+      <CommunityConnectStack.Screen
+        name="ChatScreen"
+        component={ChatScreen}
+        options={{ headerShown: false }}
+      />
+      <CommunityConnectStack.Screen
+        name="SearchScreen"
+        component={SearchScreen}
+        options={{ headerShown: false }}
+      />
+      <CommunityConnectStack.Screen
+        name="CommunityScreen"
+        component={CommunityScreen}
+        options={{ headerShown: false }}
+      />
+      <CommunityConnectStack.Screen
+        name="CreateCommunityScreen"
+        component={CreateCommunityScreen}
+        options={{ headerShown: false }}
+      />
+      <CommunityConnectStack.Screen
+        name="CreatePostScreen"
+        component={CreatePostScreen}
+        options={{ headerShown: false }}
+      />
+
+      <CommunityConnectStack.Screen
+        name="UserScreen"
+        component={UserScreen}
+        options={{ headerShown: false }}
+      />
+    </CommunityConnectStack.Navigator>
+  );
+}
 function JPBottomTabNavigator({ route }) {
   return (
     <Tab.Navigator
@@ -97,12 +197,12 @@ function BottomTabNavigator() {
           } else if (route.name === "AppliedJobsScreen") {
             // Icon for Applied Jobs Screen
             iconName = focused ? "document" : "document-outline";
-          // } else if (route.name === "DonationHomepage") {
-          //   // Icon for Applied Jobs Screen
-          //   iconName = focused ? "document" : "heart-half-outline";
+            // } else if (route.name === "DonationHomepage") {
+            //   // Icon for Applied Jobs Screen
+            //   iconName = focused ? "document" : "heart-half-outline";
 
-          return <Ionicons name={iconName} size={size} color={color} />;
-        }
+            return <Ionicons name={iconName} size={size} color={color} />;
+          }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -115,7 +215,7 @@ function BottomTabNavigator() {
         component={JobListScreen}
         options={{ headerShown: false, tabBarLabel: "Jobs" }} // Set proper label
       />
-       {/* <Tab.Screen
+      {/* <Tab.Screen
         name="DonationHomepage"
         component={DonationHomepage}
         options={{ headerShown: false, tabBarLabel: "Donate Now" }} // Set proper label
@@ -125,7 +225,11 @@ function BottomTabNavigator() {
         component={AppliedJobsScreen}
         options={{ headerShown: false, tabBarLabel: "Applied Jobs" }} // Set proper label
       />
-      
+      <Tab.Screen
+        name="CommunityConnect"
+        component={CommunityConnectStackNavigator}
+        options={{ tabBarLabel: "Community", headerShown: false }}
+      />
     </Tab.Navigator>
   );
 }
@@ -133,7 +237,7 @@ function BottomTabNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="HomeScreen">
+      <Stack.Navigator initialRouteName="MainTabs">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}
@@ -144,32 +248,7 @@ export default function App() {
           component={SignInScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="HomeScreen"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ChatScreen"
-          component={ChatScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ChatListScreen"
-          component={ChatListScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="SearchScreen"
-          component={SearchScreen}
-          options={{ headerShown: false }}
-        />
-        
-        <Stack.Screen
-          name="CreateCommunityScreen"
-          component={CreateCommunityScreen}
-          options={{ headerShown: false }}
-        />
+
         <Stack.Screen
           name="DonationHomepage"
           component={DonationHomepage}
@@ -210,26 +289,7 @@ export default function App() {
           component={CampaignDonation}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="ProfileScreen"
-          component={ProfileScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="CreatePostScreen"
-          component={CreatePostScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="CommunityScreen"
-          component={CommunityScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="DetailedPostScreen"
-          component={DetailedPostScreen}
-          options={{ headerShown: false }}
-        />
+
         <Stack.Screen
           name="Program"
           component={Program}

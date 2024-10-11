@@ -94,7 +94,7 @@ export default function CommunityScreen() {
         `http://${IPAddress}:5000/User/users/${userId}/toggle-community`, // Replace with your API endpoint
         { communityId: community?._id } // Include necessary data
       );
-      setIsMember(!isMember);
+
       setReload(reload + 1); // Optionally show a message
     } catch (error) {
       console.error("Error toggling community membership", error);
@@ -133,6 +133,11 @@ export default function CommunityScreen() {
           )}`
         );
         const communityData = response.data.data;
+        const isUserMember = await communityData.members.some(
+          (member: any) => member._id === userId
+        );
+
+        console.log("Community data:", isUserMember);
         const updatedPosts = communityData.relatedPosts.map((post) => {
           const userVote = post.upvotedBy.includes(userId)
             ? "upvoted"
@@ -142,11 +147,8 @@ export default function CommunityScreen() {
           return { ...post, userVote };
         });
         setCommunity({ ...communityData, relatedPosts: updatedPosts });
-        const isUserMember = communityData.members.some(
-          (member: any) => member._id === userId
-        );
-        setIsMember(isUserMember); // Set membership status
         setIsAdmin(communityData.admin._id === userId);
+        setIsMember(isUserMember); // Set membership status
         setLoading(false); // Stop loading
       } catch (error) {
         console.error("Error fetching community data", error);
@@ -268,8 +270,6 @@ export default function CommunityScreen() {
   };
 
   const handleDeletePost = async (postId) => {
-    console.log("Deleting post with ID:", postId);
-    console.log("User ID:", community._id);
     try {
       await axios
         .delete(
@@ -613,24 +613,6 @@ export default function CommunityScreen() {
             </View>
           )}
         </ScrollView>
-
-        <View style={styles.bottomNav}>
-          <TouchableOpacity>
-            <Ionicons name="home-outline" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="compass-outline" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="add-circle-outline" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="chatbubble-outline" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="notifications-outline" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
       </View>
       <Modal
         visible={isPostDeleteModalVisibal}

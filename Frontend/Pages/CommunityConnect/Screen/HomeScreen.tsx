@@ -16,7 +16,7 @@ import { IPAddress } from "../../../globals";
 import { ParentPost } from "../Components/ParentPost";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 
@@ -30,7 +30,7 @@ export default function HomeScreen() {
   const [sortOption, setSortOption] = useState("hot"); // "hot" or "popular"
   const navigation = useNavigation();
   const [reload, setReload] = useState(1);
-
+  const isFocused = useIsFocused();
   const getUserFromAsyncStorage = async () => {
     try {
       const admin = await AsyncStorage.getItem("user");
@@ -84,7 +84,7 @@ export default function HomeScreen() {
     };
 
     fetchPosts();
-  }, [activeTab, sortOption, reload]); // Refetch when activeTab or sortOption changes
+  }, [activeTab, sortOption, reload, isFocused]); // Refetch when activeTab or sortOption changes
 
   const timeAgo = (date) => {
     const now = new Date();

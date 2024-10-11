@@ -317,9 +317,9 @@ export default function ProfileScreen() {
   };
   // Function to render each post
   const renderPost = ({ item }) => {
-    const userVote = item.upvotedBy.includes(user)
+    const userVote = item.upvotedBy.includes(userId)
       ? "upvoted"
-      : item.downvotedBy.includes(user)
+      : item.downvotedBy.includes(userId)
       ? "downvoted"
       : null;
     return (

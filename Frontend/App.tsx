@@ -197,9 +197,9 @@ function BottomTabNavigator() {
           } else if (route.name === "AppliedJobsScreen") {
             // Icon for Applied Jobs Screen
             iconName = focused ? "document" : "document-outline";
-            // } else if (route.name === "DonationHomepage") {
-            //   // Icon for Applied Jobs Screen
-            //   iconName = focused ? "document" : "heart-half-outline";
+            } else if (route.name === "DonationHomepage") {
+              // Icon for Applied Jobs Screen
+              iconName = focused ? "document" : "heart-half-outline";
           } else if (route.name === "DonationHomepage") {
              // Icon for Applied Jobs Screen
             iconName = focused ? "heart-half" : "heart-half-outline";
@@ -224,11 +224,6 @@ function BottomTabNavigator() {
         component={JobListScreen}
         options={{ headerShown: false, tabBarLabel: "Jobs" }} // Set proper label
       />
-      {/* <Tab.Screen
-        name="DonationHomepage"
-        component={DonationHomepage}
-        options={{ headerShown: false, tabBarLabel: "Donate Now" }} // Set proper label
-      /> */}
        
       <Tab.Screen
         name="AppliedJobsScreen"
@@ -258,12 +253,12 @@ export default function App() {
           component={SignInScreen}
           options={{ headerShown: false }}
         />
-
-        <Stack.Screen
+         <Stack.Screen
           name="DonationHomepage"
           component={DonationHomepage}
           options={{ headerShown: false }}
         />
+        
         <Stack.Screen
           name="CatergoryScreen"
           component={CatergoryScreen}

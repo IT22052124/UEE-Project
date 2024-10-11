@@ -69,6 +69,8 @@ export default function Login() {
   }, [navigate]);
 
   return (
+    <div className="bg-gradient-to-r from-blue-500 to-red-300">
+    <div><center><h1>welcome</h1></center></div>
     <div className="min-h-screen bg-gradient-to-br flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -163,6 +165,7 @@ className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-2 px-
           </div>
         </div>
       </motion.div>
+    </div>
     </div>
   );
 }

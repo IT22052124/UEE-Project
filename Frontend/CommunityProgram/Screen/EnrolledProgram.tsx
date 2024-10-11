@@ -79,13 +79,6 @@ export default function EnrolledProgramsScreen() {
           />
         ))}
       </ScrollView>
-      <View style={styles.bottomNav}>
-        {['cash-outline', 'sync-outline', 'people-outline', 'briefcase-outline', 'settings-outline'].map((icon, index) => (
-          <View key={index} style={styles.navItem}>
-            <Ionicons name={icon} size={24} color={index === 2 ? '#3b82f6' : '#6b7280'} />
-          </View>
-        ))}
-      </View>
     </View>
   );
 }
@@ -163,17 +156,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#e5e7eb',
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-  navItem: {
-    alignItems: 'center',
   },
 });

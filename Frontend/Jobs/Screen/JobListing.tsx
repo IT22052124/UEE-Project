@@ -15,6 +15,7 @@ import axios from "axios";
 import { IPAddress } from "../../globals";
 import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function JobListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,7 +24,6 @@ export default function JobListScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [newNotifications, setNewNotifications] = useState(0);
-  const user = "66f55789b9c3be6113e48bae";
 
   useFocusEffect(
     React.useCallback(() => {
@@ -49,6 +49,8 @@ export default function JobListScreen({ navigation }) {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
       const response = await axios.get(
         `http://${IPAddress}:5000/Job/notifications/${user}`
       );
@@ -79,9 +81,8 @@ export default function JobListScreen({ navigation }) {
     <TouchableOpacity
       style={styles.jobItem}
       onPress={() => {
-        console.log(item)
+        console.log(item);
         navigation.navigate("JobDetailsScreen", { item: item });
-
       }}
     >
       <Image

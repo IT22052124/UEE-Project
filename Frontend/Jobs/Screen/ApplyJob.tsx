@@ -20,6 +20,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../Storage/firebase";
 import { IPAddress } from "../../globals";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const schema = yup.object().shape({
   firstName: yup.string().required("Please Enter a First Name"),
@@ -43,7 +44,6 @@ export default function ApplyJobScreen({ route }) {
   const [documentError, setDocumentError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
-  const user = "66f55789b9c3be6113e48bae";
 
   const {
     control,
@@ -75,6 +75,9 @@ export default function ApplyJobScreen({ route }) {
         await uploadBytes(storageRef, blob);
         downloadURL = await getDownloadURL(storageRef);
       }
+
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
 
       await axios.post(`http://${IPAddress}:5000/Job/apply`, {
         formData,

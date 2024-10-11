@@ -123,7 +123,7 @@ export default function DonateScreen({ route }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.paymentButton, { backgroundColor: '#FF9800 ' }]}
+            style={[styles.paymentButton, { backgroundColor: 'orange' }]}
             onPress={() => handleDonatePress('BankDeposits')}
           >
             <Ionicons name="business-outline" size={24} color="white" style={styles.paymentIcon} />

@@ -5,6 +5,7 @@ import {
   deleteCommunity,
   getAllCommunities,
   getAllCommunityByName,
+  postDeleteById,
   updateAdmin,
   updateCommunity,
 } from "../Controllers/communityController.js";
@@ -32,5 +33,7 @@ router.post("/community/:communityId/relatedPosts", addRelatedPosts);
 
 // Update the admin of a community
 router.put("/community/:communityId/admin", updateAdmin);
+
+router.delete("/communities/:communityId/posts/:postId", postDeleteById);
 
 export default router;

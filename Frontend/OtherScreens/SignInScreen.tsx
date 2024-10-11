@@ -1,33 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  Alert,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { IPAddress } from "../globals";
 
 export default function SignInScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const validateEmail = (email) => {
     const re = /\S+@\S+\.\S+/;
     if (!email) {
-      setEmailError('Email is required');
+      setEmailError("Email is required");
     } else if (!re.test(email)) {
-      setEmailError('Invalid email format');
+      setEmailError("Invalid email format");
     } else {
-      setEmailError('');
+      setEmailError("");
     }
   };
 
   const validatePassword = (password) => {
     if (!password) {
-      setPasswordError('Password is required');
-    } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
+      setPasswordError("Password is required");
     } else {
-      setPasswordError('');
+      setPasswordError("");
     }
   };
 
@@ -35,20 +46,60 @@ export default function SignInScreen({ navigation }) {
     setIsFormValid(email && password && !emailError && !passwordError);
   }, [email, password, emailError, passwordError]);
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (isFormValid) {
-      // Implement your sign-in logic here
-      Alert.alert('Success', 'Sign in successful!');
+      setLoading(true);
+
+      try {
+        const response = await axios.post(
+          `http://${IPAddress}:5000/User/login`,
+          { password, email }
+        );
+        if (response.data.success) {
+          await AsyncStorage.setItem(
+            "user",
+            JSON.stringify(response.data.user || {})
+          );
+
+          Toast.show({
+            type: "success",
+            position: "top",
+            text1: "Login Successful",
+            visibilityTime: 2000,
+            autoHide: true,
+          });
+          navigation.replace("ProfileScreen");
+        } else {
+          Toast.show({
+            type: "error",
+            position: "top",
+            text1: "Login Failed",
+            text2: response.data.message || "Please check your credentials.",
+            visibilityTime: 2000,
+            autoHide: true,
+          });
+        }
+      } catch (error) {
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: `Login Failed - Please check your credentials.`,
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
     <ImageBackground
-      source={{ uri: 'https://example.com/background-image.jpg' }}
+      source={{ uri: "https://example.com/background-image.jpg" }}
       style={styles.backgroundImage}
     >
       <LinearGradient
-        colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.9)']}
+        colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.9)"]}
         style={styles.container}
       >
         <View style={styles.headerContainer}>
@@ -67,7 +118,9 @@ export default function SignInScreen({ navigation }) {
               validateEmail(text);
             }}
           />
-          {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+          {emailError ? (
+            <Text style={styles.errorText}>{emailError}</Text>
+          ) : null}
           <TextInput
             style={[styles.input, passwordError && styles.inputError]}
             placeholder="Password"
@@ -79,7 +132,9 @@ export default function SignInScreen({ navigation }) {
               validatePassword(text);
             }}
           />
-          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+          {passwordError ? (
+            <Text style={styles.errorText}>{passwordError}</Text>
+          ) : null}
         </View>
         <TouchableOpacity
           style={[styles.button, !isFormValid && styles.buttonDisabled]}
@@ -93,7 +148,7 @@ export default function SignInScreen({ navigation }) {
         </TouchableOpacity>
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <TouchableOpacity onPress={() => navigation.navigate("SignUpScreen")}>
             <Text style={styles.signupLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -105,74 +160,74 @@ export default function SignInScreen({ navigation }) {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   headerContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
   },
   headerText: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     marginTop: 10,
   },
   inputContainer: {
     marginBottom: 20,
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: "rgba(255,255,255,0.1)",
     height: 50,
     borderRadius: 25,
     paddingHorizontal: 20,
     fontSize: 16,
-    color: 'white',
+    color: "white",
     marginBottom: 15,
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: "red",
     borderWidth: 1,
   },
   errorText: {
-    color: 'red',
+    color: "red",
     marginBottom: 10,
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     height: 50,
     borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonDisabled: {
-    backgroundColor: '#888',
+    backgroundColor: "#888",
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   forgotPassword: {
-    color: 'white',
-    textAlign: 'center',
+    color: "white",
+    textAlign: "center",
     marginTop: 20,
   },
   signupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 20,
   },
   signupText: {
-    color: 'white',
+    color: "white",
   },
   signupLink: {
-    color: '#4CAF50',
-    fontWeight: 'bold',
+    color: "#4CAF50",
+    fontWeight: "bold",
   },
 });

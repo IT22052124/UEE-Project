@@ -12,11 +12,12 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { IPAddress } from "../../../globals";
 import { ParentPost } from "../Components/ParentPost";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Types for comment and post structures
 interface Comment {
@@ -70,31 +71,41 @@ const formatTimestamp = (dateString: string) => {
 };
 
 // Component for rendering a single comment
-const CommentItem: React.FC<{ comment: Comment; postId: string }> = ({
-  comment,
-  postId,
-}) => {
+const CommentItem: React.FC<{
+  comment: Comment;
+  postId: string;
+  setReload2: Function;
+}> = ({ comment, postId, setReload2 }) => {
   const [replyInput, setReplyInput] = useState("");
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replies, setReplies] = useState(comment.replies || []);
   const [showReplies, setShowReplies] = useState(false); // To toggle reply visibility
 
+  const getUserFromAsyncStorage = async () => {
+    try {
+      const admin = await AsyncStorage.getItem("user");
+      return admin ? JSON.parse(admin)._id || null : null;
+    } catch (error) {
+      console.error("Failed to retrieve user:", error);
+      return null;
+    }
+  };
   const handleReply = async () => {
     if (replyInput.trim()) {
       try {
-        const response = await axios.post(
-          `http://${IPAddress}:5000/Post/posts/${postId}/comments/${comment._id}/replies`,
-          {
-            userId: "66f3dda2bd01bea47d940c63",
-            reply: replyInput,
-          }
-        );
-
-        if (response.status === 200) {
-          setReplies((prevReplies) => [...prevReplies, response.data.reply]);
-          setReplyInput(""); // Clear reply input
-          setShowReplyInput(false); // Hide reply input
-        }
+        const userId = await getUserFromAsyncStorage();
+        await axios
+          .post(
+            `http://${IPAddress}:5000/Post/posts/${postId}/comments/${comment._id}/replies`,
+            {
+              userId: userId,
+              reply: replyInput,
+            }
+          )
+          .then((response) => {
+            setReplyInput(""); // Clear the input
+            setReload2((prev: number) => prev + 1); // Reload the comments
+          });
       } catch (error) {
         console.error("Error posting reply", error);
       }
@@ -104,11 +115,11 @@ const CommentItem: React.FC<{ comment: Comment; postId: string }> = ({
   return (
     <View style={styles.commentContainer}>
       <Image
-        source={{ uri: comment.userId.profilePic }}
+        source={{ uri: comment.userId?.profilePic }}
         style={styles.commentProfilePic}
       />
       <View style={styles.commentContent}>
-        <Text style={styles.commentUsername}>{comment.userId.username}</Text>
+        <Text style={styles.commentUsername}>{comment.userId?.username}</Text>
         <Text style={styles.commentText}>{comment.comment}</Text>
         <Text style={styles.commentTimestamp}>
           {formatTimestamp(comment.time)}
@@ -143,7 +154,11 @@ const CommentItem: React.FC<{ comment: Comment; postId: string }> = ({
             </TouchableOpacity>
             {showReplies &&
               replies.map((reply) => (
-                <CommentItem key={reply._id} comment={reply} postId={postId} />
+                <CommentItem
+                  comment={reply}
+                  postId={postId}
+                  setReload2={setReload2}
+                />
               ))}
           </View>
         )}
@@ -154,103 +169,47 @@ const CommentItem: React.FC<{ comment: Comment; postId: string }> = ({
 
 export const DetailedPostScreen = () => {
   const route = useRoute();
-  const userId = "66f3dda2bd01bea47d940c63";
+  const [userId, setUserId] = useState("");
   const { postid } = route.params;
+
+  const communityName = route.params?.communityName || null;
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
-  const [upvotes, setUpvotes] = useState(0);
-  const [downvotes, setDownvotes] = useState(0);
+  const [UserVote, setUserVote] = useState("");
+  const [reload, setReload] = useState(1);
+  const [comments, setComments] = useState([]);
+  const [reload2, setReload2] = useState(1);
 
-  const handleUpvote = async () => {
+  const getUserFromAsyncStorage = async () => {
     try {
-      if (post?.userVote === "upvoted") {
-        // User has already upvoted, so remove the upvote
-        await axios.put(
-          `http://${IPAddress}:5000/Post/posts/${postid}/remove-upvote`,
-          { userId }
-        );
-        setUpvotes((prev) => prev - 1);
-        setPost((prevPost) =>
-          prevPost ? { ...prevPost, userVote: null } : null
-        );
-      } else {
-        // User upvotes the post
-        await axios.put(
-          `http://${IPAddress}:5000/Post/posts/${postid}/upvote`,
-          { userId }
-        );
-        if (post?.userVote === "downvoted") {
-          // If the user had previously downvoted, increase upvotes and remove a downvote
-          setUpvotes((prev) => prev + 1);
-          setDownvotes((prev) => prev - 1);
-        } else {
-          setUpvotes((prev) => prev + 1);
-        }
-        setPost((prevPost) =>
-          prevPost ? { ...prevPost, userVote: "upvoted" } : null
-        );
-      }
+      const admin = await AsyncStorage.getItem("user");
+      return admin ? JSON.parse(admin)._id || null : null;
     } catch (error) {
-      console.error("Error upvoting post", error);
-    }
-  };
-
-  const handleDownvote = async () => {
-    try {
-      if (post?.userVote === "downvoted") {
-        // User has already downvoted, so remove the downvote
-        await axios.put(
-          `http://${IPAddress}:5000/Post/posts/${postid}/remove-downvote`,
-          { userId }
-        );
-        setDownvotes((prev) => prev - 1);
-        setPost((prevPost) =>
-          prevPost ? { ...prevPost, userVote: null } : null
-        );
-      } else {
-        // User downvotes the post
-        await axios.put(
-          `http://${IPAddress}:5000/Post/posts/${postid}/downvote`,
-          { userId }
-        );
-        if (post?.userVote === "upvoted") {
-          // If the user had previously upvoted, remove an upvote and add a downvote
-          setUpvotes((prev) => prev - 1);
-          setDownvotes((prev) => prev + 1);
-        } else {
-          setDownvotes((prev) => prev + 1);
-        }
-        setPost((prevPost) =>
-          prevPost ? { ...prevPost, userVote: "downvoted" } : null
-        );
-      }
-    } catch (error) {
-      console.error("Error downvoting post", error);
+      console.error("Failed to retrieve user:", error);
+      return null;
     }
   };
 
   // Fetch post details from API
   useEffect(() => {
     const fetchDetails = async () => {
-      setLoading(true);
+      const id = await getUserFromAsyncStorage(); // Get the user ID from async storage
+      setUserId(id);
       try {
         const response = await axios.get(
-          `http://${IPAddress}:5000/Post/posts/${postid}`
+          `http://${IPAddress}:5000/Post/posts/${postid}/nocomments`
         );
-        const postData = response.data.post;
-
-        // Determine the user's vote (upvoted, downvoted, or none)
-        const userVote = postData.upvotedBy.includes(userId)
-          ? "upvoted"
-          : postData.downvotedBy.includes(userId)
-          ? "downvoted"
-          : null;
-
-        // Set the post data with the userVote included
-        setPost({ ...postData, userVote });
-        setUpvotes(postData.upVotes || 0);
-        setDownvotes(postData.downVotes || 0);
+        setPost(response.data.post);
+        const userVote =
+          response.data.post.upvotedBy &&
+          response.data.post.upvotedBy.includes(id)
+            ? "upvoted"
+            : response.data.post.downvotedBy &&
+              response.data.post.downvotedBy.includes(id)
+            ? "downvoted"
+            : null;
+        setUserVote(userVote);
       } catch (error) {
         console.error("Error fetching post details:", error);
       } finally {
@@ -259,7 +218,25 @@ export const DetailedPostScreen = () => {
     };
 
     fetchDetails();
-  }, [postid, userId]);
+  }, [postid, reload]);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const response = await axios.get(
+          `http://${IPAddress}:5000/Post/posts/${postid}/comments`
+        );
+
+        setComments(response.data.Comments);
+      } catch (error) {
+        console.error("Error fetching post details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [postid, reload2]);
 
   const handleAddComment = async () => {
     if (newComment.trim()) {
@@ -273,6 +250,7 @@ export const DetailedPostScreen = () => {
         );
 
         if (response.status === 200) {
+          setReload2((prev: number) => prev + 1); // Reload the comments
           setNewComment(""); // Reset comment input
         }
       } catch (error) {
@@ -300,82 +278,163 @@ export const DetailedPostScreen = () => {
   // Prepare data for FlatList rendering
   const postData = [
     { key: "header", post },
-    { key: "commentsHeader", comments: "Comments" },
-    ...post.comments.map((comment) => ({ key: comment._id, comment })),
+    { key: "commentsHeader", comments: `${comments.length} Comments` },
+    ...comments.map((comment) => ({ key: comment._id, comment })),
   ];
+  const navigation = useNavigation();
+
+  const handleUpvote = async () => {
+    const id = await getUserFromAsyncStorage();
+    try {
+      await axios.put(`http://${IPAddress}:5000/Post/posts/${postid}/upvote`, {
+        userId: id,
+      });
+
+      setReload(reload + 1);
+    } catch (error) {
+      console.error("Error upvoting post", error);
+    }
+  };
+
+  // Handle Downvote
+  const handleDownvote = async () => {
+    try {
+      const id = await getUserFromAsyncStorage();
+      await axios.put(
+        `http://${IPAddress}:5000/Post/posts/${postid}/downvote`,
+        { userId: id }
+      );
+
+      setReload(reload + 1);
+    } catch (error) {
+      console.error("Error downvoting post", error);
+    }
+  };
 
   const renderItem = ({ item }: { item: any }) => {
     if (item.key === "header") {
       return (
-        <View style={styles.header}>
-          <View style={styles.authorInfo}>
-            <Image
-              source={{ uri: post.author.profilePic }}
-              style={styles.profilePic}
-            />
-            <View style={styles.textContainer}>
-              <View style={styles.usernameContainer}>
-                <Text style={styles.username}>{post.author.username}</Text>
-                <Text style={styles.timestamp}>
-                  {formatTimestamp(post.createdAt)}
-                </Text>
+        <>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.touch}
+              onPress={() =>
+                navigation.navigate("SearchScreen", {
+                  Name: communityName ? communityName : post.author.username,
+                })
+              }
+            >
+              <View style={styles.searchBar}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search..."
+                  placeholderTextColor="#777"
+                  value={communityName ? communityName : post.author.username}
+                  editable={false} // Disable
+                />
+                <Ionicons
+                  name="search"
+                  size={24}
+                  color="#777"
+                  style={styles.searchIcon}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.header2}>
+            <View style={styles.authorInfo}>
+              <Image
+                source={{ uri: post.author.profilePic }}
+                style={styles.profilePic}
+              />
+              <View style={styles.textContainer}>
+                <View style={styles.usernameContainer}>
+                  {/* Community Name */}
+                  {communityName && (
+                    <Text style={styles.CommunityName}>{communityName}</Text>
+                  )}
+
+                  {/* Username and Timestamp below Community Name */}
+                  <View style={styles.userDetailsContainer}>
+                    <Text style={styles.username}>{post.author.username}</Text>
+                    <Text style={styles.timestamp}>
+                      {formatTimestamp(post.createdAt)}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </View>
-          </View>
-          <Text style={styles.title}>{post.postTitle}</Text>
-          <Text style={styles.description}>{post.descriptions}</Text>
-          {post.medias && post.medias.length > 0 ? (
-            <ParentPost post={post} />
-          ) : null}
-          <View style={styles.postStats}>
-            {/* Upvote Button */}
-            <TouchableOpacity onPress={handleUpvote}>
-              <Entypo
-                name="arrow-bold-up"
-                size={32}
-                color={post?.userVote === "upvoted" ? "#FF4500" : "#FFFFFF"} // Shows orange if upvoted, white otherwise
-              />
-            </TouchableOpacity>
+            <Text style={styles.title}>{post.postTitle}</Text>
+            <Text style={styles.description}>{post.descriptions}</Text>
+            {post.medias && post.medias.length > 0 ? (
+              <ParentPost post={post} />
+            ) : null}
+            <View style={styles.postStats}>
+              {/* Upvote Button */}
+              <TouchableOpacity onPress={handleUpvote}>
+                <Entypo
+                  name="arrow-bold-up"
+                  size={32}
+                  color={UserVote === "upvoted" ? "#FF4500" : "#FFFFFF"} // Shows orange if upvoted, white otherwise
+                />
+              </TouchableOpacity>
 
-            {/* Vote Score */}
-            <Text style={styles.postStatText}>{upvotes - downvotes}</Text>
+              {/* Vote Score */}
+              <Text style={styles.postStatText}>
+                {post.upVotes - post.downVotes}
+              </Text>
 
-            {/* Downvote Button */}
-            <TouchableOpacity onPress={handleDownvote}>
-              <Entypo
-                name="arrow-down"
-                size={32}
-                color={post?.userVote === "downvoted" ? "#FF4500" : "#FFFFFF"} // Shows orange if downvoted, white otherwise
-              />
-            </TouchableOpacity>
-          </View>
+              {/* Downvote Button */}
+              <TouchableOpacity onPress={handleDownvote}>
+                <Entypo
+                  name="arrow-down"
+                  size={32}
+                  color={UserVote === "downvoted" ? "#FF4500" : "#FFFFFF"} // Shows orange if downvoted, white otherwise
+                />
+              </TouchableOpacity>
+            </View>
 
-          {/* <TouchableOpacity style={styles.shareButton}>
+            {/* <TouchableOpacity style={styles.shareButton}>
               <Text style={styles.shareButtonText}>Share</Text>
             </TouchableOpacity> */}
 
-          <View style={styles.commentInputContainer}>
-            <TextInput
-              style={styles.commentInput}
-              value={newComment}
-              onChangeText={setNewComment}
-              placeholder="Add a comment..."
-              placeholderTextColor="#CCCCCC"
-              multiline
-            />
-            <TouchableOpacity
-              onPress={handleAddComment}
-              style={styles.addCommentButton}
-            >
-              <Text style={styles.addCommentButtonText}>Post</Text>
-            </TouchableOpacity>
+            <View style={styles.commentInputContainer}>
+              <TextInput
+                style={styles.commentInput}
+                value={newComment}
+                onChangeText={setNewComment}
+                placeholder="Add a comment..."
+                placeholderTextColor="#CCCCCC"
+                multiline
+              />
+              <TouchableOpacity
+                onPress={handleAddComment}
+                style={styles.addCommentButton}
+              >
+                <Text style={styles.addCommentButtonText}>Post</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </>
       );
     } else if (item.key === "commentsHeader") {
-      return <Text style={styles.commentsHeader}>{item.comments}</Text>;
+      return comments.length === 0 ? (
+        <Text style={styles.noCommentsText}>No comments available</Text>
+      ) : (
+        <Text style={styles.commentsHeader}>{item.comments}</Text>
+      );
     } else {
-      return <CommentItem comment={item.comment} postId={postid} />;
+      return (
+        <CommentItem
+          comment={item.comment}
+          postId={postid}
+          setReload2={setReload2}
+        />
+      );
     }
   };
 
@@ -385,7 +444,7 @@ export const DetailedPostScreen = () => {
         <FlatList
           data={postData}
           renderItem={renderItem}
-          keyExtractor={(item) => item.key}
+          keyExtractor={(item) => item.key || item.id || item._id}
         />
       </View>
     </SafeAreaView>
@@ -399,9 +458,20 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     backgroundColor: "#121212",
   },
+  touch: {
+    width: "100%",
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#1A1A1B",
+  },
+  noCommentsText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginTop: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -414,7 +484,7 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
   },
-  header: {
+  header2: {
     padding: 16,
     backgroundColor: "#1E1E1E",
     marginBottom: 8,
@@ -436,11 +506,6 @@ const styles = StyleSheet.create({
 
   textContainer: {
     flex: 1, // Allow text container to take remaining space
-  },
-
-  usernameContainer: {
-    flexDirection: "row", // Align username and timestamp in a row
-    alignItems: "center", // Center vertically
   },
 
   username: {
@@ -477,7 +542,7 @@ const styles = StyleSheet.create({
   postStats: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    margin: 10,
   },
   postStatText: {
     color: "#FFFFFF",
@@ -568,7 +633,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    color: "#333",
+    color: "white",
   },
   replyButtonText: {
     marginLeft: 10,
@@ -583,6 +648,50 @@ const styles = StyleSheet.create({
   toggleRepliesButton: {
     color: "#007AFF", // Color for visibility toggle
     marginVertical: 4,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#1A1A1B",
+    justifyContent: "flex-start", // Aligns icons to the left
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#272729",
+    borderRadius: 20,
+    marginHorizontal: 10,
+    paddingHorizontal: 10,
+  },
+  searchText: {
+    color: "#FFFFFF",
+    marginLeft: 10,
+  },
+  backButton: {
+    padding: 5,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: "#222",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    color: "#fff",
+  },
+  CommunityName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FF4500", // Customize color as per your theme
+  },
+  userDetailsContainer: {
+    flexDirection: "row", // Align username and timestamp horizontally
+    alignItems: "center", // Align vertically in the center
+    marginTop: 5, // Add spacing between CommunityName and the user details
+  },
+  usernameContainer: {
+    alignItems: "flex-start", // Align community name, username, and timestamp vertically
   },
 });
 

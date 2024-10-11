@@ -1,4 +1,5 @@
 import { Community } from "../Models/CommunityModel.js"; // Adjust the path as necessary
+import { Post } from "../Models/PostModel.js";
 import { User } from "../Models/UserModel.js";
 
 // Create a new community with an admin
@@ -18,22 +19,30 @@ export const createCommunity = async (req, res) => {
         .status(400)
         .json({ message: "Community name already exists." });
     }
+
     // Check if the admin user exists
     const admin = await User.findById(adminId);
     if (!admin) {
       return res.status(404).json({ message: "Admin user not found" });
     }
 
+    // Create a new community and add the admin as a member
     const newCommunity = new Community({
       communityName,
       communityDescription,
       communityPic,
       coverPic,
       admin: adminId, // Set the admin field
+      members: [adminId], // Add the admin as the first member
     });
 
     // Save the new community to the database
     const savedCommunity = await newCommunity.save();
+
+    // Optionally, you can also update the admin's communities array to include the new community
+    await User.findByIdAndUpdate(adminId, {
+      $addToSet: { communities: { communityId: savedCommunity._id } },
+    });
 
     // Return the created community
     res.status(201).json({
@@ -57,8 +66,8 @@ export const getAllCommunityByName = async (req, res) => {
     const community = await Community.find({
       communityName: req.params.communityName,
     })
-      .populate("admin", "username email _id") // Populates admin field with username and email from the User model
-      .populate("members", "username email _id") // Populates members with username and email from the User model
+      .populate("admin", "username fullName profilePic  _id") // Populates admin field with username and email from the User model
+      .populate("members", "username fullName profilePic _id") // Populates members with username and email from the User model
       .populate({
         path: "relatedPosts",
         populate: {
@@ -228,5 +237,33 @@ export const deleteCommunity = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const postDeleteById = async (req, res) => {
+  try {
+    const { postId, communityId } = req.params;
+
+    // Find and delete the post from the Post collection
+    const deletedPost = await Post.findByIdAndDelete(postId);
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Update the community to remove the deleted post from relatedPosts
+    await Community.findByIdAndUpdate(
+      communityId,
+      { $pull: { relatedPosts: postId } }, // Remove postId from relatedPosts array
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Post deleted successfully",
+      post: deletedPost, // Return the deleted post information if needed
+    });
+  } catch (error) {
+    console.error(error); // Log the error for debugging purposes
+    res.status(500).json({ message: error.message }); // Return a 500 error with the error message
   }
 };

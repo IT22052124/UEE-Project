@@ -21,45 +21,60 @@ import axios from "axios";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../Storage/firebase";
 import { IPAddress } from "../../../globals";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { ActivityIndicator } from "react-native";
 
 export default function CreatePostScreen() {
-  const userId = "66f3dda2bd01bea47d940c63";
-  const [community, setCommunity] = useState("");
+  const [userId, setUserId] = useState(""); // State to store the user ID
+  const route = useRoute();
+  const communityName = route.params?.communityName || "Post In Profile";
+  const navigator = useNavigation();
+  const [community, setCommunity] = useState(communityName);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<any[]>([]); // To store selected media
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
-
   const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
   const [communities, setCommunities] = useState([
     { id: "1", name: "Post In Profile" },
   ]);
+  const [loading, setLoading] = useState(false);
 
+  const getUserFromAsyncStorage = async () => {
+    try {
+      const admin = await AsyncStorage.getItem("user");
+      return admin ? JSON.parse(admin)._id || null : null;
+    } catch (error) {
+      console.error("Failed to retrieve user:", error);
+      return null;
+    }
+  };
   useEffect(() => {
     const fetchcommunities = async () => {
-      try {
-        const response = await axios.get(
-          `http://${IPAddress}:5000/User/users/${userId}/communities`
-        );
-
-        if (Array.isArray(response.data.communities)) {
-          const newCommunities = response.data.communities.map(
-            (community: any) => ({
-              id: community._id, // Assuming community has an _id property
-              name: community.communityName, // Assuming community has a name property
-            })
+      const id = await getUserFromAsyncStorage(); // Get the user ID from async storage
+      setUserId(id);
+      if (id) {
+        try {
+          const response = await axios.get(
+            `http://${IPAddress}:5000/User/users/${userId}/communities`
           );
 
-          // Update the state with the new communities
-          setCommunities((prevCommunities) => [
-            ...prevCommunities,
-            ...newCommunities,
-          ]);
-        }
-      } catch (error) {
-        console.error("Error fetching community data", error);
+          if (Array.isArray(response.data.communities)) {
+            const newCommunities = response.data.communities.map(
+              (community: any) => ({
+                id: community._id, // Assuming community has an _id property
+                name: community.communityName, // Assuming community has a name property
+              })
+            );
+
+            // Update the state with the new communities
+            setCommunities((prevCommunities) => [
+              ...prevCommunities,
+              ...newCommunities,
+            ]);
+          }
+        } catch (error) {}
       }
     };
 
@@ -72,9 +87,6 @@ export default function CreatePostScreen() {
   };
 
   // Text formatting functions
-  const toggleBold = () => setIsBold(!isBold);
-  const toggleItalic = () => setIsItalic(!isItalic);
-  const toggleUnderline = () => setIsUnderline(!isUnderline);
 
   const handleTextChange = (text: string) => {
     setContent(text);
@@ -115,10 +127,16 @@ export default function CreatePostScreen() {
 
   const handlePostSubmit = async () => {
     if (!title || !content || !community) {
-      alert("Please fill in all fields and add at least one media item.");
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Please fill in all fields",
+        visibilityTime: 2000,
+        autoHide: true,
+      });
       return;
     }
-
+    setLoading(true);
     const mediaUrls = [];
 
     try {
@@ -147,16 +165,17 @@ export default function CreatePostScreen() {
           medias: mediaUrls,
         })
         .then((response) => {
-          console.log(response);
-          alert("Post created successfully!");
-          setTitle("");
-          setContent("");
-          setMedia([]);
-          setCommunity("");
+          setLoading(false);
+          if (community === "Post In Profile") {
+            navigator.navigate("ProfileScreen");
+          } else {
+            navigator.navigate("CommunityScreen", { communityName: community });
+          }
         })
         .catch((err) => {
           console.error("Error during post submission:", err);
           alert("Failed to create post. Please try again.");
+          setLoading(false);
         });
     } catch (error) {
       console.error("Error during media upload:", error);
@@ -173,169 +192,129 @@ export default function CreatePostScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigator.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#FF4500" />
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Create a post</Text>
-          <TouchableOpacity>
-            <Ionicons name="document-text-outline" size={24} color="#FF4500" />
-          </TouchableOpacity>
         </View>
+        {loading ? ( // Show the loader when loading
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#FF4500" />
+          </View>
+        ) : (
+          <>
+            <ScrollView style={styles.content}>
+              <TouchableOpacity
+                style={styles.communitySelector}
+                onPress={() => setModalVisible(true)}
+              >
+                <Ionicons name="people-outline" size={20} color="#898989" />
+                <Text style={styles.communitySelectorText}>
+                  {community || "Choose a community"}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#898989" />
+              </TouchableOpacity>
 
-        <ScrollView style={styles.content}>
-          <TouchableOpacity
-            style={styles.communitySelector}
-            onPress={() => setModalVisible(true)}
-          >
-            <Ionicons name="people-outline" size={20} color="#898989" />
-            <Text style={styles.communitySelectorText}>
-              {community || "Choose a community"}
-            </Text>
-            <Ionicons name="chevron-down" size={20} color="#898989" />
-          </TouchableOpacity>
-
-          {/* Modal for selecting community */}
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Select a community</Text>
-                <FlatList
-                  data={communities}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
+              {/* Modal for selecting community */}
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Select a community</Text>
+                    <FlatList
+                      data={communities}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={styles.modalItem}
+                          onPress={() => handleCommunitySelect(item.name)}
+                        >
+                          <Text style={styles.modalItemText}>{item.name}</Text>
+                        </TouchableOpacity>
+                      )}
+                    />
                     <TouchableOpacity
-                      style={styles.modalItem}
-                      onPress={() => handleCommunitySelect(item.name)}
+                      style={styles.closeButton}
+                      onPress={() => setModalVisible(false)}
                     >
-                      <Text style={styles.modalItemText}>{item.name}</Text>
+                      <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
-                  )}
-                />
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
+                  </View>
+                </View>
+              </Modal>
+
+              <TextInput
+                style={styles.titleInput}
+                placeholder=" An interesting title (Type Here)"
+                value={title}
+                onChangeText={setTitle}
+              />
+
+              {/* Formatting Buttons */}
+
+              <TextInput
+                style={[styles.contentInput]}
+                placeholder="Your text post (optional)"
+                value={content}
+                onChangeText={handleTextChange}
+                multiline
+              />
+
+              {/* Media Selector */}
+              <TouchableOpacity style={styles.mediaButton} onPress={pickMedia}>
+                <Ionicons name="images-outline" size={24} color="#898989" />
+                <Text style={styles.mediaButtonText}>
+                  Add Media ({media.length}/4)
+                </Text>
+              </TouchableOpacity>
+
+              {/* Display selected media horizontally */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.mediaScrollContainer}
+              >
+                {media.map((item, index) => (
+                  <View key={index} style={styles.mediaPreview}>
+                    {item.type === "Image" ? (
+                      <Image
+                        source={{ uri: item.uri }}
+                        style={{ width: 200, height: 200, marginRight: 10 }}
+                      />
+                    ) : item.type === "Video" ? (
+                      <Video
+                        source={{ uri: item.uri }}
+                        style={{ width: 200, height: 200, marginRight: 10 }}
+                        useNativeControls
+                        resizeMode={ResizeMode.COVER}
+                      />
+                    ) : (
+                      <Text>Other Media</Text>
+                    )}
+                    <TouchableOpacity
+                      style={styles.removeMediaButton}
+                      onPress={() => handleRemoveMedia(index)}
+                    >
+                      <Ionicons name="close-circle" size={24} color="red" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            </ScrollView>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.postButton}
+                onPress={handlePostSubmit}
+              >
+                <Text style={styles.postButtonText}>Post</Text>
+              </TouchableOpacity>
             </View>
-          </Modal>
-
-          <TextInput
-            style={styles.titleInput}
-            placeholder=" An interesting title (Type Here)"
-            value={title}
-            onChangeText={setTitle}
-          />
-
-          {/* Formatting Buttons */}
-          <View style={styles.formattingButtons}>
-            <TouchableOpacity
-              style={[styles.formatButton, isBold && styles.activeFormatButton]}
-              onPress={toggleBold}
-            >
-              <Text
-                style={[styles.formatText, isBold && styles.activeFormatText]}
-              >
-                B
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.formatButton,
-                isItalic && styles.activeFormatButton,
-              ]}
-              onPress={toggleItalic}
-            >
-              <Text
-                style={[styles.formatText, isItalic && styles.activeFormatText]}
-              >
-                I
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.formatButton,
-                isUnderline && styles.activeFormatButton,
-              ]}
-              onPress={toggleUnderline}
-            >
-              <Text
-                style={[
-                  styles.formatText,
-                  isUnderline && styles.activeFormatText,
-                ]}
-              >
-                U
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            style={[
-              styles.contentInput,
-              isBold && styles.boldText,
-              isItalic && styles.italicText,
-              isUnderline && styles.underlineText,
-            ]}
-            placeholder="Your text post (optional)"
-            value={content}
-            onChangeText={handleTextChange}
-            multiline
-          />
-
-          {/* Media Selector */}
-          <TouchableOpacity style={styles.mediaButton} onPress={pickMedia}>
-            <Ionicons name="images-outline" size={24} color="#898989" />
-            <Text style={styles.mediaButtonText}>
-              Add Media ({media.length}/4)
-            </Text>
-          </TouchableOpacity>
-
-          {/* Display selected media horizontally */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.mediaScrollContainer}
-          >
-            {media.map((item, index) => (
-              <View key={index} style={styles.mediaPreview}>
-                {item.type === "Image" ? (
-                  <Image
-                    source={{ uri: item.uri }}
-                    style={{ width: 200, height: 200, marginRight: 10 }}
-                  />
-                ) : item.type === "Video" ? (
-                  <Video
-                    source={{ uri: item.uri }}
-                    style={{ width: 200, height: 200, marginRight: 10 }}
-                    useNativeControls
-                    resizeMode={ResizeMode.COVER}
-                  />
-                ) : (
-                  <Text>Other Media</Text>
-                )}
-                <TouchableOpacity
-                  style={styles.removeMediaButton}
-                  onPress={() => handleRemoveMedia(index)}
-                >
-                  <Ionicons name="close-circle" size={24} color="red" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </ScrollView>
-
-        </ScrollView>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.postButton}
-              onPress={handlePostSubmit}
-            >
-              <Text style={styles.postButtonText}>Post</Text>
-            </TouchableOpacity>
-          </View>
+          </>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -350,15 +329,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E5E5",
   },
   headerTitle: {
+    marginLeft: 16,
     fontSize: 20,
     fontWeight: "bold",
   },
@@ -506,5 +487,10 @@ const styles = StyleSheet.create({
     // Optional: slightly transparent background
     borderRadius: 50,
     padding: 5,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

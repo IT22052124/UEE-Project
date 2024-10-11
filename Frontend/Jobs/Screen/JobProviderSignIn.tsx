@@ -108,12 +108,13 @@ export default function JobProviderSignIn({ navigation }) {
         <Image source={require("./../SignIn.jpg")} style={styles.image} />
 
         <View style={styles.form}>
-          {/* Company Name Field */}
+          {/* Email Field */}
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
-              <>
+              <View style={styles.inputContainer}>
+                <Ionicons name="mail-outline" size={24} color="#999" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   onBlur={onBlur}
@@ -121,34 +122,34 @@ export default function JobProviderSignIn({ navigation }) {
                   value={value}
                   placeholder="Email"
                   placeholderTextColor="#999"
+                  keyboardType="email-address"
                 />
-                {errors.email && (
-                  <Text style={styles.errorText}>{errors.email.message}</Text>
-                )}
-              </>
+              </View>
             )}
           />
+          {errors.email && (
+            <Text style={styles.errorText}>{errors.email.message}</Text>
+          )}
 
           {/* Password Field */}
-          <View style={styles.passwordContainer}>
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed-outline" size={24} color="#999" style={styles.inputIcon} />
             <Controller
               control={control}
               name="password"
               render={({ field: { onChange, onBlur, value } }) => (
-                <>
-                  <TextInput
-                    style={styles.passwordInput}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    placeholder="Password"
-                    placeholderTextColor="#999"
-                    secureTextEntry={!showPassword}
-                  />
-                </>
+                <TextInput
+                  style={styles.passwordInput}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  placeholder="Password"
+                  placeholderTextColor="#999"
+                  secureTextEntry={!showPassword}
+                />
               )}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
               <Ionicons
                 name={showPassword ? "eye-off" : "eye"}
                 size={24}
@@ -224,26 +225,30 @@ const styles = StyleSheet.create({
   form: {
     width: "100%",
   },
-  input: {
-    height: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-    marginBottom: 20,
-    fontSize: 16,
-    color: "#000",
-  },
-  passwordContainer: {
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
     marginBottom: 20,
   },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: "#000",
+  },
   passwordInput: {
     flex: 1,
     height: 50,
     fontSize: 16,
     color: "#000",
+  },
+  eyeIcon: {
+    padding: 10,
   },
   signInButton: {
     backgroundColor: "#007AFF",

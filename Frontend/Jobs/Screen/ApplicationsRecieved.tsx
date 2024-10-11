@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -18,14 +18,13 @@ import { IPAddress } from "../../globals";
 import { useFocusEffect } from "@react-navigation/native";
 
 const getFormattedDate = (isoString) => {
-  const date = new Date(isoString); // Parse the ISO string
-  const year = date.getFullYear(); // Get the year
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Get the month (add 1 since it's 0-based)
-  const day = String(date.getDate()).padStart(2, "0"); // Get the day
-  return `${year}-${month}-${day}`; // Return formatted as YYYY-MM-DD
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
 
-// Define the structure of a job application
 interface JobApplication {
   id: string;
   jobTitle: string;
@@ -67,20 +66,16 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({
   };
 
   const updateApplicationStatus = async (applicationId, newStatus) => {
-
-    console.log("here")
     try {
       const response = await axios.patch(
         `http://${IPAddress}:5000/Job/updateStatus/${applicationId}`,
-        { status: newStatus } // Send the new status in the request body
+        { status: newStatus }
       );
 
       if (response.status === 200) {
         console.log(
           `Status updated to ${newStatus} for application ID: ${applicationId}`
         );
-
-      
       } else {
         console.error(
           `Failed to update status. Status code: ${response.status}`
@@ -144,18 +139,17 @@ export default function JobApplicationsScreen() {
   useFocusEffect(
     React.useCallback(() => {
       fetchApplicationsByCompany();
-    }, [applications])
+    }, [])
   );
 
   const fetchApplicationsByCompany = async () => {
     try {
       setLoading(true);
       const userDetails = await AsyncStorage.getItem("user");
-      const user = JSON.parse(userDetails)?._id; // Get the user's company ID
+      const user = JSON.parse(userDetails)?._id;
 
-      // Fetch job applications for this company
       const response = await axios.get(
-        `http://${IPAddress}:5000/Job/getApplication/${user}` // Assuming this endpoint fetches applications by company ID
+        `http://${IPAddress}:5000/Job/getApplication/${user}`
       );
 
       setApplications(response.data);
@@ -170,6 +164,16 @@ export default function JobApplicationsScreen() {
     }
   };
 
+  const renderEmptyState = () => (
+    <View style={styles.emptyStateContainer}>
+      <Ionicons name="document-text-outline" size={64} color="#a0aec0" />
+      <Text style={styles.emptyStateText}>No recent applications</Text>
+      <Text style={styles.emptyStateSubtext}>
+        When you receive new applications, they'll appear here.
+      </Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -177,12 +181,16 @@ export default function JobApplicationsScreen() {
         <Text style={styles.headerTitle}>Recent Applications</Text>
       </View>
       <View style={styles.separator} />
-      <FlatList
-        data={applications} // Use the actual applications data here
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <ApplicationCard application={item} />}
-        contentContainerStyle={styles.listContainer}
-      />
+      {applications.length > 0 ? (
+        <FlatList
+          data={applications}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => <ApplicationCard application={item} />}
+          contentContainerStyle={styles.listContainer}
+        />
+      ) : (
+        renderEmptyState()
+      )}
     </SafeAreaView>
   );
 }
@@ -261,5 +269,23 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: "600",
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyStateText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4a5568',
+    marginTop: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 16,
+    color: '#718096',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });

@@ -1,6 +1,7 @@
 import { Job } from "../Models/JobModel.js";
 import { JobProvider } from "../Models/JobProviderModel.js"; // Import the JobProvider model
 import bcrypt from "bcrypt";
+import { Notification } from "../Models/NotificationModel.js";
 
 // Create a new job provider
 export const createJobProvider = async (req, res) => {
@@ -126,8 +127,6 @@ export const postJob = async (req, res) => {
     const { jobTitle, jobDescription, location, salary, skills, user } =
       req.body;
 
-    console.log(req.body);
-
     // Validate that skills is an array
     if (!Array.isArray(skills)) {
       return res.status(400).json({ message: "Skills must be an array." });
@@ -158,6 +157,16 @@ export const postJob = async (req, res) => {
     // Save the new job to the database
     const savedJob = await newJob.save();
 
+    // Create a notification for the newly posted job
+    try {
+      await Notification.create({
+        message: `New job posted: ${jobTitle}`,
+        jobId: savedJob._id, // Use saved job's ID for the notification
+      });
+    } catch (error) {
+      console.error("Error creating notification:", error.message);
+    }
+
     // Respond with the saved job details
     res.status(201).json(savedJob);
   } catch (error) {
@@ -169,7 +178,7 @@ export const postJob = async (req, res) => {
 export const postedJobs = async (req, res) => {
   const { userId } = req.query;
   try {
-    const jobs = await Job.find({ postedBy: userId });
+    const jobs = await Job.find({ postedBy: userId }).sort({ _id: -1 });
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({ message: "Error fetching jobs" });
@@ -215,7 +224,7 @@ export const getJobProviderById = async (req, res) => {
 };
 
 export const getJobById = async (req, res) => {
-  console.log(req.params.id)
+  console.log(req.params.id);
   try {
     const job = await Job.findById(req.params.id);
     if (!job) {

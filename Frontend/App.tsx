@@ -36,9 +36,12 @@ import Location from "./CommunityProgram/Screen/Location";
 import JobProviderSignIn from "./Jobs/Screen/JobProviderSignIn";
 import Toast from "react-native-toast-message";
 import JobApplicationsScreen from "./Jobs/Screen/ApplicationsRecieved";
-//import UserScreen from "./Pages/CommunityConnect/Screen/UserScreen";
 import UpdateJobScreen from "./Jobs/Screen/UpdateJob";
 import AppliedJobsScreen from "./Jobs/Screen/AppliedJobs";
+import SignInScreen from "./OtherScreens/SignInScreen";
+import ChatScreen from "./Pages/CommunityConnect/Screen/ChatScreen";
+import ChatListScreen from "./Pages/CommunityConnect/Screen/ChatListScreen";
+import JobNotificationsScreen from "./Jobs/Screen/Notifications";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -103,7 +106,7 @@ function BottomTabNavigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "blue", // Customize the active icon color
+        tabBarActiveTintColor: "#4a90e2", // Customize the active icon color
         tabBarInactiveTintColor: "gray", // Customize the inactive icon color
       })}
     >
@@ -130,10 +133,15 @@ function BottomTabNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Program">
+      <Stack.Navigator initialRouteName="HomeScreen">
         <Stack.Screen
           name="SignUpScreen"
           component={SignUpScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SignInScreen"
+          component={SignInScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -142,10 +150,21 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="ChatScreen"
+          component={ChatScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChatListScreen"
+          component={ChatListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="SearchScreen"
           component={SearchScreen}
           options={{ headerShown: false }}
         />
+        
         <Stack.Screen
           name="CreateCommunityScreen"
           component={CreateCommunityScreen}
@@ -270,6 +289,11 @@ export default function App() {
         <Stack.Screen
           name="ApplyJobScreen"
           component={ApplyJobScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobNotificationsScreen"
+          component={JobNotificationsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

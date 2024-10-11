@@ -69,6 +69,11 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
     navigation.navigate("UpdateJobScreen", { jobId });
   };
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   const renderJobItem = ({ item }) => (
     <View style={styles.jobItem}>
       <View style={styles.jobContent}>
@@ -87,6 +92,10 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
         <View style={styles.skillsContainer}>
           <Ionicons name="construct-outline" size={16} color="#4a5568" />
           <Text style={styles.jobSkills}>{item.skills.join(", ")}</Text>
+        </View>
+        <View style={styles.createdAtContainer}>
+          <Ionicons name="calendar-outline" size={16} color="#4a5568" />
+          <Text style={styles.createdAt}>Posted on: {formatDate(item.createdAt)}</Text>
         </View>
       </View>
       <View style={styles.buttonContainer}>
@@ -220,10 +229,20 @@ const styles = StyleSheet.create({
   skillsContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 8,
   },
   jobSkills: {
     fontSize: 14,
     color: "#4a5568",
+    marginLeft: 4,
+  },
+  createdAtContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  createdAt: {
+    fontSize: 14,
+    color: "#718096",
     marginLeft: 4,
   },
   buttonContainer: {
@@ -241,7 +260,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: "absolute",
     right: 20,
-    bottom: 20,
+    bottom: 10,
     backgroundColor: "#4299e1",
     borderRadius: 30,
     width: 60,

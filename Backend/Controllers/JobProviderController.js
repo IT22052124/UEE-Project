@@ -178,7 +178,7 @@ export const postJob = async (req, res) => {
 export const postedJobs = async (req, res) => {
   const { userId } = req.query;
   try {
-    const jobs = await Job.find({ postedBy: userId });
+    const jobs = await Job.find({ postedBy: userId }).sort({ _id: -1 });
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({ message: "Error fetching jobs" });

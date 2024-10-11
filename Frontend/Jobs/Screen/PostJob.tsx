@@ -9,9 +9,10 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useNavigation } from "@react-navigation/native";
 import { IPAddress } from "../../globals";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,6 +24,7 @@ export default function JobPostingScreen({ navigation }) {
   const [salary, setSalary] = useState("");
   const [skill, setSkill] = useState("");
   const [skills, setSkills] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const addSkill = () => {
     if (skill.trim()) {
@@ -51,6 +53,8 @@ export default function JobPostingScreen({ navigation }) {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       const userDetails = await AsyncStorage.getItem("user");
       const user = JSON.parse(userDetails)?._id;
@@ -77,6 +81,8 @@ export default function JobPostingScreen({ navigation }) {
         "Error",
         "There was an issue posting the job. Please try again."
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -152,8 +158,16 @@ export default function JobPostingScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.postButton} onPress={postJob}>
-          <Text style={styles.postButtonText}>Post Job</Text>
+        <TouchableOpacity 
+          style={[styles.postButton, isLoading && styles.disabledButton]} 
+          onPress={postJob}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.postButtonText}>Post Job</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -253,5 +267,8 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  disabledButton: {
+    backgroundColor: "#A5D6A7",
   },
 });

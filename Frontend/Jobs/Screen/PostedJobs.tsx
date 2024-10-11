@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { useFocusEffect } from '@react-navigation/native';
 export default function UpdatedPostedJobsScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedJobId, setExpandedJobId] = useState(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -74,45 +75,53 @@ export default function UpdatedPostedJobsScreen({ navigation }) {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const toggleJobDescription = (jobId) => {
+    setExpandedJobId(expandedJobId === jobId ? null : jobId);
+  };
+
   const renderJobItem = ({ item }) => (
-    <View style={styles.jobItem}>
-      <View style={styles.jobContent}>
-        <Text style={styles.jobTitle}>{item.title}</Text>
-        <Text style={styles.jobDescription}>{item.description}</Text>
-        <View style={styles.jobDetails}>
-          <View style={styles.detailItem}>
-            <Ionicons name="location-outline" size={16} color="#4a5568" />
-            <Text style={styles.jobLocation}>{item.location}</Text>
+    <TouchableOpacity onPress={() => toggleJobDescription(item._id)}>
+      <View style={styles.jobItem}>
+        <View style={styles.jobContent}>
+          <Text style={styles.jobTitle}>{item.title}</Text>
+          {expandedJobId === item._id && (
+            <Text style={styles.jobDescription}>{item.description}</Text>
+          )}
+          <View style={styles.jobDetails}>
+            <View style={styles.detailItem}>
+              <Ionicons name="location-outline" size={16} color="#4a5568" />
+              <Text style={styles.jobLocation}>{item.location}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Ionicons name="cash-outline" size={16} color="#4a5568" />
+              <Text style={styles.jobSalary}>RS.{item.salary}.00</Text>
+            </View>
           </View>
-          <View style={styles.detailItem}>
-            <Ionicons name="cash-outline" size={16} color="#4a5568" />
-            <Text style={styles.jobSalary}>RS.{item.salary}.00</Text>
+          <View style={styles.skillsContainer}>
+            <Ionicons name="construct-outline" size={16} color="#4a5568" />
+            <Text style={styles.jobSkills}>{item.skills.join(", ")}</Text>
+          </View>
+          <View style={styles.createdAtContainer}>
+            <Ionicons name="calendar-outline" size={16} color="#4a5568" />
+            <Text style={styles.createdAt}>Posted on: {formatDate(item.createdAt)}</Text>
           </View>
         </View>
-        <View style={styles.skillsContainer}>
-          <Ionicons name="construct-outline" size={16} color="#4a5568" />
-          <Text style={styles.jobSkills}>{item.skills.join(", ")}</Text>
-        </View>
-        <View style={styles.createdAtContainer}>
-          <Ionicons name="calendar-outline" size={16} color="#4a5568" />
-          <Text style={styles.createdAt}>Posted on: {formatDate(item.createdAt)}</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.updateButton}
+            onPress={() => handleUpdateJob(item._id)}
+          >
+            <MaterialIcons name="edit" size={24} color="#4299e1" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => confirmDelete(item._id)}
+          >
+            <MaterialIcons name="delete-outline" size={24} color="#e53e3e" />
+          </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.updateButton}
-          onPress={() => handleUpdateJob(item._id)}
-        >
-          <MaterialIcons name="edit" size={24} color="#4299e1" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => confirmDelete(item._id)}
-        >
-          <MaterialIcons name="delete-outline" size={24} color="#e53e3e" />
-        </TouchableOpacity>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const handleAddNewJob = () => {

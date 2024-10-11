@@ -10,6 +10,7 @@ import {
   Platform,
   Image,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
@@ -21,7 +22,8 @@ import axios from "axios";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../Storage/firebase"; // Firebase configuration
 import { IPAddress } from "../../globals";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useNavigation } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
 
 const schema = yup.object().shape({
   telephone: yup
@@ -46,6 +48,7 @@ export default function JobProviderRegistration2({ route }) {
   const { formData: previousFormData } = route.params;
   const [logoUri, setLogoUri] = useState<string | undefined>(undefined);
   const [isChecked, setIsChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     control,
@@ -55,68 +58,73 @@ export default function JobProviderRegistration2({ route }) {
     resolver: yupResolver(schema),
   });
 
-  const signPage = ()=>{
+  const signPage = () => {
     navigation.navigate("JobProviderSignIn");
   }
 
   // Function to handle form submission
   const onSubmit = async (data: JobProviderFormInputs) => {
     if (!isChecked) {
-      alert("You must agree to the terms to proceed."); // Alert user if checkbox is not checked
-      return; // Prevent submission
+      alert("You must agree to the terms to proceed.");
+      return;
     }
-    const combinedFormData = { ...previousFormData, ...data }; // Combine previous and current form data
-
-    if (logoUri) {
-      const response = await fetch(logoUri);
-      const blob = await response.blob();
-      const storageRef = ref(
-        storage,
-        `companyLogos/${previousFormData.companyName}.png`
-      );
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      combinedFormData.companyLogo = downloadURL; // Add logo URL to form data
-    }
+    setIsLoading(true);
+    const combinedFormData = { ...previousFormData, ...data };
 
     try {
+      if (logoUri) {
+        const response = await fetch(logoUri);
+        const blob = await response.blob();
+        const storageRef = ref(
+          storage,
+          `companyLogos/${previousFormData.companyName}.png`
+        );
+        await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(storageRef);
+        combinedFormData.companyLogo = downloadURL;
+      }
+
       const response = await axios.post(
         `http://${IPAddress}:5000/JobProvider/jobProvider`,
-        combinedFormData // Send combined form data to the backend
+        combinedFormData
       );
 
       console.log("Job provider created successfully:", response.data);
 
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Account Created Successfully",
+        visibilityTime: 2000,
+        autoHide: true,
+      });
+
       navigation.navigate("JobProviderSignIn");
     } catch (error) {
-      // Improved error handling
       if (error.response) {
-        // Check for specific error messages
         const errorMessage = error.response.data.message;
 
-        if (
-          errorMessage.includes("Job provider with this email already exists")
-        ) {
+        if (errorMessage.includes("Job provider with this email already exists")) {
           Alert.alert(
             "Registration Failed",
             "This email is already registered. Please use a different email."
           );
         } else {
-          Alert.alert("Error", errorMessage); // Display other error messages
+          Alert.alert("Error", errorMessage);
         }
       } else if (error.request) {
-        // No response was received
         Alert.alert(
           "Error",
           "No response from the server. Please check your internet connection."
         );
       } else {
-        // Something happened while setting up the request
         Alert.alert(
           "Error",
           "An unexpected error occurred. Please try again later."
         );
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,7 +138,7 @@ export default function JobProviderRegistration2({ route }) {
     });
 
     if (!result.cancelled) {
-      setLogoUri(result.assets[0].uri); // Use setLogoUri instead of setImage
+      setLogoUri(result.assets[0].uri);
     }
   };
 
@@ -267,10 +275,15 @@ export default function JobProviderRegistration2({ route }) {
         </Text>
 
         <TouchableOpacity
-          style={styles.signUpButton}
+          style={[styles.signUpButton, isLoading && styles.disabledButton]}
           onPress={handleSubmit(onSubmit)}
+          disabled={isLoading}
         >
-          <Text style={styles.signUpButtonText}>Sign Up</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.signUpButtonText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -351,6 +364,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
+  },
+  disabledButton: {
+    backgroundColor: "#A5D6A7",
   },
   signUpButtonText: {
     color: "#fff",

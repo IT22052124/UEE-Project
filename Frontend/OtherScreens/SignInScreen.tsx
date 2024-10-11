@@ -61,6 +61,7 @@ export default function SignInScreen({ navigation }) {
             JSON.stringify(response.data.user || {})
           );
 
+          navigation.replace("MainTabs");
           Toast.show({
             type: "success",
             position: "top",
@@ -68,7 +69,6 @@ export default function SignInScreen({ navigation }) {
             visibilityTime: 2000,
             autoHide: true,
           });
-          navigation.replace("DonationHomepage");
         } else {
           Toast.show({
             type: "error",

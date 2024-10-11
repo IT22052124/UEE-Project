@@ -8,19 +8,19 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Image,
+  ActivityIndicator,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Ionicons } from "react-native-vector-icons";
-import { CheckBox } from "react-native-elements";
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../../Storage/firebase"; // Firebase configuration
+import { storage } from "../../Storage/firebase";
 import { IPAddress } from "../../globals";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const schema = yup.object().shape({
   firstName: yup.string().required("Please Enter a First Name"),
@@ -38,12 +38,12 @@ interface JobProviderFormInputs {
   lastName: String;
 }
 
-export default function ApplyJobScreen({ navigation, route }) {
+export default function ApplyJobScreen({ route }) {
   const { item } = route.params;
   const [documentUri, setDocumentUri] = useState(null);
-  const user = "66f55789b9c3be6113e48bae";
   const [documentError, setDocumentError] = useState("");
-  const [URL, setURL] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
 
   const {
     control,
@@ -53,69 +53,60 @@ export default function ApplyJobScreen({ navigation, route }) {
     resolver: yupResolver(schema),
   });
 
-  // Function to handle form submission
   const onSubmit = async (data: JobProviderFormInputs) => {
     if (!documentUri) {
-      setDocumentError("Please upload your resume"); // Set error if no document is selected
-      return; // Prevent submission
-    } else {
-      setDocumentError(""); // Clear the error if a document is selected
+      setDocumentError("Please upload your resume");
+      return;
     }
+    setDocumentError("");
+    setIsLoading(true);
 
-    const formData = { ...data };
-    let downloadURL = "";
+    try {
+      const formData = { ...data };
+      let downloadURL = "";
 
-    if (documentUri) {
-      try {
+      if (documentUri) {
         const response = await fetch(documentUri);
         const blob = await response.blob();
-
-        // Generate a unique file name
         const storageRef = ref(
           storage,
           `jobDocuments/${user}_${Date.now()}_document.pdf`
         );
-
-        // Upload the file to Firebase
         await uploadBytes(storageRef, blob);
-
-        // Get the download URL
         downloadURL = await getDownloadURL(storageRef);
-      } catch (error) {
-        console.error("Error uploading document:", error);
-        return; // Exit the function if there's an error
       }
-    }
 
-    try {
-      // Post job application with the download URL
-      const response = await axios.post(`http://${IPAddress}:5000/Job/apply`, {
+      const userDetails = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userDetails)?._id;
+
+      await axios.post(`http://${IPAddress}:5000/Job/apply`, {
         formData,
         item,
         user,
-        URL: downloadURL, // Use the download URL directly here
+        URL: downloadURL,
       });
 
-      console.log("Successfully applied for the job:", response.data);
-
+      console.log("Successfully applied for the job");
       navigation.navigate("JobListScreen", { item: item });
     } catch (error) {
       console.error("Error applying job:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const pickDocument = async () => {
     let result = await DocumentPicker.getDocumentAsync({
-      type: "application/pdf", // Change this to the type of documents you want to pick
+      type: "application/pdf",
       copyToCacheDirectory: true,
     });
 
     if (!result.cancelled) {
-      setDocumentUri(result.assets[0].uri); // Use setLogoUri instead of setImage
+      setDocumentUri(result.assets[0].uri);
       setDocumentError("");
     }
   };
-  console.log(documentUri);
+
   const removeDocument = () => {
     setDocumentUri(null);
     setDocumentError("Please upload your resume");
@@ -212,15 +203,20 @@ export default function ApplyJobScreen({ navigation, route }) {
             </View>
           )}
         </TouchableOpacity>
-        {documentError ? ( // Display the document error
+        {documentError ? (
           <Text style={styles.errorText}>{documentError}</Text>
         ) : null}
 
         <TouchableOpacity
           style={styles.applyButton}
           onPress={handleSubmit(onSubmit)}
+          disabled={isLoading}
         >
-          <Text style={styles.applyButtonText}>Apply</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={styles.applyButtonText}>Apply</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

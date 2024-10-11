@@ -16,9 +16,10 @@ import { IPAddress } from "../../../globals";
 import { ParentPost } from "../Components/ParentPost";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function HomeScreen() {
   const [userId, setUserId] = useState(""); // Replace with actual user ID
@@ -30,7 +31,7 @@ export default function HomeScreen() {
   const [sortOption, setSortOption] = useState("hot"); // "hot" or "popular"
   const navigation = useNavigation();
   const [reload, setReload] = useState(1);
-
+  const isFocused = useIsFocused();
   const getUserFromAsyncStorage = async () => {
     try {
       const admin = await AsyncStorage.getItem("user");
@@ -54,7 +55,8 @@ export default function HomeScreen() {
           );
 
           if (communityResponse.status === 200) {
-            setCommunityPost(communityResponse.data.posts);
+            const communityPosts = communityResponse.data.posts || []; // Default to empty array if no posts
+            setCommunityPost(communityPosts);
           }
 
           // Fetch user following posts
@@ -63,15 +65,17 @@ export default function HomeScreen() {
           );
 
           if (userResponse.status === 200) {
-            setUserPost(userResponse.data.posts);
+            const userPosts = userResponse.data.posts || []; // Default to empty array if no posts
+            setUserPost(userPosts);
           }
 
           // Combine community and user posts only for "Hot" in "All" tab
           if (activeTab === "all" && sortOption === "hot") {
-            setPosts([
-              ...communityResponse.data.posts,
-              ...userResponse.data.posts,
-            ]);
+            const combinedPosts = [
+              ...(communityResponse.data.posts || []), // Default to empty array if no posts
+              ...(userResponse.data.posts || []), // Default to empty array if no posts
+            ];
+            setPosts(combinedPosts);
           }
         } else {
           console.error("User ID not found.");
@@ -84,7 +88,7 @@ export default function HomeScreen() {
     };
 
     fetchPosts();
-  }, [activeTab, sortOption, reload]); // Refetch when activeTab or sortOption changes
+  }, [activeTab, sortOption, reload, isFocused]);
 
   const timeAgo = (date) => {
     const now = new Date();
@@ -192,9 +196,9 @@ export default function HomeScreen() {
           <View style={styles.postStats}>
             <TouchableOpacity onPress={() => handleUpvote(post._id)}>
               {userVote === "upvoted" ? (
-                <Entypo name="arrow-bold-up" size={24} color="#FF4500" />
+                <Entypo name="arrow-bold-up" size={24} color="#FF0000" />
               ) : (
-                <Entypo name="arrow-bold-up" size={24} color="#FFFFFF" />
+                <Entypo name="arrow-bold-up" size={24} color="#808080" />
               )}
             </TouchableOpacity>
             <Text style={styles.postStatText}>
@@ -202,9 +206,9 @@ export default function HomeScreen() {
             </Text>
             <TouchableOpacity onPress={() => handleDownvote(post._id)}>
               {userVote === "downvoted" ? (
-                <Entypo name="arrow-down" size={24} color="#FF4500" />
+                <Entypo name="arrow-down" size={24} color="#FF0000" />
               ) : (
-                <Entypo name="arrow-down" size={24} color="#FFFFFF" />
+                <Entypo name="arrow-down" size={24} color="#808080" />
               )}
             </TouchableOpacity>
 
@@ -217,7 +221,7 @@ export default function HomeScreen() {
               }
             >
               <View style={styles.commentContainer}>
-                <Ionicons name="chatbubble-outline" size={24} color="#FFFFFF" />
+                <Ionicons name="chatbubble-outline" size={24} color="#808080" />
                 <Text style={styles.postStatText}>{post.comments.length}</Text>
               </View>
             </TouchableOpacity>
@@ -230,12 +234,16 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Home</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("SearchScreen")}>
-            <Ionicons name="search" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+        <LinearGradient colors={["#4a90e2", "#63b3ed"]}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Home</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SearchScreen")}
+            >
+              <Ionicons name="search" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
 
         {/* Tab bar at the top */}
         <View style={styles.tabContainer}>
@@ -315,11 +323,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#FFFFFF", // Change background to white
   },
   container: {
     flex: 1,
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#FFFFFF", // Main background is white
   },
   loaderContainer: {
     flex: 1,
@@ -333,32 +341,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#444444",
+    borderBottomColor: "#E0E0E0", // Light border for header
   },
   communityInfo: {
-    marginLeft: 8, // Optional: Space between the profile picture and community info
+    marginLeft: 8,
   },
   CommunityName: {
-    color: "#FFFFFF",
-    fontSize: 16, // Increased font size
-    fontWeight: "bold", // Optional: Make it bold
+    color: "#000000", // Black text for community name
+    fontSize: 16,
+    fontWeight: "bold",
   },
   postAuthor: {
-    color: "#898989",
+    color: "#4F4F4F", // Dark grey for author text
     fontSize: 12,
-    marginTop: 2, // Optional: Add space between community name and post author
+    marginTop: 2,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#fff",
+    marginBottom: 4, // Black header title
   },
   post: {
-    backgroundColor: "#292929",
+    backgroundColor: "#F9F9F9", // Light grey post background
     padding: 16,
     marginVertical: 8,
     marginHorizontal: 16,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E0E0E0", // Soft border for post
   },
   postHeader: {
     flexDirection: "row",
@@ -374,15 +385,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 8,
   },
-
   postTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#2d3748',
     marginTop: 8,
   },
   postFlair: {
-    color: "#FF4500",
-    fontSize: 12,
+    color: "#808080", // Red flair for highlighting
+    fontSize: 14,
     marginVertical: 4,
   },
   postImage: {
@@ -397,7 +408,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   postStatText: {
-    color: "#898989",
+    color: "#4F4F4F", // Dark grey for stats text
     fontSize: 14,
     marginHorizontal: 8,
   },
@@ -407,24 +418,24 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   shareButton: {
-    backgroundColor: "#444444",
+    backgroundColor: "#E0E0E0", // Light grey button
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginLeft: 16,
   },
   shareButtonText: {
-    color: "#FF4500",
+    color: "#007AFF", // Blue share button text
     fontSize: 12,
     fontWeight: "bold",
   },
-  // Updated styles for tabs near the top
+  // Tabs at the top
   tabContainer: {
     flexDirection: "row",
     justifyContent: "space-evenly",
-    backgroundColor: "#333333",
+    backgroundColor: "#E0E0E0", // Light grey background for tabs
     borderBottomWidth: 1,
-    borderBottomColor: "#444444",
+    borderBottomColor: "#C0C0C0", // Slightly darker border
   },
   tab: {
     paddingHorizontal: 20,
@@ -432,13 +443,13 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: "#FF4500",
+    borderBottomColor: "#007AFF", // Blue active tab border
   },
   tabText: {
-    color: "#898989",
+    color: "#4F4F4F", // Grey tab text
   },
   activeTabText: {
-    color: "#FF4500",
+    color: "#007AFF", // Blue active tab text
     fontWeight: "bold",
   },
   scrollview: {
@@ -450,26 +461,32 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   sortText: {
-    color: "#818384",
+    color: "#4F4F4F", // Grey sort text
     marginRight: 5,
   },
 });
 
+// Updated styles for picker
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    color: "#FFFFFF",
-    backgroundColor: "#333333",
+    color: "#000000", // Black text for iOS picker
+    backgroundColor: "#E0E0E0", // Light grey picker background
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderRadius: 5,
     fontSize: 16,
   },
   inputAndroid: {
-    color: "#FFFFFF",
-    backgroundColor: "#333333",
+    color: "#000000", // Black text for Android picker
+    backgroundColor: "#E0E0E0", // Light grey picker background
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
     fontSize: 16,
+  },
+  headerGradient: {
+    flex: 1,
+    justifyContent: "flex-end",
+    padding: 16,
   },
 });

@@ -68,7 +68,7 @@ export default function SignInScreen({ navigation }) {
             visibilityTime: 2000,
             autoHide: true,
           });
-          navigation.replace("ProfileScreen");
+          navigation.replace("MainTabs");
         } else {
           Toast.show({
             type: "error",
@@ -150,6 +150,12 @@ export default function SignInScreen({ navigation }) {
           <Text style={styles.signupText}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("SignUpScreen")}>
             <Text style={styles.signupLink}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>Job Provider?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("JobProviderSignIn")}>
+            <Text style={styles.signupLink}> Click here to sign in </Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>

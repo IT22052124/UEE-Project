@@ -4,12 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import {IPAddress} from "../../globals"
 interface DonationCampaign {
   id: string;
   title: string;
   image: string;
   amountRaised: number;
+  amountRequired: number;
   category: string;
 }
 
@@ -24,7 +25,7 @@ export default function CategoryScreen() {
   const { category } = route.params;
 
   useEffect(() => {
-    axios.get('http://192.168.1.4:5000/Donation/all')
+    axios.get(`http://${IPAddress}:5000/Donation/all`)
       .then(response => {
         setAllDonations(response.data.donations);
       })
@@ -86,22 +87,26 @@ export default function CategoryScreen() {
         )}
         scrollEventThrottle={16}
       >
-        {filteredDonations.map((campaign) => (
-          <TouchableOpacity
-            key={campaign.Id}
-            style={styles.campaignCard}
-            onPress={() => navigation.navigate('AboutScreen', { campaign })}
-          >
-            <Image source={{ uri: campaign.image[0] }} style={styles.campaignImage} />
-            <View style={styles.campaignInfo}>
-              <Text style={styles.campaignTitle}>{campaign.title}</Text>
-              <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${((campaign.amountRaised / campaign.amountRequired) * 100).toFixed(0)}%` }]} />
+        {filteredDonations.map((campaign) => {
+          const progressPercentage = ((campaign.amountRaised / campaign.amountRequired) * 100).toFixed(0);
+          return (
+            <TouchableOpacity
+              key={campaign.Id}
+              style={styles.campaignCard}
+              onPress={() => navigation.navigate('AboutScreen', { campaign })}
+            >
+              <Image source={{ uri: campaign.image[0] }} style={styles.campaignImage} />
+              <View style={styles.campaignInfo}>
+                <Text style={styles.campaignTitle}>{campaign.title}</Text>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
+                </View>
+                <Text style={styles.percentageText}>{progressPercentage}% </Text>
+                <Text style={styles.fundRaised}>Fund Required: Rs.{campaign.amountRequired}/-</Text>
               </View>
-              <Text style={styles.fundRaised}>Fund Raised: Rs.{campaign.amountRaised}/-</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          );
+        })}
       </Animated.ScrollView>
     </SafeAreaView>
   );
@@ -121,15 +126,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     padding: 15,
   },
-  
-   backButton: {
-      width: 40,
-      height: 40,
-      marginLeft:0,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255,255,255,0.3)',
-      justifyContent: 'center',
-      alignItems: 'center',
+  backButton: {
+    width: 40,
+    height: 40,
+    marginLeft: 0,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 18,
   },
   headerTitle: {
@@ -174,14 +178,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    paddingTop:2
-
+    paddingTop: 2,
   },
   campaignImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 16,
-
+    marginTop: 2,
+    width: 110,
+    height: 110,
+    borderRadius: 15,
   },
   campaignInfo: {
     flex: 1,
@@ -190,22 +193,31 @@ const styles = StyleSheet.create({
   campaignTitle: {
     fontSize: 15,
     fontWeight: 'bold',
+    color: '#2d3748',
     marginBottom: 8,
-    color: '#2D3748',
+    marginTop: -10,
   },
   progressBar: {
-    height: 6,
+    height: 8,
     backgroundColor: '#E2E8F0',
     borderRadius: 3,
-    marginBottom: 8,
+    marginBottom: 5,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#4299E1',
+    backgroundColor: '#3CB371',
     borderRadius: 3,
   },
+  percentageText: {
+    fontSize: 11,
+    color: 'black',
+    textAlign: 'right',
+    marginBottom: -3,
+    fontWeight: 'bold',
+  },
   fundRaised: {
-    fontSize: 14,
-    color: '#718096',
+    fontSize: 13,
+    color: '#4a5568',
+    marginBottom: -5,
   },
 });

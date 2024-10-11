@@ -213,6 +213,7 @@ export default function ProfileScreen() {
       visibilityTime: 2000,
       autoHide: true,
     });
+    setIsLogOutModalVisible(false);
     navigation.navigate("SignInScreen");
   };
 
@@ -317,9 +318,9 @@ export default function ProfileScreen() {
   };
   // Function to render each post
   const renderPost = ({ item }) => {
-    const userVote = item.upvotedBy.includes(user)
+    const userVote = item.upvotedBy.includes(userId)
       ? "upvoted"
-      : item.downvotedBy.includes(user)
+      : item.downvotedBy.includes(userId)
       ? "downvoted"
       : null;
     return (
@@ -334,7 +335,7 @@ export default function ProfileScreen() {
               setModalVisible(true); // Show the delete confirmation modal
             }}
           >
-            <Ionicons name="trash-outline" size={16} color="white" />
+            <Ionicons name="trash-outline" size={16} color="#e6adbc" />
           </TouchableOpacity>
         </View>
         <Text style={styles.postTime}>{timeAgo(item.createdAt)}</Text>
@@ -345,9 +346,9 @@ export default function ProfileScreen() {
         <View style={styles.postStats}>
           <TouchableOpacity onPress={() => handleUpvote(item._id)}>
             {userVote === "upvoted" ? (
-              <Entypo name="arrow-bold-up" size={32} color="#FF4500" />
+              <Entypo name="arrow-bold-up" size={32} color="#e6adbc" />
             ) : (
-              <Entypo name="arrow-bold-up" size={32} color="#FFFFFF" />
+              <Entypo name="arrow-bold-up" size={32} color="#808080" />
             )}
           </TouchableOpacity>
           <Text style={styles.postStatText}>
@@ -355,9 +356,9 @@ export default function ProfileScreen() {
           </Text>
           <TouchableOpacity onPress={() => handleDownvote(item._id)}>
             {userVote === "downvoted" ? (
-              <Entypo name="arrow-down" size={32} color="#FF4500" />
+              <Entypo name="arrow-down" size={32} color="#e6adbc" />
             ) : (
-              <Entypo name="arrow-down" size={32} color="#FFFFFF" />
+              <Entypo name="arrow-down" size={32} color="#808080" />
             )}
           </TouchableOpacity>
           <TouchableOpacity
@@ -368,13 +369,10 @@ export default function ProfileScreen() {
             }
           >
             <View style={styles.commentContainer}>
-              <Ionicons name="chatbubble-outline" size={32} color="#FFFFFF" />
+              <Ionicons name="chatbubble-outline" size={32} color="#808080" />
               <Text style={styles.postStatText}>{item.comments.length}</Text>
             </View>
           </TouchableOpacity>
-          {/* <TouchableOpacity style={styles.shareButton}>
-          <Text style={styles.shareButtonText}>Share</Text>
-        </TouchableOpacity> */}
         </View>
       </View>
     );
@@ -451,13 +449,13 @@ export default function ProfileScreen() {
               navigation.navigate(`CreatePostScreen`, {});
             }}
           >
-            <Ionicons name="add" size={24} color="#2196F3" />
+            <Ionicons name="add" size={24} color="#FFF" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => setIsUpdateModalVisible(true)}
           >
-            <Ionicons name="create" size={24} color="#2196F3" />
+            <Ionicons name="create" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
 
@@ -678,13 +676,13 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFF",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFE082",
+    backgroundColor: "#FFF",
   },
   imageContainer: {
     position: "relative",
@@ -711,7 +709,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   infoContainer: {
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     marginTop: -20,
@@ -721,17 +719,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 5,
-    color: "white",
+    color: "#000",
   },
   location: {
     fontSize: 16,
     marginBottom: 5,
-    color: "white",
+    color: "#000",
   },
   email: {
     fontSize: 14,
     marginBottom: 20,
-    color: "white",
+    color: "#000",
   },
   statsContainer: {
     flexDirection: "row",
@@ -743,12 +741,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    color: "white",
+    color: "#000",
     fontSize: 18,
     fontWeight: "bold",
   },
   statLabel: {
-    color: "white",
+    color: "#000",
     fontSize: 14,
   },
   followButton: {
@@ -769,13 +767,13 @@ const styles = StyleSheet.create({
     right: 20,
   },
   iconButton: {
-    backgroundColor: "white",
+    backgroundColor: "#e6adbc",
     borderRadius: 20,
     padding: 10,
     marginLeft: 10,
   },
   errorMessage: {
-    color: "#ff0000",
+    color: "#000",
     fontSize: 16,
     margin: 20,
   },
@@ -788,16 +786,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "white",
+    color: "#000",
   },
   noPostsMessage: {
-    color: "white",
+    color: "#000",
     fontSize: 16,
   },
   post: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#FF4500",
+    borderBottomColor: "#e6adbc",
   },
   postHeader: {
     flexDirection: "row",
@@ -824,19 +822,19 @@ const styles = StyleSheet.create({
     alignItems: "flex-start", // Align items to the start (top)
   },
   postTitle: {
-    color: "white",
-    fontSize: 18, // Increased font size for the title
+    fontSize: 18,
     fontWeight: "bold",
-    marginRight: 10, // Space between title and time
+    color: "#2d3748",
+    marginTop: 8,
   },
   postTime: {
     color: "#888", // Lighter color for the timestamp
     fontSize: 12, // Slightly lower than the title
   },
   postFlair: {
-    color: "#FF4500",
-    fontSize: 12,
-    marginTop: 5,
+    color: "#808080", // Red flair for highlighting
+    fontSize: 15,
+    marginVertical: 4,
   },
   postStats: {
     flexDirection: "row",
@@ -857,7 +855,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
   },
   modalContent: {
     backgroundColor: "#1A1A1B",

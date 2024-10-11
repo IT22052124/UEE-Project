@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as FileSystem from "expo-file-system";
@@ -36,10 +37,14 @@ interface JobApplication {
   status: "Pending" | "Reviewed";
 }
 
-const ApplicationCard: React.FC<{ application: JobApplication }> = ({
-  application,
-}) => {
+const ApplicationCard: React.FC<{ 
+  application: JobApplication, 
+  onStatusChange: (id: string, newStatus: string) => void 
+}> = ({ application, onStatusChange }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const handleDownloadPdf = async () => {
+    setIsDownloading(true);
     const fileUri = `${FileSystem.documentDirectory}${application._id}_resume.pdf`;
 
     try {
@@ -57,11 +62,16 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({
         });
 
         await updateApplicationStatus(application._id, "Reviewed");
+        onStatusChange(application._id, "Reviewed");
       } else {
         console.error("Download failed with status:", response.status);
+        Alert.alert("Error", "Failed to download the resume. Please try again.");
       }
     } catch (error) {
       console.error("Error downloading file:", error);
+      Alert.alert("Error", "An error occurred while downloading the resume.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -102,8 +112,13 @@ const ApplicationCard: React.FC<{ application: JobApplication }> = ({
           <TouchableOpacity
             onPress={handleDownloadPdf}
             style={styles.downloadButton}
+            disabled={isDownloading}
           >
-            <Ionicons name="download-outline" size={20} color="#fff" />
+            {isDownloading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="download-outline" size={20} color="#fff" />
+            )}
           </TouchableOpacity>
           <View
             style={[
@@ -136,13 +151,7 @@ export default function JobApplicationsScreen() {
   const [loading, setLoading] = useState(false);
   const [applications, setApplications] = useState<JobApplication[]>([]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchApplicationsByCompany();
-    }, [])
-  );
-
-  const fetchApplicationsByCompany = async () => {
+  const fetchApplicationsByCompany = useCallback(async () => {
     try {
       setLoading(true);
       const userDetails = await AsyncStorage.getItem("user");
@@ -162,7 +171,21 @@ export default function JobApplicationsScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchApplicationsByCompany();
+    }, [fetchApplicationsByCompany])
+  );
+
+  const handleStatusChange = useCallback((id: string, newStatus: string) => {
+    setApplications((prevApplications) =>
+      prevApplications.map((app) =>
+        app._id === id ? { ...app, status: newStatus } : app
+      )
+    );
+  }, []);
 
   const renderEmptyState = () => (
     <View style={styles.emptyStateContainer}>
@@ -173,6 +196,14 @@ export default function JobApplicationsScreen() {
       </Text>
     </View>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4299e1" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -185,7 +216,12 @@ export default function JobApplicationsScreen() {
         <FlatList
           data={applications}
           keyExtractor={(item) => item._id}
-          renderItem={({ item }) => <ApplicationCard application={item} />}
+          renderItem={({ item }) => (
+            <ApplicationCard 
+              application={item} 
+              onStatusChange={handleStatusChange}
+            />
+          )}
           contentContainerStyle={styles.listContainer}
         />
       ) : (
@@ -260,6 +296,10 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     marginBottom: 8,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   statusButton: {
     paddingHorizontal: 12,
@@ -287,5 +327,10 @@ const styles = StyleSheet.create({
     color: '#718096',
     textAlign: 'center',
     marginTop: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

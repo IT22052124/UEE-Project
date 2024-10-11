@@ -47,120 +47,122 @@ export default function PaymentSuccessScreen({ route }) {
   // Function to create PDF
   const createPDF = async () => {
     const html = `
-    <!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donation Receipt</title>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
         
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Roboto', sans-serif;
             line-height: 1.6;
             color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
             padding: 20px;
-            background-color: #f0f4f8;
-            max-width: 600px;
-            margin: 0 auto;
         }
         .container {
+            max-width: 600px;
+            margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 10px;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-        }
-        h1 {
+        .header {
+            background-color: #003366;
+            color: #ffffff;
+            padding: 20px;
             text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 32px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .content {
+            padding: 30px;
         }
         .campaign-title {
+            font-size: 20px;
+            color: #003366;
+            margin-bottom: 20px;
             text-align: center;
-            color: #3498db;
-            font-size: 22px;
-            margin-bottom: 40px;
-            font-weight: 300;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e0e0e0;
+            font-weight: 700;
         }
         .details {
-            margin: 30px 0;
-            padding: 25px;
             background-color: #f9f9f9;
-            border-radius: 12px;
-            border-left: 5px solid #3498db;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
         .details p {
-            margin: 15px 0;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            margin: 10px 0;
+            font-size: 14px;
         }
         .details strong {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        .details span {
-            font-weight: 300;
+            color: #003366;
         }
         .thank-you {
             text-align: center;
-            margin-top: 40px;
-            font-style: italic;
-            color: #3498db;
             font-size: 18px;
+            color: #003366;
+            margin-top: 20px;
+            font-weight: 700;
         }
         .footer {
+            background-color: #f0f0f0;
             text-align: center;
-            margin-top: 30px;
-            font-size: 14px;
-            color: grey;
+            padding: 15px;
+            font-size: 12px;
+            color: #666;
         }
-        .heart {
-            color: #e74c3c;
-            font-size: 24px;
-            animation: heartbeat 1.5s infinite;
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
         }
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            color: rgba(0, 51, 102, 0.05);
+            pointer-events: none;
+            z-index: 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Donation Receipt</h1>
-        <div class="campaign-title">${campaign.title}</div>
-        <div class="details">
-            <p><strong>Ref Number:</strong> <span>${referenceNumber}</span></p>
-            <p><strong>Date:</strong> <span>${formattedDate}</span></p>
-            <p><strong>Time:</strong> <span>${formattedTime}</span></p>
-            <p><strong>Card:</strong> <span>**** **** **** ${cards[0].cardNumber.slice(8)}</span></p>
-            <p><strong>Amount (Rs):</strong> <span>${value}</span></p>
+        <div class="header">
+        
+           
+            <h1>Donation Receipt</h1>
         </div>
-        <div class="thank-you">
-            Thank you for your generous donation! <span class="heart">&hearts;</span>
+        <div class="content">
+            <div class="watermark">RECEIPT</div>
+            <div class="campaign-title">${campaign.title}</div>
+            <div class="details">
+                <p><strong>Reference Number:</strong> <span>${referenceNumber}</span></p>
+                <p><strong>Date:</strong> <span>${formattedDate}</span></p>
+                <p><strong>Time:</strong> <span>${formattedTime}</span></p>
+                <p><strong>Card:</strong> <span>**** **** **** ${cards[0].cardNumber.slice(8)}</span></p>
+                <p><strong>Amount:</strong> <span>Rs. ${value}</span></p>
+            </div>
+            <div class="thank-you">
+                Thank you for your generous contribution!
+            </div>
         </div>
         <div class="footer">
-            This receipt is automatically generated and does not require a signature.
+            This is an official receipt. No signature is required.
         </div>
     </div>
 </body>
@@ -347,6 +349,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     borderRadius: 8,
     paddingVertical: 16,
+    marginBottom:15
   },
   doneButtonText: {
     color: '#FFFFFF',

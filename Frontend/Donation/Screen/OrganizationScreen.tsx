@@ -53,7 +53,7 @@ export default function DirectTransferScreen({ route, navigation }) {
         <View style={styles.content}>
           <View style={styles.causeContainer}>
             <Text style={styles.causeTitle}>{campaign.title}</Text>
-            <Text style={styles.donationAmount}>Amount: ${value}</Text>
+         
           </View>
 
           <View style={styles.section}>
@@ -288,14 +288,16 @@ const styles = StyleSheet.create({
   },
   instructionTextBold: {
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 15,
   },
   instructionText: {
+    marginLeft:-32,
+    marginBottom: 10,
     fontSize: 14,
     color: '#444',
   },
   highlight: {
-    fontWeight: 'bold',
+   
     color: '#2980B9',
   },
   transferButton: {

@@ -52,7 +52,7 @@ export default function BankTransferScreen({ route, navigation }) {
         <View style={styles.content}>
           <View style={styles.causeContainer}>
             <Text style={styles.causeTitle}>{campaign.title}</Text>
-            <Text style={styles.donationAmount}>Amount (Rs): {value}</Text>
+           
           </View>
 
           <View style={styles.section}>
@@ -109,7 +109,7 @@ export default function BankTransferScreen({ route, navigation }) {
 
           {/* Thank You Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Thank You for Your Support!</Text>
+            <Text style={styles.sectionTitle}>Thank You !</Text>
             <View style={styles.instructionContainer}>
               <View style={styles.instructionItem}>
                 <Ionicons name="heart-outline" size={24} color="green" style={styles.instructionIcon} />
@@ -281,11 +281,14 @@ const styles = StyleSheet.create({
   instructionText: {
     fontSize: 14,
     color: '#333',
-    marginBottom: 6,
+    marginBottom: 10,
+    marginLeft:-32,
+
   },
   instructionTextBold: {
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 15,
+    
   },
   transferButton: {
     backgroundColor: '#007AFF',

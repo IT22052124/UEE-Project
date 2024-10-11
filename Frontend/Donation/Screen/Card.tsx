@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   addButton: {
-    backgroundColor: '#4a90e2',
+    backgroundColor: '#007AFF',
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',

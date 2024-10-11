@@ -68,7 +68,7 @@ export default function SignInScreen({ navigation }) {
             visibilityTime: 2000,
             autoHide: true,
           });
-          navigation.replace("ProfileScreen");
+          navigation.replace("DonationHomepage");
         } else {
           Toast.show({
             type: "error",

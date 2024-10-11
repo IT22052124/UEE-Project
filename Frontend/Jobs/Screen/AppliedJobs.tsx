@@ -46,7 +46,7 @@ export default function AppliedJobsScreen({ navigation }) {
     <TouchableOpacity
       style={styles.jobItem}
       onPress={() => {
-        navigation.navigate('JobDetailsScreen', { item: item });
+        navigation.navigate('JobDetailsScreen', { item: item.JobID });
       }}
     >
       <Image

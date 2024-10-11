@@ -140,7 +140,6 @@ export const updateStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-
     const application = await Application.findByIdAndUpdate(
       id,
       { status: status },
@@ -160,11 +159,17 @@ export const updateStatus = async (req, res) => {
 
 export const getNotificationsForUser = async (req, res) => {
   try {
-    const userId = req.user;
+    const userId = req.params.user;
 
-    // Find notifications that the user hasn't seen yet
+    // Find notifications that the user hasn't seen yet and populate jobId and postedBy
     const notifications = await Notification.find({
       usersSeen: { $ne: userId },
+    }).populate({
+      path: "jobId", // Populate jobId
+      populate: {
+        path: "postedBy", // Further populate postedBy within jobId
+        model: "JobProvider", // Assuming postedBy is a reference to the User model
+      },
     });
 
     res.status(200).json(notifications);
@@ -175,17 +180,16 @@ export const getNotificationsForUser = async (req, res) => {
 
 export const markNotificationAsSeen = async (req, res) => {
   try {
-    const { notificationId } = req.params;
-    const userId = req.user;
+    const notificationId = req.params.notificationId;
+    const userId = req.params.user;
 
     // Add the user's ID to the usersSeen array
     await Notification.findByIdAndUpdate(notificationId, {
       $addToSet: { usersSeen: userId },
     });
 
-    res.status(200).json({ message: 'Notification marked as seen' });
+    res.status(200).json({ message: "Notification marked as seen" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-

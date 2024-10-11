@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,10 +21,14 @@ export default function JobListScreen({ navigation }) {
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [newNotifications, setNewNotifications] = useState(0);
+  const user = "66f55789b9c3be6113e48bae";
 
   useFocusEffect(
     React.useCallback(() => {
       fetchJobs();
+      fetchNotifications();
     }, [])
   );
 
@@ -42,6 +46,25 @@ export default function JobListScreen({ navigation }) {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `http://${IPAddress}:5000/Job/notifications/${user}`
+      );
+      setNotifications(response.data); // First, set the notifications
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      Alert.alert("Error", "Could not fetch notifications. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setNewNotifications(notifications.length); // Update the notification count once notifications are set
+  }, [notifications]);
+
   const handleSearch = (query) => {
     setSearchQuery(query);
     const filtered = jobs.filter(
@@ -56,7 +79,9 @@ export default function JobListScreen({ navigation }) {
     <TouchableOpacity
       style={styles.jobItem}
       onPress={() => {
+        console.log(item)
         navigation.navigate("JobDetailsScreen", { item: item });
+
       }}
     >
       <Image
@@ -101,6 +126,19 @@ export default function JobListScreen({ navigation }) {
             onChangeText={handleSearch}
           />
         </View>
+        <TouchableOpacity
+          style={styles.notificationIcon}
+          onPress={() => navigation.navigate("JobNotificationsScreen")}
+        >
+          <Ionicons name="notifications" size={24} color="#4a90e2" />
+          {newNotifications > 0 && (
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>
+                {newNotifications}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
       <Text style={styles.headerTitle}>Recently Added</Text>
 
@@ -157,7 +195,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    width: "100%",
+    flex: 1,
   },
   searchIcon: {
     marginRight: 8,
@@ -166,6 +204,26 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     fontSize: 16,
+  },
+  notificationIcon: {
+    marginLeft: 16,
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    right: -6,
+    top: -6,
+    backgroundColor: "red",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notificationBadgeText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   listContainer: {
     padding: 16,
@@ -218,8 +276,8 @@ const styles = StyleSheet.create({
   },
   loaderContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loaderText: {
     marginTop: 10,

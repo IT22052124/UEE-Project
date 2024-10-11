@@ -152,6 +152,12 @@ export default function SignInScreen({ navigation }) {
             <Text style={styles.signupLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>Job Provider?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("JobProviderSignIn")}>
+            <Text style={styles.signupLink}> Click here to sign in </Text>
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
     </ImageBackground>
   );

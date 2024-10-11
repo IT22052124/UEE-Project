@@ -19,7 +19,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function AppliedJobsScreen({ navigation }) {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const user = '66f55789b9c3be6113e48bae';
 
   useFocusEffect(
     React.useCallback(() => {
@@ -31,7 +30,7 @@ export default function AppliedJobsScreen({ navigation }) {
     try {
       setLoading(true);
       const userDetails = await AsyncStorage.getItem('user');
-      //const user = JSON.parse(userDetails)?._id;
+      const user = JSON.parse(userDetails)?._id;
       const response = await axios.get(`http://${IPAddress}:5000/Job/appliedJobs/${user}`);
       setAppliedJobs(response.data);
     } catch (error) {

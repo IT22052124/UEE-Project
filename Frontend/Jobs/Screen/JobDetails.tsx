@@ -35,14 +35,14 @@ export default function JobDetailsScreen({ navigation, route }) {
   const [applied, setApplied] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  console.log(item)
+  console.log(item);
 
   const checkApplicationStatus = async () => {
     try {
       setLoading(true);
       const userDetails = await AsyncStorage.getItem("user");
-      //const user = JSON.parse(userDetails)?._id || '66f3dda2bd01bea47d940c63';
-      const user ='66f55789b9c3be6113e48bae';
+      const user = JSON.parse(userDetails)?._id;
+
       const response = await axios.get(`http://${IPAddress}:5000/Job/check`, {
         params: { item, user },
       });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 export default function JobNotificationsScreen({ navigation }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
-  const user ='66f55789b9c3be6113e48bae';
+  const user = '66f55789b9c3be6113e48bae';
 
   useFocusEffect(
     React.useCallback(() => {
@@ -53,15 +53,15 @@ export default function JobNotificationsScreen({ navigation }) {
       style={styles.notificationItem}
       onPress={() => {
         markAsRead(item._id);
-        navigation.navigate('JobDetailsScreen', { item: item.job });
+        navigation.navigate('JobDetailsScreen', { item: item.jobId });
       }}
     >
       <View style={styles.notificationContent}>
         <Ionicons name="briefcase-outline" size={24} color="#4a90e2" style={styles.icon} />
         <View style={styles.notificationInfo}>
           <Text style={styles.notificationTitle}>New Job Posted</Text>
-          <Text style={styles.jobTitle}>{item.job.title}</Text>
-          <Text style={styles.companyName}>{item.job.postedBy.companyName}</Text>
+          <Text style={styles.jobTitle}>{item.jobId?.title}</Text>
+          <Text style={styles.companyName}>{item.jobId?.postedBy?.companyName}</Text>
           <Text style={styles.timestamp}>{new Date(item.createdAt).toLocaleString()}</Text>
         </View>
       </View>
@@ -72,6 +72,9 @@ export default function JobNotificationsScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#4a90e2" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Job Notifications</Text>
       </View>
 
@@ -109,6 +112,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#f8f9fa',
+  },
+  backButton: {
+    marginRight: 16,
   },
   headerTitle: {
     fontSize: 20,

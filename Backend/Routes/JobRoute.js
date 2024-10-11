@@ -19,6 +19,6 @@ router.get("/getApplication/:id", getJobApplicationsByCompany);
 router.patch("/updateStatus/:id", updateStatus);
 router.get("/appliedJobs/:id", getJobApplicationsByUser);
 router.get("/notifications/:user", getNotificationsForUser);
-router.put("/notifications/:userId/:notificationId", markNotificationAsSeen);
+router.post("/notifications/:user/:notificationId", markNotificationAsSeen);
 
 export default router;

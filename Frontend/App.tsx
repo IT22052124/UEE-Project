@@ -36,9 +36,9 @@ import Location from "./CommunityProgram/Screen/Location";
 import JobProviderSignIn from "./Jobs/Screen/JobProviderSignIn";
 import Toast from "react-native-toast-message";
 import JobApplicationsScreen from "./Jobs/Screen/ApplicationsRecieved";
-import UserScreen from "./Pages/CommunityConnect/Screen/UserScreen";
 import UpdateJobScreen from "./Jobs/Screen/UpdateJob";
 import AppliedJobsScreen from "./Jobs/Screen/AppliedJobs";
+import JobNotificationsScreen from "./Jobs/Screen/Notifications";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -146,11 +146,7 @@ export default function App() {
           component={SearchScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="UserScreen"
-          component={UserScreen}
-          options={{ headerShown: false }}
-        />
+        
         <Stack.Screen
           name="CreateCommunityScreen"
           component={CreateCommunityScreen}
@@ -275,6 +271,11 @@ export default function App() {
         <Stack.Screen
           name="ApplyJobScreen"
           component={ApplyJobScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JobNotificationsScreen"
+          component={JobNotificationsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

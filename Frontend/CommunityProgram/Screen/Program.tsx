@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';  // Axios for API calls
+import axios from 'axios'; 
 import { IPAddress } from "../../globals";
 import { useNavigation } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
+//import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from '@react-navigation/native';
 
-const ProgramItem = ({ name, type, description, location, startDate, endDate, organizer, isExpanded, onToggle, onEnroll, onLocationPress  }) => (
+const ProgramItem = ({ name, type, description, location, startDate, endDate, organizer, isExpanded, onToggle, onEnroll, onLocationPress }) => (
   <View style={styles.programItem}>
     <TouchableOpacity onPress={onToggle} style={styles.programHeader}>
       <Text style={styles.programName}>{name}</Text>
@@ -37,16 +39,16 @@ const ProgramItem = ({ name, type, description, location, startDate, endDate, or
   </View>
 );
 
-const email = 'afhamuzumaki34@gmail.com'; // You can replace this with dynamic user email
+ //const userDetails = await AsyncStorage.getItem("user");
+     // const email = JSON.parse(userDetails)?.email;
+const email = 'afhamuzumaki34@gmail.com'; 
 
 export default function CommunityProgramsScreen() {
   const [expandedProgram, setExpandedProgram] = useState(null);
   const [notEnrolledPrograms, setNotEnrolledPrograms] = useState([]);
-  const navigation = useNavigation(); // Initialize navigation
-  
-  
+  const navigation = useNavigation(); 
 
-  useEffect(() => {
+  
     const fetchNotEnrolledPrograms = async () => {
       try {
         const response = await axios.get(`http://${IPAddress}:5000/Program/unenrolled-programs?userEmail=${email}`);
@@ -54,12 +56,10 @@ export default function CommunityProgramsScreen() {
         const programs = response.data.data || [];
         setNotEnrolledPrograms(programs);
 
-        // Check for new programs
         programs.forEach(program => {
           const startDate = new Date(program.startDate);
           const currentDate = new Date();
 
-          // If the program starts today or in the future, schedule a notification
           if (startDate.toDateString() === currentDate.toDateString()) {
             scheduleNotification(program.title, startDate);
           }
@@ -68,24 +68,41 @@ export default function CommunityProgramsScreen() {
         console.error('Error fetching not enrolled programs:', error);
       }
     };
+    
+  // useFocusEffect to trigger the data refresh when the page is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotEnrolledPrograms(); // This will run every time the screen is focused
+  }, []));
 
-    fetchNotEnrolledPrograms();
-  }, []);
-
-  const handleEnroll = async (programId) => {
-    try {
-      // Call your API to enroll the user in the program
-      const response = await axios.put(`http://${IPAddress}:5000/Program/enroll`, {
-        programId,
-        userEmail: email, // Assuming email is defined
-      });
-      console.log(response.data);
-      // Redirect to the enrolled community programs screen
-      navigation.navigate('EnrolledProgram'); // Change this to your actual route name
-    } catch (error) {
-      console.error('Error enrolling in program:', error);
-      // Optionally handle errors here, e.g., show an alert
-    }
+  const handleEnroll = (programId) => {
+    Alert.alert(
+      'Confirm Enrollment',
+      'Are you sure you want to enroll in this program?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Enrollment cancelled'),
+          style: 'cancel',
+        },
+        {
+          text: 'Enroll',
+          onPress: async () => {
+            try {
+              const response = await axios.put(`http://${IPAddress}:5000/Program/enroll`, {
+                programId,
+                userEmail: email,
+              });
+              console.log(response.data);
+              navigation.navigate('EnrolledProgram');
+            } catch (error) {
+              console.error('Error enrolling in program:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const scheduleNotification = async (title, date) => {
@@ -99,7 +116,6 @@ export default function CommunityProgramsScreen() {
   };
 
   const handleLocationPress = (location) => {
-    // Navigate to the MapScreen with location as a parameter
     navigation.navigate('Location', { location });
   };
 
@@ -115,7 +131,7 @@ export default function CommunityProgramsScreen() {
         {notEnrolledPrograms.map((program, index) => (
           <ProgramItem
             key={index}
-            name={program.title} // Ensure you're mapping correct field names
+            name={program.title}
             type={program.label}
             description={program.description}
             location={program.address}
@@ -124,18 +140,11 @@ export default function CommunityProgramsScreen() {
             organizer={program.organizer}
             isExpanded={expandedProgram === index}
             onToggle={() => setExpandedProgram(expandedProgram === index ? null : index)}
-            onEnroll={() => handleEnroll(program._id)} // Pass the program ID
-            onLocationPress={() => handleLocationPress(program.address)}  // Pass location to handler
+            onEnroll={() => handleEnroll(program._id)}
+            onLocationPress={() => handleLocationPress(program.address)}
           />
         ))}
       </ScrollView>
-      <View style={styles.bottomNav}>
-        {['cash-outline', 'sync-outline', 'people-outline', 'briefcase-outline', 'settings-outline'].map((icon, index) => (
-          <View key={index} style={styles.navItem}>
-            <Ionicons name={icon} size={24} color={index === 2 ? '#3b82f6' : '#6b7280'} />
-          </View>
-        ))}
-      </View>
     </View>
   );
 }

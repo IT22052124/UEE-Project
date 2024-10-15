@@ -21,6 +21,7 @@ import { storage } from "../../../Storage/firebase"; // Firebase configuration
 import uuid from "react-native-uuid"; // Optional: For unique IDs
 import { IPAddress } from "../../../globals";
 import { useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function CommunityFormScreen({ navigation }) {
   const route = useRoute();
@@ -30,8 +31,18 @@ export default function CommunityFormScreen({ navigation }) {
   const [description, setDescription] = useState("");
   const [communityPic, setCommunityPic] = useState(null);
   const [coverPic, setCoverPic] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Loading state
+
+  const getUserFromAsyncStorage = async () => {
+    try {
+      const admin = await AsyncStorage.getItem("user");
+      return admin ? JSON.parse(admin)._id || null : null;
+    } catch (error) {
+      console.error("Failed to retrieve user:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     console.log("Existing community:", existingCommunity);
@@ -121,7 +132,7 @@ export default function CommunityFormScreen({ navigation }) {
       const requestData = {
         communityName: formattedCommunityName,
         communityDescription: description,
-        adminId: "66f3dda2bd01bea47d940c63", // Change to actual admin ID
+        adminId: await getUserFromAsyncStorage(), // Change to actual admin ID
         communityPic: uploadedCommunityPic,
         coverPic: uploadedCoverPic,
       };
@@ -217,7 +228,7 @@ export default function CommunityFormScreen({ navigation }) {
               style={[styles.input, isDarkMode && styles.darkInput]}
               value={communityName} // Show only the community name in the input
               onChangeText={handleCommunityNameChange}
-              placeholder="Enter community name (letters, numbers, underscores)"
+              placeholder="Enter community name "
               placeholderTextColor={isDarkMode ? "#bbb" : "#999"}
             />
           </View>
@@ -259,11 +270,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFF",
   },
   container: {
     flex: 1,
-    backgroundColor: "#1e1e1e", // Keeping only dark mode
+    backgroundColor: "#FFF", // Keeping only dark mode
   },
   darkContainer: {
     backgroundColor: "#1A1A1B",
@@ -288,7 +299,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     left: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
     borderRadius: 20,
     padding: 5,
   },
@@ -331,7 +342,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    color: "white",
+    color: "#000",
+    fontWeight: "bold",
     fontSize: 16,
     marginBottom: 4,
   },
@@ -343,13 +355,13 @@ const styles = StyleSheet.create({
     borderColor: "#666",
     borderRadius: 8,
     padding: 8,
-    color: "white",
+    color: "#000",
   },
   darkInput: {
     borderColor: "#bbb",
   },
   communityNameDisplay: {
-    color: "white",
+    color: "#000",
     fontSize: 16,
     marginBottom: 4,
   },

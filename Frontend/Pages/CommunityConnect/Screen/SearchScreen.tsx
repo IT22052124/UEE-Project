@@ -14,7 +14,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { IPAddress } from "../../../globals";
-import { useNavigation, useRoute } from "@react-navigation/native"; // Import useNavigation
+import {
+  useIsFocused,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native"; // Import useNavigation
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const defaultPic =
@@ -52,6 +56,7 @@ export default function SearchScreen() {
   const navigation = useNavigation(); // Initialize useNavigation
 
   const tabs = ["All", "Communities", "Users"];
+  const isFocused = useIsFocused();
 
   const getUserFromAsyncStorage = async () => {
     try {
@@ -106,7 +111,7 @@ export default function SearchScreen() {
     };
 
     fetchResults();
-  }, [activeTab]);
+  }, [activeTab, isFocused]);
 
   // Filter search results based on searchQuery
   useEffect(() => {
@@ -178,7 +183,7 @@ export default function SearchScreen() {
             onPress={() => navigation.goBack()}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color="#000000" />
           </TouchableOpacity>
           <TextInput
             style={styles.searchInput}
@@ -225,37 +230,36 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#FFFFFF", // Light background
   },
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#FFFFFF", // Main background
   },
   backButton: {
     marginRight: 10,
   },
   noResultsText: {
-    color: "#fff",
+    color: "#000", // Black text
     textAlign: "center",
     marginTop: 20,
     fontSize: 16,
   },
-
   profilePic: { width: 40, height: 40, borderRadius: 20, marginRight: 8 },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: "#E0E0E0", // Light border
   },
   searchInput: {
     flex: 1,
     height: 40,
-    backgroundColor: "#222",
+    backgroundColor: "#F0F0F0", // Light background for search
     borderRadius: 20,
     paddingHorizontal: 15,
-    color: "#fff",
+    color: "#000", // Black text
   },
   searchIcon: {
     marginLeft: 10,
@@ -263,7 +267,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: "#E0E0E0", // Light border for tabs
   },
   tab: {
     flex: 1,
@@ -272,13 +276,13 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: "#ff3b30",
+    borderBottomColor: "#007AFF", // Accent color for active tab
   },
   tabText: {
     color: "#777",
   },
   activeTabText: {
-    color: "#ff3b30",
+    color: "#007AFF", // Accent color for active tab text
   },
   resultList: {
     flex: 1,
@@ -288,13 +292,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: "#E0E0E0", // Light border for results
   },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#333",
+    backgroundColor: "#F0F0F0", // Light avatar background
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
@@ -303,17 +307,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   resultName: {
-    color: "#fff",
+    color: "#000", // Black text for result name
     fontSize: 16,
     fontWeight: "bold",
   },
   resultDetails: {
-    color: "#777",
-    fontSize: 14,
+    color: "#777", // Grey text for result details
+    fontSize: 15,
+    fontWeight: 'bold',
+   
   },
-  loadingText: {
-    color: "#fff",
-    textAlign: "center",
-    marginTop: 20,
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

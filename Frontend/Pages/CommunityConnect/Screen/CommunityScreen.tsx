@@ -133,7 +133,7 @@ export default function CommunityScreen() {
           )}`
         );
         const communityData = response.data.data;
-        const isUserMember = await communityData.members.some(
+        const isUserMember = await communityData.members?.some(
           (member: any) => member._id === userId
         );
 
@@ -296,7 +296,7 @@ export default function CommunityScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={24} color="#000000" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.touch}
@@ -317,7 +317,7 @@ export default function CommunityScreen() {
               <Ionicons
                 name="search"
                 size={24}
-                color="#777"
+                color="#000"
                 style={styles.searchIcon}
               />
             </View>
@@ -489,7 +489,7 @@ export default function CommunityScreen() {
                             <Entypo
                               name="arrow-bold-up"
                               size={32}
-                              color="#FFFFFF"
+                              color="#808080"
                             />
                           )}
                         </TouchableOpacity>
@@ -509,7 +509,7 @@ export default function CommunityScreen() {
                             <Entypo
                               name="arrow-down"
                               size={32}
-                              color="#FFFFFF"
+                              color="#808080"
                             />
                           )}
                         </TouchableOpacity>
@@ -525,15 +525,12 @@ export default function CommunityScreen() {
                             <Ionicons
                               name="chatbubble-outline"
                               size={32}
-                              color="#FFFFFF"
+                              color="#808080"
                             />
                             <Text style={styles.postStatText}>
                               {post.comments.length}
                             </Text>
                           </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.shareButton}>
-                          <Text style={styles.shareButtonText}>Share</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -555,7 +552,7 @@ export default function CommunityScreen() {
               </Text>
 
               <Text style={styles.membertext}>
-                {community.members.length} MEMBERS
+                {community.members?.length} MEMBERS
               </Text>
               <TouchableOpacity
                 onPress={() =>
@@ -650,11 +647,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFFFFF",
   },
   touch: {
     width: "100%",
@@ -663,20 +660,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#1A1A1B",
     justifyContent: "flex-start", // Aligns icons to the left
   },
   searchBar: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#272729",
+    borderBlockColor: "#000",
+    borderBottomColor: "#E0E0E0",
     borderRadius: 20,
     marginHorizontal: 10,
     paddingHorizontal: 10,
   },
   searchText: {
-    color: "#FFFFFF",
+    color: "#00000",
     marginLeft: 10,
   },
   banner: {
@@ -695,12 +692,12 @@ const styles = StyleSheet.create({
     borderColor: "#1A1A1B",
   },
   communityStats: {
-    color: "#818384",
-    fontSize: 12,
-    marginTop: 5,
+    color: "#777", // Grey text for result details
+    fontSize: 15,
+    fontWeight: "bold",
   },
   communityDescription: {
-    color: "#D7DADC",
+    color: "#777", // Grey text for result details
     fontSize: 14,
     marginTop: 10,
   },
@@ -727,14 +724,15 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   activeTab: {
-    borderBottomWidth: 2,
+    borderBottomWidth: 3,
     borderBottomColor: "#FF4500",
   },
   tabText: {
     color: "#818384",
   },
   activeTabText: {
-    color: "#FFFFFF",
+    color: "#FF4500",
+    fontWeight: "bold",
   },
   sortContainer: {
     flexDirection: "row",
@@ -767,7 +765,8 @@ const styles = StyleSheet.create({
   },
   postAuthor: {
     color: "#818384",
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: "semibold",
     marginLeft: 10,
   },
   spoilerTag: {
@@ -784,15 +783,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   postTitle: {
-    color: "#D7DADC",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
-    marginTop: 5,
+    color: "#2d3748",
+    marginTop: 8,
   },
   postFlair: {
-    color: "#FF4500",
-    fontSize: 12,
-    marginTop: 5,
+    color: "#808080", // Red flair for highlighting
+    fontSize: 14,
+    marginVertical: 4,
   },
   mediaContainer: {
     flexDirection: "row",
@@ -841,7 +840,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFFFFF",
   },
   commentContainer: {
     flexDirection: "row", // Align comment icon and text in a row
@@ -864,10 +863,10 @@ const styles = StyleSheet.create({
   communityName: {
     flex: 1, // Community name takes the remaining space
     marginRight: 10,
-    color: "#FFFFFF",
-    fontSize: 20,
+    color: "#000",
+    fontSize: 25,
     fontWeight: "bold",
-    marginTop: 10, // Space between text and buttons
+    // Space between text and buttons
   },
   adminButtons: {
     flexDirection: "row",
@@ -896,25 +895,26 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 40,
-    backgroundColor: "#222",
+    backgroundColor: "#F0F0F0", // Light background for search
     borderRadius: 20,
     paddingHorizontal: 15,
-    color: "#fff",
+    color: "#000", // Black text
   },
   searchIcon: {
     marginLeft: 10,
   },
   aboutSection: {
     padding: 15,
-    backgroundColor: "#1A1A1B",
+    backgroundColor: "#FFF",
+    
   },
   aboutText: {
-    color: "#D7DADC",
+    color: "#000",
     fontSize: 16,
     marginBottom: 10,
   },
   membertext: {
-    color: "#D7DADC",
+    color: "#000",
     fontWeight: "bold",
     fontSize: 20,
     marginBottom: 10,

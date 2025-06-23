@@ -4,7 +4,7 @@
 ## 📖 Introduction  
 ─────────────────────────────────────────────  
 
-UEE-Project is designed to bridge the gap between donors, organizations, and job providers by offering an integrated mobile platform. Built on top of React Native with Expo, this application leverages modern UI elements such as gradients, icons, and card layouts to create a seamless user experience. The project is structured to handle both donation transactions and job management, ensuring high responsiveness and a user-friendly interface.  
+Unity Engage is designed to bridge the gap between donors, organizations, and job providers by offering an integrated mobile platform. Built on top of React Native with Expo, this application leverages modern UI elements such as gradients, icons, and card layouts to create a seamless user experience. The project is structured to handle both donation transactions and job management, ensuring high responsiveness and a user-friendly interface.  
 
 ─────────────────────────────────────────────  
 ## ✨ Features  
